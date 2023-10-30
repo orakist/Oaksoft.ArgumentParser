@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/src/Glowy.CLxParser/obj
+/src/Glowy.CLxParser/bin
+/test/Glowy.CLxParser.Console/bin
+/test/Glowy.CLxParser.Console/obj

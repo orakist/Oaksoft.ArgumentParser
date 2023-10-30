@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <Product>Turquoise Command Line Arguments Parser</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Glowy.CLxParser.Attributes.BuildDateTimeAttribute">
+      <_Parameter1>$([System.DateTime]::Now.ToString("yyyy-MM-dd HH:mm:ss"))</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

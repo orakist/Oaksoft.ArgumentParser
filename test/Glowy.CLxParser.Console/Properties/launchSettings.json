@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Console Profile": {
+      "commandName": "Project",
+      "commandLineArgs": "arg --m --f --e"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+﻿namespace Glowy.CLxParser.Parser;
+
+internal class ParserSettings : IParserSettings
+{
+    public bool? AutoPrintHeader { get; set; }
+
+    public bool? AutoPrintErrors { get; set; }
+
+    public bool? AutoPrintHelp { get; set; }
+
+    public int? HelpDisplayWidth { get; set; }
+
+    public bool? NewLineAfterOption { get; set; }
+
+    public bool? ShowTitle { get; set; }
+
+    public bool? ShowDescription { get; set; }
+
+    public string? Title { get; set; }
+
+    public string? Description { get; set; }
+}

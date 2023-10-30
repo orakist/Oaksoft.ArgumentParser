@@ -68,11 +68,27 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (string.IsNullOrWhiteSpace(Settings.Title))
         {
             Settings.Title = AssemblyHelper.GetAssemblyTitle();
+
+            var version = AssemblyHelper.GetAssemblyVersion();
+            if (!string.IsNullOrWhiteSpace(version))
+                Settings.Title += " v" + version;
+
+            var company = AssemblyHelper.GetAssemblyCompany();
+            if (!string.IsNullOrWhiteSpace(company))
+                Settings.Title += ", " + company;
         }
 
         if (string.IsNullOrWhiteSpace(Settings.Description))
         {
+            var copyright = AssemblyHelper.GetAssemblyCopyright();
             Settings.Description = AssemblyHelper.GetAssemblyDescription();
+
+            if (!string.IsNullOrWhiteSpace(copyright))
+            {
+                var desc = Settings.Description ?? string.Empty;
+                var comma = string.IsNullOrWhiteSpace(desc) ? string.Empty : (desc.EndsWith(".") ? " ": ", ");
+                Settings.Description = $"{desc}{comma}{copyright}";
+            }
         }
     }
 

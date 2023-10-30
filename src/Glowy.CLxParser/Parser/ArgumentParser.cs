@@ -7,8 +7,8 @@ namespace Glowy.CLxParser.Parser;
 internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentParser<TOptions>
     where TOptions : BaseApplicationOptions, new()
 {
-    public override BaseApplicationOptions AppOptions 
-        => _appOptions; 
+    public override BaseApplicationOptions AppOptions
+        => _appOptions;
 
     private readonly TOptions _appOptions;
     private Action<TOptions>? _configureOptions;
@@ -49,6 +49,7 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
 
         InitializeOptions();
 
+        PrintHelpInformation();
         return this;
     }
 
@@ -82,11 +83,11 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
 
     public void PrintHelpInformation()
     {
-        AssemblyHelper.WriteLine();
-        if(!string.IsNullOrWhiteSpace(Settings.Title))
+        if (Settings.ShowTitle is true && !string.IsNullOrWhiteSpace(Settings.Title))
             AssemblyHelper.WriteLine(Settings.Title);
-        if (!string.IsNullOrWhiteSpace(Settings.Description))
+        if (Settings.ShowTitle is true && !string.IsNullOrWhiteSpace(Settings.Description))
             AssemblyHelper.WriteLine(Settings.Description);
+        AssemblyHelper.WriteLine("These are command line options of this application.");
         AssemblyHelper.WriteLine();
 
         var options = _appOptions.Options;
@@ -112,7 +113,8 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
                     AssemblyHelper.WriteLine($"       {description}");
             }
 
-            AssemblyHelper.WriteLine();
+            if (Settings.NewLineAfterOption is true)
+                AssemblyHelper.WriteLine();
         }
 
         var usageLines = CreateLinesByWidth(options.Select(o => o.Usage), true);

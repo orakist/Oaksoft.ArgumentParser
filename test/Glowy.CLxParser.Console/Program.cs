@@ -15,7 +15,7 @@ internal static class Program
         {
             while (true)
             {
-                parser.Parse(args);
+                var result = parser.Parse(args);
 
                 System.Console.WriteLine("Type the commands and press enter. Type 'q' to quit.");
                 System.Console.Write("./> ");
@@ -37,9 +37,9 @@ internal static class Program
     private static void AddCustomOptions(ApplicationOptions options)
     {
         options.AddDefaultOption(o => o.FilePaths, requiredTokenCount: 1, maximumTokenCount: 10)
-            .WithName("File or Directory Path")
-            .WithUsage("workbook-file-path | directory-path")
-            .WithDescription("File path of the workbook or directory path of the workbooks. " +
+            .WithName("FilePath")
+            .WithUsage("log-file-path")
+            .WithDescription("File path of the log file or directory path of the '*.log' files. " +
                              "Provided path count must be between 1 and 10. At least 1 path is required.");
 
         options.AddSwitchOption(o => o.ShowMismatches)
@@ -87,7 +87,7 @@ internal static class Program
 
         options.AddIntegerOption(o => o.PrecisionFilter, minIntegerValue: 1, maxIntegerValue: 15)
             .WithDefaultValue("8")
-            .WithDescription("Sets the precision (epsilon) number between Excel and PSC numbers. The number represents the decimal digit. " +
+            .WithDescription("Sets the precision (epsilon) number between two numbers. The number represents the decimal digit. " +
                              "Default value is 8. It must be between 1 and 15.");
 
         options.AddStringOption(o => o.AutomationOutputPath, o => o.AutomationEnabled, valueTokenMustExist: false)

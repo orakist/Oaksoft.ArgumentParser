@@ -19,8 +19,6 @@ public interface IArgumentParser
 
     IParserSettings Settings { get; }
 
-    void Parse(string[] args);
-
     string GetHeaderText();
 
     string GetHelpText(bool? enableColoring = default);
@@ -38,5 +36,7 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
     IArgumentParser<TOptions> ConfigureParser(Action<IParserSettings> action);
 
     IArgumentParser<TOptions> Build();
+
+    TOptions Parse(string[] args);
 }
 

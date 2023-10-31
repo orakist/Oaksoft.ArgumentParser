@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Glowy.CLxParser.Extensions;
 using Glowy.CLxParser.Options;
 
@@ -25,6 +26,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
     public abstract BaseApplicationOptions AppOptions { get; }
 
     protected readonly List<string> _errors;
+    private PropertyInfo[]? _propertyInfos;
+    private List<string>? _registeredPropertyNames;
 
     protected BaseArgumentParser(
         string commandPrefix, string valueSeparator, string tokenSeparator, bool caseSensitive)
@@ -37,8 +40,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         Settings = new ParserSettings();
         _errors = new List<string>();
     }
-
-    public abstract void Parse(string[] args);
 
     public abstract string GetHeaderText();
 
@@ -110,7 +111,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         _errors.Clear();
 
-        AppOptions.ClearOptions();
+        ClearOptionPropertiesByReflection();
     }
 
     protected void ParseArguments(string[] arguments)
@@ -164,7 +165,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             try
             {
-                AppOptions.UpdateProperties(option);
+                UpdateOptionPropertiesByReflection(option);
             }
             catch (Exception ex)
             {
@@ -265,5 +266,110 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
 
         return string.IsNullOrWhiteSpace(description) ? null : description;
+    }
+
+    private void ClearOptionPropertiesByReflection()
+    {
+        var options = AppOptions.Options.Cast<BaseOption>().ToList();
+        _registeredPropertyNames ??= GetRegisteredPropertyNames(options);
+
+        _propertyInfos ??= AppOptions.GetType().GetProperties()
+            .Where(p => _registeredPropertyNames.Contains(p.Name))
+            .ToArray();
+
+        foreach (var option in options)
+        {
+            option.Clear();
+        }
+
+        foreach (var property in _propertyInfos)
+        {
+            var type = property.PropertyType;
+            var option = options.FirstOrDefault(o => o.KeyProperty == property.Name);
+            if (option is IHaveValueOption valOption && !string.IsNullOrWhiteSpace(valOption.DefaultValue))
+            {
+                // all scalar-command and non-command options may have a default option.
+                // so apply default option to registered property if it exists.
+                if (type.IsAssignableFrom(typeof(string)))
+                {
+                    property.SetValue(AppOptions, valOption.DefaultValue);
+                    continue;
+                }
+
+                if (option is ScalarCommandOption scalarOption)
+                {
+                    scalarOption.ApplyDefaultValue(AppOptions, property);
+                    continue;
+                }
+            }
+
+            var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
+            property.SetValue(AppOptions, defaultValue);
+        }
+    }
+
+    private void UpdateOptionPropertiesByReflection(IBaseOption option)
+    {
+        if (option.ValidatedTokenCount < 1)
+            return;
+
+        var baseOption = (option as BaseOption)!;
+        if (!string.IsNullOrWhiteSpace(baseOption.CountProperty))
+        {
+            var countProp = _propertyInfos!.First(p => p.Name == baseOption.CountProperty);
+            if (countProp.PropertyType == typeof(bool))
+            {
+                countProp.SetValue(AppOptions, true);
+            }
+            else if (countProp.PropertyType == typeof(int))
+            {
+                countProp.SetValue(AppOptions, option.ValidatedTokenCount);
+            }
+        }
+
+        var keyProp = _propertyInfos!.First(p => p.Name == baseOption.KeyProperty);
+        var type = keyProp.PropertyType;
+        if (option is SwitchOption)
+        {
+            if (type == typeof(bool))
+            {
+                keyProp.SetValue(AppOptions, true);
+            }
+            else if (type == typeof(int))
+            {
+                keyProp.SetValue(AppOptions, option.ValidatedTokenCount);
+            }
+        }
+        else if (option is IHaveValueOption valOption)
+        {
+            if (type.IsAssignableFrom(typeof(List<string>)))
+            {
+                keyProp.SetValue(AppOptions, valOption.ParsedValues);
+            }
+            else if (type.IsAssignableFrom(typeof(string[])))
+            {
+                keyProp.SetValue(AppOptions, valOption.ParsedValues.ToArray());
+            }
+            else if (type.IsAssignableFrom(typeof(string)))
+            {
+                keyProp.SetValue(AppOptions, valOption.ParsedValues.First());
+            }
+            else if (option is ScalarCommandOption scalarOption)
+            {
+                scalarOption.UpdatePropertyValue(AppOptions, keyProp);
+            }
+        }
+    }
+
+    private List<string> GetRegisteredPropertyNames(IReadOnlyList<BaseOption> options)
+    {
+        var propertyNames = options
+            .Where(o => !string.IsNullOrWhiteSpace(o.CountProperty))
+            .Select(a => a.CountProperty!)
+            .ToList();
+
+        propertyNames.AddRange(options.Select(o => o.KeyProperty));
+
+        return propertyNames;
     }
 }

@@ -56,7 +56,7 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
         return this;
     }
 
-    public override void Parse(string[] arguments)
+    public TOptions Parse(string[] arguments)
     {
         ClearOptions();
 
@@ -71,6 +71,8 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
         PrintHelpText();
 
         PrintErrorText();
+
+        return _appOptions;
     }
 
     public override string GetHeaderText()

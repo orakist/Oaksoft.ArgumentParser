@@ -18,6 +18,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public bool IsValid => _errors.Count < 1;
 
+    public List<string> Errors => _errors.ToList();
+
     public IParserSettings Settings { get; }
 
     public abstract BaseApplicationOptions AppOptions { get; }
@@ -40,9 +42,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public abstract string GetHeaderText();
 
-    public abstract string GetHelpText();
+    public abstract string GetHelpText(bool? colorized = default);
 
-    public abstract string GetErrorText();
+    public abstract string GetErrorText(bool? colorized = default);
 
     protected void CreateDefaultSettings()
     {
@@ -53,6 +55,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         Settings.NewLineAfterOption ??= true;
         Settings.ShowTitle ??= true;
         Settings.ShowDescription ??= true;
+        Settings.EnableColoring ??= true;
 
         ValidateParserSettings();
     }
@@ -66,30 +69,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
 
         if (string.IsNullOrWhiteSpace(Settings.Title))
-        {
-            Settings.Title = AssemblyHelper.GetAssemblyTitle();
-
-            var version = AssemblyHelper.GetAssemblyVersion();
-            if (!string.IsNullOrWhiteSpace(version))
-                Settings.Title += " v" + version;
-
-            var company = AssemblyHelper.GetAssemblyCompany();
-            if (!string.IsNullOrWhiteSpace(company))
-                Settings.Title += ", " + company;
-        }
+            Settings.Title = BuildTitleLine();
 
         if (string.IsNullOrWhiteSpace(Settings.Description))
-        {
-            var copyright = AssemblyHelper.GetAssemblyCopyright();
-            Settings.Description = AssemblyHelper.GetAssemblyDescription();
-
-            if (!string.IsNullOrWhiteSpace(copyright))
-            {
-                var desc = Settings.Description ?? string.Empty;
-                var comma = string.IsNullOrWhiteSpace(desc) ? string.Empty : (desc.EndsWith(".") ? " ": ", ");
-                Settings.Description = $"{desc}{comma}{copyright}";
-            }
-        }
+            Settings.Description = BuildDescriptionLine();
     }
 
     protected void CreateDefaultOptions()
@@ -234,21 +217,17 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected void ValidateHelpToken(IReadOnlyList<IBaseOption> options)
     {
-        var helpOption = GetHelpOption(options);
-        if (!IsOnlyOption(helpOption, options))
-        {
-            _errors.Add($"{helpOption.Name} command cannot be used with other commands.");
-        }
-        else
+        var helpOption = options.OfType<SwitchOption>().
+            First(o => o.KeyProperty == nameof(IApplicationOptions.Help));
+
+        if (IsOnlyOption(helpOption, options))
         {
             _errors.Clear();
         }
-    }
-
-    private static ICommandOption GetHelpOption(IReadOnlyList<IBaseOption> options)
-    {
-        return options.OfType<SwitchOption>()
-            .First(o => o.KeyProperty == nameof(BaseApplicationOptions.Help));
+        else if (helpOption.CommandTokens.Count > 0)
+        {
+            _errors.Add($"{helpOption.Name} ({helpOption.Command}) command cannot be combined with other commands.");
+        }
     }
 
     private void AddErrorMessage(IBaseOption option, Exception ex)
@@ -257,5 +236,34 @@ internal abstract class BaseArgumentParser : IArgumentParser
         var comma = ex.Message.EndsWith(".") ? string.Empty : ",";
         _errors.Add($"{ex.Message}{comma} Name: {name}");
     }
-}
 
+    private static string? BuildTitleLine()
+    {
+        var title = AssemblyHelper.GetAssemblyTitle() ?? string.Empty;
+
+        var version = AssemblyHelper.GetAssemblyVersion();
+        if (!string.IsNullOrWhiteSpace(version))
+            title += $" v{version}";
+
+        var company = AssemblyHelper.GetAssemblyCompany();
+        if (!string.IsNullOrWhiteSpace(company))
+            title += $", {company}";
+
+        return string.IsNullOrWhiteSpace(title) ? null : title;
+    }
+
+    private static string? BuildDescriptionLine()
+    {
+        var copyright = AssemblyHelper.GetAssemblyCopyright();
+        var description = AssemblyHelper.GetAssemblyDescription() ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(copyright))
+        {
+            var comma = string.IsNullOrWhiteSpace(description) ?
+                string.Empty : (description.EndsWith(".") ? " " : ", ");
+            description += $"{comma}{copyright}";
+        }
+
+        return string.IsNullOrWhiteSpace(description) ? null : description;
+    }
+}

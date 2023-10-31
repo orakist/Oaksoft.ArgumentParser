@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Glowy.CLxParser.Parser;
 
@@ -14,15 +15,17 @@ public interface IArgumentParser
 
     bool IsValid { get; }
 
+    List<string> Errors { get; }
+
     IParserSettings Settings { get; }
 
     void Parse(string[] args);
 
     string GetHeaderText();
 
-    string GetHelpText();
+    string GetHelpText(bool? enableColoring = default);
 
-    string GetErrorText();
+    string GetErrorText(bool? enableColoring = default);
 }
 
 public interface IArgumentParser<out TOptions> : IArgumentParser

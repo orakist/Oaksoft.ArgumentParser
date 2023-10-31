@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
+using Glowy.CLxParser.Extensions;
 using Glowy.CLxParser.Options;
 
 namespace Glowy.CLxParser.Parser;
@@ -49,7 +51,8 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
 
         InitializeOptions();
 
-        PrintHelpInformation();
+        PrintHeaderText();
+
         return this;
     }
 
@@ -64,45 +67,96 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
         ValidateOptions(arguments);
 
         BindOptionsToAttributes();
+
+        PrintHelpText();
+
+        PrintErrorText();
     }
 
     public override string GetHeaderText()
     {
-        throw new NotImplementedException();
+        return BuildHeaderText(true, true).ToString();
     }
 
-    public override string GetHelpText()
+    public override string GetHelpText(bool? enableColoring = default)
     {
-        throw new NotImplementedException();
+        var coloring = enableColoring ?? Settings.EnableColoring ?? true;
+        return BuildHelpText(coloring).ToString();
     }
 
-    public override string GetErrorText()
+    public override string GetErrorText(bool? enableColoring = default)
     {
-        throw new NotImplementedException();
+        var coloring = enableColoring ?? Settings.EnableColoring ?? true;
+        return BuildErrorText(coloring).ToString();
     }
 
-    public void PrintHelpInformation()
+    private void PrintHeaderText()
     {
-        if (Settings.ShowTitle is true && !string.IsNullOrWhiteSpace(Settings.Title))
-            AssemblyHelper.WriteLine(Settings.Title);
-        if (Settings.ShowTitle is true && !string.IsNullOrWhiteSpace(Settings.Description))
-            AssemblyHelper.WriteLine(Settings.Description);
-        AssemblyHelper.WriteLine("These are command line options of this application.");
-        AssemblyHelper.WriteLine();
+        if (Settings.AutoPrintHeader != true)
+            return;
+
+        Console.Write(BuildHeaderText(true, true).ToString());
+        Console.WriteLine();
+    }
+
+    private void PrintHelpText()
+    {
+        if (Settings.AutoPrintHelp != true || _errors.Count > 0)
+            return;
+
+        var options = _appOptions.Options;
+        var helpOption = _appOptions.Options.OfType<SwitchOption>().
+            First(o => o.KeyProperty == nameof(IApplicationOptions.Help));
+
+        if (!IsOnlyOption(helpOption, options))
+            return;
+
+        Console.Write(BuildHelpText(Settings.EnableColoring ?? true).ToString());
+        Console.WriteLine();
+    }
+
+    private void PrintErrorText()
+    {
+        if (Settings.AutoPrintErrors != true || _errors.Count < 1)
+            return;
+
+        Console.Write(BuildErrorText(Settings.EnableColoring ?? true).ToString());
+        Console.WriteLine();
+    }
+
+    private StringBuilder BuildHeaderText(bool showTitle, bool showDescription)
+    {
+        var sb = new StringBuilder();
+
+        if (showTitle && !string.IsNullOrWhiteSpace(Settings.Title))
+            sb.AppendLine(Settings.Title);
+        if (showDescription && !string.IsNullOrWhiteSpace(Settings.Description))
+            sb.AppendLine(Settings.Description);
+
+        return sb;
+    }
+
+    private StringBuilder BuildHelpText(bool enableColoring)
+    {
+        ColoringExtensions.SetEnabled(enableColoring);
+
+        var sb = BuildHeaderText(Settings.ShowTitle ?? true, Settings.ShowDescription ?? true);
+        sb.AppendLine("These are command line options of this application.");
+        sb.AppendLine();
 
         var options = _appOptions.Options;
         foreach (var option in options)
         {
             var command = option as ICommandOption;
             var commandName = command?.Command ?? string.Empty;
-            AssemblyHelper.Write($"[{commandName,-4}] ", ConsoleColor.DarkGreen);
-            AssemblyHelper.Write("Usage: ", ConsoleColor.DarkYellow);
-            AssemblyHelper.WriteLine(option.Usage);
+            sb.Pastel($"[{commandName,-4}] ", ConsoleColor.DarkGreen);
+            sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
+            sb.AppendLine(option.Usage);
 
             if (command is not null)
             {
-                AssemblyHelper.Write("       Commands:", ConsoleColor.DarkYellow);
-                AssemblyHelper.WriteLine($" {string.Join(", ", command.Commands)} ");
+                sb.Pastel("       Commands:", ConsoleColor.DarkYellow);
+                sb.AppendLine($" {string.Join(", ", command.Commands)} ");
             }
 
             if (option.Description is not null)
@@ -110,21 +164,41 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
                 var descriptionWords = option.Description.Split(' ');
                 var descriptionLines = CreateLinesByWidth(descriptionWords);
                 foreach (var description in descriptionLines)
-                    AssemblyHelper.WriteLine($"       {description}");
+                    sb.AppendLine($"       {description}");
             }
 
             if (Settings.NewLineAfterOption is true)
-                AssemblyHelper.WriteLine();
+                sb.AppendLine();
         }
 
         var usageLines = CreateLinesByWidth(options.Select(o => o.Usage), true);
-        AssemblyHelper.Write("Usage: ", ConsoleColor.DarkYellow);
-        AssemblyHelper.WriteLine(usageLines[0]);
+        sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
+        sb.AppendLine(usageLines[0]);
 
         for (var index = 1; index < usageLines.Count; ++index)
-            AssemblyHelper.WriteLine($"       {usageLines[index]}");
+            sb.AppendLine($"       {usageLines[index]}");
 
-        AssemblyHelper.WriteLine();
+        return sb;
+    }
+
+    private StringBuilder BuildErrorText(bool enableColoring)
+    {
+        var sb = new StringBuilder();
+        if (_errors.Count < 1)
+            return sb;
+        
+        ColoringExtensions.SetEnabled(enableColoring);
+        
+        sb.Pastel("     Error(s)!", ConsoleColor.Red);
+        sb.AppendLine();
+
+        for (int i = 0; i < _errors.Count; i++)
+        {
+            sb.Pastel($"{(i + 1):00} - ", ConsoleColor.DarkYellow);
+            sb.AppendLine(_errors[i]);
+        }
+
+        return sb;
     }
 }
 

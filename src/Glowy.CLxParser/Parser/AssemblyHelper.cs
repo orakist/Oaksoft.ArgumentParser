@@ -5,24 +5,6 @@ namespace Glowy.CLxParser.Parser;
 
 internal static class AssemblyHelper
 {
-    public static void Write(string text, ConsoleColor color)
-    {
-        var mainColor = Console.ForegroundColor;
-        Console.ForegroundColor = color;
-        Console.Write(text);
-        Console.ForegroundColor = mainColor;
-    }
-
-    public static void WriteLine()
-    {
-        Console.WriteLine();
-    }
-
-    public static void WriteLine(string text)
-    {
-        Console.WriteLine(text);
-    }
-
     public static string? GetAssemblyTitle()
     {
         var assembly = Assembly.GetEntryAssembly();

@@ -16,6 +16,8 @@ internal class ParserSettings : IParserSettings
 
     public bool? ShowDescription { get; set; }
 
+    public bool? EnableColoring { get; set; }
+
     public string? Title { get; set; }
 
     public string? Description { get; set; }

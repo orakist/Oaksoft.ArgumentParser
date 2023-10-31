@@ -51,7 +51,7 @@ public abstract class BaseApplicationOptions : IApplicationOptions
 
                 if (option is ScalarCommandOption scalarOption)
                 {
-                    scalarOption.UpdatePropertyValue(this, property);
+                    scalarOption.ApplyDefaultValue(this, property);
                     continue;
                 }
             }

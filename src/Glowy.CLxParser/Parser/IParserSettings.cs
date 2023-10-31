@@ -16,6 +16,8 @@ public interface IParserSettings
 
     bool? ShowDescription { get; set; }
 
+    bool? EnableColoring { get; set; }
+
     string? Title { get; set; }
 
     string? Description { get; set; }

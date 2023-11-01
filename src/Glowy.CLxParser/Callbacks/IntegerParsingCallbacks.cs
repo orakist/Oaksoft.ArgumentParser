@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Glowy.CLxParser.Options;
-using Glowy.CLxParser.Parser;
+using Oaksoft.ArgumentParser.Options;
+using Oaksoft.ArgumentParser.Parser;
 
-namespace Glowy.CLxParser.Callbacks;
+namespace Oaksoft.ArgumentParser.Callbacks;
 
 internal sealed class IntegerParsingCallbacks : BaseParsingCallbacks
 {
@@ -53,7 +53,7 @@ internal sealed class IntegerParsingCallbacks : BaseParsingCallbacks
 
         if (int.TryParse(context.DefaultValue, out var number))
         {
-            property.SetValue(this, number);
+            property.SetValue(appOptions, number);
         }
     }
 
@@ -62,15 +62,15 @@ internal sealed class IntegerParsingCallbacks : BaseParsingCallbacks
         var parsedValues = context.ParsedValues.Select(int.Parse);
         if (property.PropertyType.IsAssignableFrom(typeof(List<int>)))
         {
-            property.SetValue(this, parsedValues.ToList());
+            property.SetValue(appOptions, parsedValues.ToList());
         }
         else if (property.PropertyType.IsAssignableFrom(typeof(int[])))
         {
-            property.SetValue(this, parsedValues.ToArray());
+            property.SetValue(appOptions, parsedValues.ToArray());
         }
         else if (property.PropertyType.IsAssignableFrom(typeof(int)))
         {
-            property.SetValue(this, parsedValues.First());
+            property.SetValue(appOptions, parsedValues.First());
         }
     }
 

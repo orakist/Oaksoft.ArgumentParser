@@ -1,28 +1,9 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 
-namespace Glowy.CLxParser.Parser;
+namespace Oaksoft.ArgumentParser.Parser;
 
 internal static class AssemblyHelper
 {
-    public static void Write(string text, ConsoleColor color)
-    {
-        var mainColor = Console.ForegroundColor;
-        Console.ForegroundColor = color;
-        Console.Write(text);
-        Console.ForegroundColor = mainColor;
-    }
-
-    public static void WriteLine()
-    {
-        Console.WriteLine();
-    }
-
-    public static void WriteLine(string text)
-    {
-        Console.WriteLine(text);
-    }
-
     public static string? GetAssemblyTitle()
     {
         var assembly = Assembly.GetEntryAssembly();
@@ -41,8 +22,9 @@ internal static class AssemblyHelper
     {
         var assembly = Assembly.GetEntryAssembly();
         var value = assembly?.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
+        var name = Assembly.GetEntryAssembly()?.GetName().Name;
 
-        return string.IsNullOrWhiteSpace(value) ? null : value;
+        return string.IsNullOrWhiteSpace(value) || name == value ? null : value;
     }
 
     public static string? GetAssemblyCopyright()
@@ -63,6 +45,12 @@ internal static class AssemblyHelper
 
     public static string? GetAssemblyVersion()
     {
-        return Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
+        var assembly = Assembly.GetEntryAssembly();
+        var value = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+        if (string.IsNullOrWhiteSpace(value))
+            value = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3);
+
+        return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Glowy.CLxParser.Parser;
+﻿namespace Oaksoft.ArgumentParser.Parser;
 
 public interface IParserSettings
 {
@@ -15,6 +15,8 @@ public interface IParserSettings
     bool? ShowTitle { get; set; }
 
     bool? ShowDescription { get; set; }
+
+    bool? EnableColoring { get; set; }
 
     string? Title { get; set; }
 

@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
-using Glowy.CLxParser.Options;
-using Glowy.CLxParser.Parser;
+using Oaksoft.ArgumentParser.Options;
+using Oaksoft.ArgumentParser.Parser;
 
-namespace Glowy.CLxParser.Callbacks;
+namespace Oaksoft.ArgumentParser.Callbacks;
 
 public interface IParsingCallbacks
 {

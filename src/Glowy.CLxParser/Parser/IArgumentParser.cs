@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 
-namespace Glowy.CLxParser.Parser;
+namespace Oaksoft.ArgumentParser.Parser;
 
 public interface IArgumentParser
 {
@@ -14,15 +15,15 @@ public interface IArgumentParser
 
     bool IsValid { get; }
 
-    IParserSettings Settings { get; }
+    List<string> Errors { get; }
 
-    void Parse(string[] args);
+    IParserSettings Settings { get; }
 
     string GetHeaderText();
 
-    string GetHelpText();
+    string GetHelpText(bool? enableColoring = default);
 
-    string GetErrorText();
+    string GetErrorText(bool? enableColoring = default);
 }
 
 public interface IArgumentParser<out TOptions> : IArgumentParser
@@ -35,5 +36,7 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
     IArgumentParser<TOptions> ConfigureParser(Action<IParserSettings> action);
 
     IArgumentParser<TOptions> Build();
+
+    TOptions Parse(string[] args);
 }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Glowy.CLxParser.Attributes;
+namespace Oaksoft.ArgumentParser.Attributes;
 
 [AttributeUsage(AttributeTargets.Assembly)]
 internal sealed class BuildDateTimeAttribute : Attribute

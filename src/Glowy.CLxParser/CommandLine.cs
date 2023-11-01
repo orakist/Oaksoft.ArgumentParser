@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using Glowy.CLxParser.Parser;
+using Oaksoft.ArgumentParser.Parser;
 
-namespace Glowy.CLxParser;
+namespace Oaksoft.ArgumentParser;
 
 public static class CommandLine
 {

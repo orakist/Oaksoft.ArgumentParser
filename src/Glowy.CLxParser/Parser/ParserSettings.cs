@@ -1,4 +1,4 @@
-﻿namespace Glowy.CLxParser.Parser;
+﻿namespace Oaksoft.ArgumentParser.Parser;
 
 internal class ParserSettings : IParserSettings
 {
@@ -15,6 +15,8 @@ internal class ParserSettings : IParserSettings
     public bool? ShowTitle { get; set; }
 
     public bool? ShowDescription { get; set; }
+
+    public bool? EnableColoring { get; set; }
 
     public string? Title { get; set; }
 

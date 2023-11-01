@@ -1,32 +1,45 @@
 ﻿using System;
-using Glowy.CLxParser.Extensions;
-using Glowy.CLxParser.Parser;
+using Oaksoft.ArgumentParser.Extensions;
 
-namespace Glowy.CLxParser.Console;
+namespace Oaksoft.ArgumentParser.Console;
 
 internal static class Program
 {
-    private static IArgumentParser<ApplicationOptions> _parser = default!;
-
     private static void Main(string[] args)
     {
-        _parser = CommandLine.CreateParser<ApplicationOptions>()
+        var parser = CommandLine.CreateParser<ApplicationOptions>()
             .ConfigureOptions(AddCustomOptions)
             .Build();
 
-        System.Console.WriteLine("Glowy Command Line Arguments Parser Tester.");
-        System.Console.WriteLine("If you want a list of all supported commands type --h or --help.");
-        System.Console.WriteLine();
+        try
+        {
+            while (true)
+            {
+                var result = parser.Parse(args);
 
-        RunApplication(args);
+                System.Console.WriteLine("Type the commands and press enter. Type 'q' to quit.");
+                System.Console.Write("./> ");
+                var commands = System.Console.In.ReadLine();
+                if (commands is "q" or "Q")
+                    break;
+
+                var arguments = commands?.Split(" ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                args = arguments ?? Array.Empty<string>();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine("Fatal error occurred.");
+            System.Console.WriteLine(ex.Message);
+        }
     }
 
     private static void AddCustomOptions(ApplicationOptions options)
     {
         options.AddDefaultOption(o => o.FilePaths, requiredTokenCount: 1, maximumTokenCount: 10)
-            .WithName("File or Directory Path")
-            .WithUsage("workbook-file-path | directory-path")
-            .WithDescription("File path of the workbook or directory path of the workbooks. " +
+            .WithName("FilePath")
+            .WithUsage("log-file-path")
+            .WithDescription("File path of the log file or directory path of the '*.log' files. " +
                              "Provided path count must be between 1 and 10. At least 1 path is required.");
 
         options.AddSwitchOption(o => o.ShowMismatches)
@@ -74,7 +87,7 @@ internal static class Program
 
         options.AddIntegerOption(o => o.PrecisionFilter, minIntegerValue: 1, maxIntegerValue: 15)
             .WithDefaultValue("8")
-            .WithDescription("Sets the precision (epsilon) number between Excel and PSC numbers. The number represents the decimal digit. " +
+            .WithDescription("Sets the precision (epsilon) number between two numbers. The number represents the decimal digit. " +
                              "Default value is 8. It must be between 1 and 15.");
 
         options.AddStringOption(o => o.AutomationOutputPath, o => o.AutomationEnabled, valueTokenMustExist: false)
@@ -108,30 +121,5 @@ internal static class Program
 
         options.AddSwitchOption(o => o.Verbose)
             .WithDescription("Prints detailed information about calculation of the workbook.");
-    }
-
-    private static void RunApplication(string[] args)
-    {
-        try
-        {
-            while (true)
-            {
-                _parser.Parse(args);
-
-                System.Console.WriteLine("Type the commands and press enter. Type 'q' to quit.");
-                System.Console.Write("./> ");
-                var commands = System.Console.In.ReadLine();
-                if (commands is "q" or "Q")
-                    break;
-
-                var arguments = commands?.Split(" ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                args = arguments ?? Array.Empty<string>();
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Console.WriteLine("Fatal error occurred.");
-            System.Console.WriteLine(ex.Message);
-        }
     }
 }

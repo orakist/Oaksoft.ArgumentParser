@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Glowy.CLxParser.Callbacks;
-using Glowy.CLxParser.Parser;
+using Oaksoft.ArgumentParser.Callbacks;
+using Oaksoft.ArgumentParser.Parser;
 
-namespace Glowy.CLxParser.Options;
+namespace Oaksoft.ArgumentParser.Options;
 
 internal sealed class ScalarCommandOption : CommandOption, IScalarCommandOption, IValueContext
 {

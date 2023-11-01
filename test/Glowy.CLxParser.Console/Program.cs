@@ -1,7 +1,7 @@
 ﻿using System;
-using Glowy.CLxParser.Extensions;
+using Oaksoft.ArgumentParser.Extensions;
 
-namespace Glowy.CLxParser.Console;
+namespace Oaksoft.ArgumentParser.Console;
 
 internal static class Program
 {

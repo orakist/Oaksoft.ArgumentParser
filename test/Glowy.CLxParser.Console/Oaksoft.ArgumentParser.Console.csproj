@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Glowy.CLxParser\Glowy.CLxParser.csproj" />
+    <ProjectReference Include="..\..\src\Glowy.CLxParser\Oaksoft.ArgumentParser.csproj" />
   </ItemGroup>
 
 </Project>

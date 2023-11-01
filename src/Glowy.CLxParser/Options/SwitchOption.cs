@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-using Glowy.CLxParser.Parser;
+using Oaksoft.ArgumentParser.Parser;
 
-namespace Glowy.CLxParser.Options;
+namespace Oaksoft.ArgumentParser.Options;
 
 internal sealed class SwitchOption : CommandOption
 {

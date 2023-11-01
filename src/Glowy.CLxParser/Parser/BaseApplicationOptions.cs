@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Oaksoft.ArgumentParser.Options;
 
-using Glowy.CLxParser.Options;
-
-namespace Glowy.CLxParser.Parser;
+namespace Oaksoft.ArgumentParser.Parser;
 
 public abstract class BaseApplicationOptions : IApplicationOptions
 {

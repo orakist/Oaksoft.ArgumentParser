@@ -1,4 +1,4 @@
-﻿namespace Glowy.CLxParser.Options;
+﻿namespace Oaksoft.ArgumentParser.Options;
 
 public interface IScalarCommandOption : ICommandOption, IHaveValueOption
 {

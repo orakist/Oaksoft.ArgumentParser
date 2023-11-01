@@ -1,4 +1,4 @@
-﻿namespace Glowy.CLxParser.Parser;
+﻿namespace Oaksoft.ArgumentParser.Parser;
 
 internal class ParserSettings : IParserSettings
 {

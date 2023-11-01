@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Glowy.CLxParser.Options;
+using Oaksoft.ArgumentParser.Options;
 
-namespace Glowy.CLxParser.Parser;
+namespace Oaksoft.ArgumentParser.Parser;
 
 public interface IApplicationOptions
 {

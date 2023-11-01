@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Glowy.CLxParser.Options;
-using Glowy.CLxParser.Parser;
+using Oaksoft.ArgumentParser.Options;
+using Oaksoft.ArgumentParser.Parser;
 
-namespace Glowy.CLxParser.Extensions;
+namespace Oaksoft.ArgumentParser.Extensions;
 
 public static partial class OptionsExtensions
 { 

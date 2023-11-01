@@ -1,7 +1,7 @@
 ﻿using System;
-using Glowy.CLxParser.Parser;
+using Oaksoft.ArgumentParser.Parser;
 
-namespace Glowy.CLxParser.Options;
+namespace Oaksoft.ArgumentParser.Options;
 
 internal abstract class BaseOption : IBaseOption
 {

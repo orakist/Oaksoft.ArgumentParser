@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Glowy.CLxParser.Extensions;
+namespace Oaksoft.ArgumentParser.Extensions;
 
 /// <summary>
 /// Controls colored console output by extension methods.

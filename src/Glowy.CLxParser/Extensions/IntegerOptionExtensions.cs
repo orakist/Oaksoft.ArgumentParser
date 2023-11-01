@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Glowy.CLxParser.Callbacks;
-using Glowy.CLxParser.Options;
-using Glowy.CLxParser.Parser;
+using Oaksoft.ArgumentParser.Callbacks;
+using Oaksoft.ArgumentParser.Options;
+using Oaksoft.ArgumentParser.Parser;
 
-namespace Glowy.CLxParser.Extensions;
+namespace Oaksoft.ArgumentParser.Extensions;
 
 public static partial class OptionsExtensions
 {

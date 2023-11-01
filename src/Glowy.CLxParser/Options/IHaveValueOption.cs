@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Glowy.CLxParser.Options;
+namespace Oaksoft.ArgumentParser.Options;
 
 public interface IHaveValueOption : IBaseOption
 {

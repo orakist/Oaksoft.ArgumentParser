@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Glowy.CLxParser.Extensions;
-using Glowy.CLxParser.Options;
+using Oaksoft.ArgumentParser.Extensions;
+using Oaksoft.ArgumentParser.Options;
 
-namespace Glowy.CLxParser.Parser;
+namespace Oaksoft.ArgumentParser.Parser;
 
 internal abstract class BaseArgumentParser : IArgumentParser
 {

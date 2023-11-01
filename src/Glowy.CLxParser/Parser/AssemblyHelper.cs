@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Glowy.CLxParser.Parser;
+namespace Oaksoft.ArgumentParser.Parser;
 
 internal static class AssemblyHelper
 {

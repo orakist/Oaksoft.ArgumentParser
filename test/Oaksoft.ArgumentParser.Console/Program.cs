@@ -37,50 +37,52 @@ internal static class Program
     private static void AddCustomOptions(ApplicationOptions options)
     {
         options.AddSwitchOption(o => o.AddSwitch)
-            .WithDescription("Enables add operator.");
+            .WithDescription("Enables the addition operator.");
 
         options.AddSwitchOption(o => o.SubtractSwitch)
-            .WithDescription("Enables subtract operator.");
+            .WithDescription("Enables the subtraction operator.");
 
         options.AddCountOption(o => o.MultiplySwitch, requiredTokenCount: 0, maximumTokenCount: 5)
-            .WithDescription("Enables multiply operator.");
+            .WithDescription("Enables the multiplication operator.");
 
         options.AddCountOption(o => o.DivideSwitch, requiredTokenCount: 0, maximumTokenCount: 2)
-            .WithDescription("Enables divide operator.");
+            .WithDescription("Enables the division operator.");
 
         options.AddScalarOption(o => o.AddCount, valueTokenMustExist: false)
             .WithDefaultValue("1")
             .WithConstraints("1", "20")
-            .WithDescription("Specifies addition count. If no option value is given, a random value is generated. Value must be between 1 and 20.");
+            .WithDescription("Sets addition count. If no option value is given, a random value is generated. Value must be between 1 and 20.");
 
         options.AddScalarOption(o => o.SubtractCount)
             .WithDefaultValue("2")
-            .WithDescription("Specifies subtraction count.");
+            .WithDescription("Sets subtraction count.");
 
         options.AddScalarOption(o => o.MultiplyCount)
             .WithDefaultValue("0")
-            .WithDescription("Specifies multiplication count.");
+            .WithDescription("Sets multiplication count.");
 
         options.AddScalarOption(o => o.DivideCount)
             .WithDefaultValue("0")
-            .WithDescription("Specifies division count.");
+            .WithDescription("Sets division count.");
 
         options.AddScalarOption(o => o.AddNumbers, valueTokenMustExist: false)
-            .WithDefaultValue("1")
-            .WithConstraints("1", "20")
-            .WithDescription("Specifies addition count. If no option value is given, a random value is generated. Value must be between 1 and 20.");
+            .WithDescription("Defines numbers for addition.");
 
         options.AddScalarOption(o => o.SubtractNumbers)
-            .WithDefaultValue("2")
-            .WithDescription("Specifies subtraction count.");
+            .WithDescription("Defines numbers for subtraction.");
 
         options.AddScalarOption(o => o.MultiplyNumbers)
-            .WithDefaultValue("0")
-            .WithDescription("Specifies multiplication count.");
+            .WithDescription("Defines numbers for multiplication.");
 
         options.AddScalarOption(o => o.DivideNumbers)
-            .WithDefaultValue("0")
-            .WithDescription("Specifies division count.");
+            .WithDescription("Defines numbers for division.");
+
+        options.AddScalarOption(o => o.FormulaSign, o => o.FormulaEnabled)
+            .WithDefaultValue("=")
+            .WithDescription("Sets formula sign.");
+
+        options.AddScalarOption(o => o.FormulaResults, o => o.FormulaCount)
+            .WithDescription("Defines formula expressions.");
 
         options.AddDefaultOption(o => o.Variables, requiredTokenCount: 0, maximumTokenCount: 10)
             .WithUsage("variable-names")

@@ -25,7 +25,7 @@ internal class ApplicationOptions : BaseApplicationOptions
     public string? FormulaSign { get; set; }
 
     public int FormulaCount { get; set; }
-    public List<double?>? FormulaResults { get; set; }
+    public List<string>? FormulaResults { get; set; }
 
     public IEnumerable<string>? Variables { get; set; }
 }

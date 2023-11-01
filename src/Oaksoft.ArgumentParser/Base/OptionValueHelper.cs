@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Oaksoft.ArgumentParser.Parser;
 
-namespace Oaksoft.ArgumentParser.Options;
+namespace Oaksoft.ArgumentParser.Base;
 
 internal static class OptionValueHelper
 {

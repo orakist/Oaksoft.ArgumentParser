@@ -36,90 +36,54 @@ internal static class Program
 
     private static void AddCustomOptions(ApplicationOptions options)
     {
-        options.AddDefaultOption(o => o.FilePaths, requiredTokenCount: 1, maximumTokenCount: 10)
-            .WithName("FilePath")
-            .WithUsage("log-file-path")
-            .WithDescription("File path of the log file or directory path of the '*.log' files. " +
-                             "Provided path count must be between 1 and 10. At least 1 path is required.");
+        options.AddSwitchOption(o => o.AddSwitch)
+            .WithDescription("Enables add operator.");
 
-        options.AddSwitchOption(o => o.ShowMismatches)
-            .WithCommands("m", "mismatch")
-            .WithDescription("Prints calculation mismatches between Spreadsheet and Microsoft Excel.");
+        options.AddSwitchOption(o => o.SubtractSwitch)
+            .WithDescription("Enables subtract operator.");
 
-        options.AddSwitchOption(o => o.ShowFormulas)
-            .WithCommands("f", "formula-counts")
-            .WithDescription("Prints used formula names and usage count of the formulas in the workbook.");
+        options.AddCountOption(o => o.MultiplySwitch, requiredTokenCount: 0, maximumTokenCount: 5)
+            .WithDescription("Enables multiply operator.");
 
-        options.AddSwitchOption(o => o.ShowLoadingErrors)
-            .WithCommands("e", "loading-errors")
-            .WithDescription("Prints all collected errors while loading the workbook.");
+        options.AddCountOption(o => o.DivideSwitch, requiredTokenCount: 0, maximumTokenCount: 2)
+            .WithDescription("Enables divide operator.");
 
-        options.AddSwitchOption(o => o.CompareGrammars)
-            .WithCommands("g", "compare-grammars")
-            .WithDescription("Compares fast grammar and slow grammar parsing results.");
+        options.AddScalarOption(o => o.AddCount, valueTokenMustExist: false)
+            .WithDefaultValue("1")
+            .WithConstraints("1", "20")
+            .WithDescription("Specifies addition count. If no option value is given, a random value is generated. Value must be between 1 and 20.");
 
-        options.AddSwitchOption(o => o.CalculationPerformance)
-            .WithCommands("cp", "calc-perf")
-            .WithDescription("Prints calculation performance statistics sheet by sheet (default).");
+        options.AddScalarOption(o => o.SubtractCount)
+            .WithDefaultValue("2")
+            .WithDescription("Specifies subtraction count.");
 
-        options.AddSwitchOption(o => o.ReadingPerformance)
-            .WithCommands("rp", "read-perf")
-            .WithDescription("Prints total calculation performance statistics of workbook then prints reading " +
-                             "performance statistics sheet by sheet.");
-
-        options.AddIntegerOption(o => o.CalculationCount, minIntegerValue: 1, maxIntegerValue: 20)
-            .WithCommands("cc", "calc-count")
+        options.AddScalarOption(o => o.MultiplyCount)
             .WithDefaultValue("0")
-            .WithDescription("Subsequent calculation count of the workbook. Default count value is 0. " +
-                             "It must be between 1 and 20.");
+            .WithDescription("Specifies multiplication count.");
 
-        options.AddStringOption(o => o.RangeFilter)
-            .WithUsage("--r <reference>")
-            .WithDescription("Specifies the range where mismatches will be checked or specifies the range will be calculated. " +
-                             "Range can be reference address or defined name address.");
+        options.AddScalarOption(o => o.DivideCount)
+            .WithDefaultValue("0")
+            .WithDescription("Specifies division count.");
 
-        options.AddStringOption(o => o.ValueTypeFilter, valueTokenMustExist: true, maximumTokenCount: 1)
-            .WithCommands("i", "ignore-type")
-            .WithAllowedValues("number", "string", "boolean", "error", "blank")
-            .WithUsage("--i <type1(;type2)(;...)>")
-            .WithDescription("Specifies the ignored cell types while printing mismatches. " +
-                             "Valid Types: number, string, boolean, error, blank");
+        options.AddScalarOption(o => o.AddNumbers, valueTokenMustExist: false)
+            .WithDefaultValue("1")
+            .WithConstraints("1", "20")
+            .WithDescription("Specifies addition count. If no option value is given, a random value is generated. Value must be between 1 and 20.");
 
-        options.AddIntegerOption(o => o.PrecisionFilter, minIntegerValue: 1, maxIntegerValue: 15)
-            .WithDefaultValue("8")
-            .WithDescription("Sets the precision (epsilon) number between two numbers. The number represents the decimal digit. " +
-                             "Default value is 8. It must be between 1 and 15.");
+        options.AddScalarOption(o => o.SubtractNumbers)
+            .WithDefaultValue("2")
+            .WithDescription("Specifies subtraction count.");
 
-        options.AddStringOption(o => o.AutomationOutputPath, o => o.AutomationEnabled, valueTokenMustExist: false)
-            .WithUsage("--a (automation-nodes-file-path)")
-            .WithDescription("Calculates automated application input nodes and writes output to a csv file. If output file path is not " +
-                             "provided path of the workbook is used. Default name of the output file is 'automation-nodes-{datetime}.csv'.");
+        options.AddScalarOption(o => o.MultiplyNumbers)
+            .WithDefaultValue("0")
+            .WithDescription("Specifies multiplication count.");
 
-        options.AddStringOption(o => o.DependencyOutputPath, o => o.DependencyEnabled, valueTokenMustExist: false)
-            .WithCommands("d", "dependency", "dep-all")
-            .WithUsage("--d (dependency-nodes-file-path)")
-            .WithDescription("Calculates dependency tree nodes and writes (only the defined name nodes) output to a csv file. If you " +
-                             "want to see all nodes of the tree use --dep-all command. If output file path is not provided path of " +
-                             "the workbook is used. Default name of the output file is 'dependency-nodes-{datetime}.csv'.");
+        options.AddScalarOption(o => o.DivideNumbers)
+            .WithDefaultValue("0")
+            .WithDescription("Specifies division count.");
 
-        options.AddStringOption(o => o.SolverInputPath, o => o.SolverEnabled)
-            .WithUsage("--s <solver-input-file-path>")
-            .WithDescription("Executes solver with a given input json file and writes output to a file. Solver output file is created " +
-                             "in the same folder as the given input file. Name of the output file is 'solver-output-{datetime}.json'.");
-
-        options.AddStringOption(o => o.LogFileOutputPath, o => o.LogFileEnabled, valueTokenMustExist: false)
-            .WithCommands("o", "log-output")
-            .WithUsage("--o (log-output-file-path)")
-            .WithDescription("Mirrors console output text into a file. If output filepath is not provided path of the workbook is used. " +
-                             "Default name of the output file is 'log-output-{datetime}.txt'.");
-
-        options.AddStringOption(o => o.Culture)
-            .WithCommands("l", "locale")
-            .WithDefaultValue("en-US")
-            .WithUsage("--l <culture-name>")
-            .WithDescription("Changes the culture of the formatting. Default: en-US");
-
-        options.AddSwitchOption(o => o.Verbose)
-            .WithDescription("Prints detailed information about calculation of the workbook.");
+        options.AddDefaultOption(o => o.Variables, requiredTokenCount: 0, maximumTokenCount: 10)
+            .WithUsage("variable-names")
+            .WithDescription("Defines variables to use them in formulas.");
     }
 }

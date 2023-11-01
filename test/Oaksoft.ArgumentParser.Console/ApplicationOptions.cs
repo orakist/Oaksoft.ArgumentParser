@@ -1,37 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Console;
 
 internal class ApplicationOptions : BaseApplicationOptions
 {
-    public ICollection<string>? FilePaths { get; set; }
+    public bool AddSwitch { get; set; }
+    public bool? SubtractSwitch { get; set; }
+    public int MultiplySwitch { get; set; }
+    public int? DivideSwitch { get; set; }
 
-    public bool ShowMismatches { get; set; }
-    public bool ShowFormulas { get; set; }
-    public bool ShowLoadingErrors { get; set; }
-    public bool CompareGrammars { get; set; }
+    public short AddCount { get; set; }
+    public string? SubtractCount { get; set; }
+    public float? MultiplyCount { get; set; }
+    public long? DivideCount { get; set; }
 
-    public bool CalculationPerformance { get; set; }
-    public bool ReadingPerformance { get; set; }
-    public int CalculationCount { get; set; }
+    public IEnumerable<int>? AddNumbers { get; set; }
+    public ICollection<string>? SubtractNumbers { get; set; }
+    public List<double?>? MultiplyNumbers { get; set; }
+    public long[]? DivideNumbers { get; set; }
 
-    public string? RangeFilter { get; set; }
-    public List<string>? ValueTypeFilter { get; set; }
-    public int PrecisionFilter { get; set; }
+    public bool FormulaEnabled { get; set; }
+    public string? FormulaSign { get; set; }
 
-    public bool AutomationEnabled { get; set; }
-    public string? AutomationOutputPath { get; set; }
+    public int FormulaCount { get; set; }
+    public List<double?>? FormulaResults { get; set; }
 
-    public bool DependencyEnabled { get; set; }
-    public string? DependencyOutputPath { get; set; }
-
-    public bool SolverEnabled { get; set; }
-    public string? SolverInputPath { get; set; }
-
-    public bool LogFileEnabled { get; set; }
-    public string? LogFileOutputPath { get; set; }
-
-    public string? Culture { get; set; }
-    public bool Verbose { get; set; }
+    public IEnumerable<string>? Variables { get; set; }
 }

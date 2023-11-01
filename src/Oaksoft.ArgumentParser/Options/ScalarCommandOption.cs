@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Callbacks;
 using Oaksoft.ArgumentParser.Parser;
 
@@ -117,6 +118,11 @@ internal sealed class ScalarCommandOption : CommandOption, IScalarCommandOption,
         {
             Usage = $"{Command}{(ValueTokenMustExist ? " <value>" : " (value)")}";
         }
+
+        if (KeyProperty.IsAssignableFrom<string>())
+            SetParsingCallbacks(DefaultParsingCallbacks.Instance);
+        else if (KeyProperty.IsAssignableFrom<int>())
+            SetParsingCallbacks(IntegerParsingCallbacks.Instance);
 
         _validateValueAction?.ValidateDefaultValue(DefaultValue);
         _validateValueAction?.ValidateAllowedValues(_allowedValues);

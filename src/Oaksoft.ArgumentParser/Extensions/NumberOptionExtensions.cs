@@ -10,7 +10,7 @@ namespace Oaksoft.ArgumentParser.Extensions;
 public static partial class OptionsExtensions
 {
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, int>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, float>> keyPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
     {
@@ -18,7 +18,7 @@ public static partial class OptionsExtensions
     }
 
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, int?>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, float?>> keyPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
     {
@@ -26,7 +26,7 @@ public static partial class OptionsExtensions
     }
 
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, short>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, double>> keyPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
     {
@@ -34,7 +34,7 @@ public static partial class OptionsExtensions
     }
 
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, short?>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, double?>> keyPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
     {
@@ -42,7 +42,7 @@ public static partial class OptionsExtensions
     }
 
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, long>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, decimal>> keyPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
     {
@@ -50,7 +50,7 @@ public static partial class OptionsExtensions
     }
 
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, long?>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, decimal?>> keyPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
     {
@@ -59,7 +59,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source, 
-        Expression<Func<TSource, IEnumerable<int>?>> keyPropExpr,
+        Expression<Func<TSource, IEnumerable<float>?>> keyPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
         where TSource : BaseApplicationOptions
@@ -70,7 +70,7 @@ public static partial class OptionsExtensions
     }
 
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, IEnumerable<int?>?>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, IEnumerable<float?>?>> keyPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
         where TSource : BaseApplicationOptions
@@ -81,7 +81,7 @@ public static partial class OptionsExtensions
     }
 
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, IEnumerable<short>?>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, IEnumerable<double>?>> keyPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
         where TSource : BaseApplicationOptions
@@ -92,7 +92,7 @@ public static partial class OptionsExtensions
     }
 
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, IEnumerable<short?>?>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, IEnumerable<double?>?>> keyPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
         where TSource : BaseApplicationOptions
@@ -103,7 +103,7 @@ public static partial class OptionsExtensions
     }
 
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, IEnumerable<long>?>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, IEnumerable<decimal>?>> keyPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
         where TSource : BaseApplicationOptions
@@ -114,7 +114,7 @@ public static partial class OptionsExtensions
     }
 
     public static IScalarCommandOption AddScalarOption<TSource>(
-        this TSource source, Expression<Func<TSource, IEnumerable<long?>?>> keyPropExpr,
+        this TSource source, Expression<Func<TSource, IEnumerable<decimal?>?>> keyPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
         where TSource : BaseApplicationOptions
@@ -126,7 +126,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source, 
-        Expression<Func<TSource, int>> keyPropExpr,
+        Expression<Func<TSource, float>> keyPropExpr,
         Expression<Func<TSource, bool>> flagPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
@@ -136,7 +136,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, int?>> keyPropExpr,
+        Expression<Func<TSource, float?>> keyPropExpr,
         Expression<Func<TSource, bool>> flagPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
@@ -146,7 +146,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, short>> keyPropExpr,
+        Expression<Func<TSource, double>> keyPropExpr,
         Expression<Func<TSource, bool>> flagPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
@@ -156,7 +156,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, short?>> keyPropExpr,
+        Expression<Func<TSource, double?>> keyPropExpr,
         Expression<Func<TSource, bool>> flagPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
@@ -166,7 +166,7 @@ public static partial class OptionsExtensions
     
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, long>> keyPropExpr,
+        Expression<Func<TSource, decimal>> keyPropExpr,
         Expression<Func<TSource, bool>> flagPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
@@ -176,7 +176,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, long?>> keyPropExpr,
+        Expression<Func<TSource, decimal?>> keyPropExpr,
         Expression<Func<TSource, bool>> flagPropExpr,
         bool valueTokenMustExist = true, bool mandatory = false)
         where TSource : BaseApplicationOptions
@@ -186,7 +186,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, IEnumerable<int>?>> keyPropExpr,
+        Expression<Func<TSource, IEnumerable<float>?>> keyPropExpr,
         Expression<Func<TSource, int>> countPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
@@ -199,7 +199,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, IEnumerable<int?>?>> keyPropExpr,
+        Expression<Func<TSource, IEnumerable<float?>?>> keyPropExpr,
         Expression<Func<TSource, int>> countPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
@@ -212,7 +212,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, IEnumerable<short>?>> keyPropExpr,
+        Expression<Func<TSource, IEnumerable<double>?>> keyPropExpr,
         Expression<Func<TSource, int>> countPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
@@ -225,7 +225,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, IEnumerable<short?>?>> keyPropExpr,
+        Expression<Func<TSource, IEnumerable<double?>?>> keyPropExpr,
         Expression<Func<TSource, int>> countPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
@@ -238,7 +238,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, IEnumerable<long>?>> keyPropExpr,
+        Expression<Func<TSource, IEnumerable<decimal>?>> keyPropExpr,
         Expression<Func<TSource, int>> countPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)
@@ -251,7 +251,7 @@ public static partial class OptionsExtensions
 
     public static IScalarCommandOption AddScalarOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, IEnumerable<long?>?>> keyPropExpr,
+        Expression<Func<TSource, IEnumerable<decimal?>?>> keyPropExpr,
         Expression<Func<TSource, int>> countPropExpr,
         bool valueTokenMustExist = false, bool enableValueTokenSplitting = true,
         bool allowSequentialValues = true, int requiredTokenCount = 0, int maximumTokenCount = 10)

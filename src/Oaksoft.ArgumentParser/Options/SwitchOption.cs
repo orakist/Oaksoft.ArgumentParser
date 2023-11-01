@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;

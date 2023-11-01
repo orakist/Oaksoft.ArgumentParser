@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Oaksoft.ArgumentParser.Parser;
+namespace Oaksoft.ArgumentParser.Base;
 
 internal static class AssemblyHelper
 {

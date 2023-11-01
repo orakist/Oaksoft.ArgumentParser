@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Parser;
 
@@ -10,73 +11,44 @@ public static partial class OptionsExtensions
 { 
     public static INonCommandOption AddDefaultOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, string?>> keyProperty,
+        Expression<Func<TSource, string?>> keyPropExpr,
         bool mandatory = false)
         where TSource : BaseApplicationOptions
     {
-        var keyPropName = ValidatePropertyExpression(keyProperty);
-
-        var command = new NonCommandOption(mandatory ? 1 : 0);
-
-        AddOption(source, command, keyPropName);
-
-        return command;
+        return source.RegisterDefaultOption(keyPropExpr, mandatory);
     }
 
     public static INonCommandOption AddDefaultOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, ICollection<string>?>> keyProperty,
-        bool enableValueTokenSplitting = true,
+        Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
+        bool enableValueTokenSplitting = true, 
         int requiredTokenCount = 0, int maximumTokenCount = 10)
         where TSource : BaseApplicationOptions
     {
-        var keyPropName = ValidatePropertyExpression(keyProperty);
-
-        var command = new NonCommandOption(requiredTokenCount, maximumTokenCount)
-        {
-            EnableValueTokenSplitting = enableValueTokenSplitting
-        };
-
-        AddOption(source, command, keyPropName);
-
-        return command;
+        return source.RegisterDefaultOption(
+            keyPropExpr, enableValueTokenSplitting, requiredTokenCount, maximumTokenCount);
     }
 
     public static INonCommandOption AddDefaultOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, string?>> keyProperty,
-        Expression<Func<TSource, bool>> countProperty,
+        Expression<Func<TSource, string?>> keyPropExpr,
+        Expression<Func<TSource, bool>> countPropExpr,
         bool mandatory = false)
         where TSource : BaseApplicationOptions
     {
-        var keyPropName = ValidatePropertyExpression(keyProperty);
-        var countPropName = ValidatePropertyExpression(countProperty);
-
-        var command = new NonCommandOption(mandatory ? 1 : 0);
-
-        AddOption(source, command, keyPropName, countPropName);
-
-        return command;
+        return source.RegisterDefaultOption(keyPropExpr, countPropExpr, mandatory);
     }
 
     public static INonCommandOption AddDefaultOption<TSource>(
         this TSource source,
-        Expression<Func<TSource, ICollection<string>?>> keyProperty,
-        Expression<Func<TSource, int>> countProperty,
-        bool enableValueTokenSplitting = true,
+        Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
+        Expression<Func<TSource, int>> countPropExpr,
+        bool enableValueTokenSplitting = true, 
         int requiredTokenCount = 0, int maximumTokenCount = 10)
         where TSource : BaseApplicationOptions
     {
-        var keyPropName = ValidatePropertyExpression(keyProperty);
-        var countPropName = ValidatePropertyExpression(countProperty);
-
-        var command = new NonCommandOption(requiredTokenCount, maximumTokenCount)
-        {
-            EnableValueTokenSplitting = enableValueTokenSplitting
-        };
-
-        AddOption(source, command, keyPropName, countPropName);
-
-        return command;
+        return source.RegisterDefaultOption(
+            keyPropExpr, countPropExpr, enableValueTokenSplitting, 
+            requiredTokenCount, maximumTokenCount);
     }
 }

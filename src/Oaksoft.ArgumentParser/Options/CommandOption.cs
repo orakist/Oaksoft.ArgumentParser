@@ -52,7 +52,7 @@ internal abstract class CommandOption : BaseOption, ICommandOption
 
         if (string.IsNullOrWhiteSpace(Name))
         {
-            Name = KeyProperty;
+            Name = KeyProperty.Name;
         }
 
         if (string.IsNullOrWhiteSpace(Description))
@@ -96,7 +96,7 @@ internal abstract class CommandOption : BaseOption, ICommandOption
 
     private string GetFirstWordOfKeyProperty()
     {
-        var property = KeyProperty.Replace('_', ' ')
+        var property = KeyProperty.Name.Replace('_', ' ')
             .TrimStart(_trimChars).TrimEnd()
             .Split(' ').First();
 

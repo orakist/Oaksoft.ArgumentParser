@@ -4,12 +4,12 @@ using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Oaksoft.ArgumentParser.Extensions;
+namespace Oaksoft.ArgumentParser.Base;
 
 /// <summary>
 /// Controls colored console output by extension methods.
 /// </summary>
-public static partial class ColoringExtensions
+public static partial class TextColoring
 {
     private static bool _enabled;
 

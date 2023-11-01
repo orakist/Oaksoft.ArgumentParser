@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using Oaksoft.ArgumentParser.Extensions;
+using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
@@ -108,7 +108,7 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
 
         var options = _appOptions.Options;
         var helpOption = _appOptions.Options.OfType<SwitchOption>().
-            First(o => o.KeyProperty == nameof(IApplicationOptions.Help));
+            First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
 
         if (!IsOnlyOption(helpOption, options))
             return;
@@ -140,7 +140,7 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
 
     private StringBuilder BuildHelpText(bool enableColoring)
     {
-        ColoringExtensions.SetEnabled(enableColoring);
+        TextColoring.SetEnabled(enableColoring);
 
         var sb = BuildHeaderText(Settings.ShowTitle ?? true, Settings.ShowDescription ?? true);
         sb.AppendLine("These are command line options of this application.");
@@ -188,8 +188,8 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
         var sb = new StringBuilder();
         if (_errors.Count < 1)
             return sb;
-        
-        ColoringExtensions.SetEnabled(enableColoring);
+
+        TextColoring.SetEnabled(enableColoring);
         
         sb.Pastel("     Error(s)!", ConsoleColor.Red);
         sb.AppendLine();

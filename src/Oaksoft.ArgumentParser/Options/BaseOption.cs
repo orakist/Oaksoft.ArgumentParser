@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
@@ -17,9 +18,9 @@ internal abstract class BaseOption : IBaseOption
 
     public abstract int ValidatedTokenCount { get; }
 
-    public string KeyProperty { get; private set; } = default!;
+    public PropertyInfo KeyProperty { get; private set; } = default!;
 
-    public string? CountProperty { get; private set; }
+    public PropertyInfo? CountProperty { get; private set; }
 
     protected bool _validated;
 
@@ -31,12 +32,12 @@ internal abstract class BaseOption : IBaseOption
             MaximumTokenCount = RequiredTokenCount;
     }
 
-    public void SetKeyProperty(string property)
+    public void SetKeyProperty(PropertyInfo property)
     {
         KeyProperty = property;
     }
 
-    public void SetCountProperty(string? property)
+    public void SetCountProperty(PropertyInfo? property)
     {
         CountProperty = property;
     }

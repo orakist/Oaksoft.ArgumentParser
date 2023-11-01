@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 
@@ -79,7 +80,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     protected void CreateDefaultOptions()
     {
         var options = AppOptions.Options.Cast<BaseOption>();
-        if (options.Any(o => o.KeyProperty == nameof(AppOptions.Help)))
+        if (options.Any(o => o.KeyProperty.Name == nameof(AppOptions.Help)))
             return;
 
         AppOptions.AddSwitchOption(o => o.Help)
@@ -219,7 +220,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     protected void ValidateHelpToken(IReadOnlyList<IBaseOption> options)
     {
         var helpOption = options.OfType<SwitchOption>().
-            First(o => o.KeyProperty == nameof(IApplicationOptions.Help));
+            First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
 
         if (IsOnlyOption(helpOption, options))
         {
@@ -285,7 +286,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         foreach (var property in _propertyInfos)
         {
             var type = property.PropertyType;
-            var option = options.FirstOrDefault(o => o.KeyProperty == property.Name);
+            var option = options.FirstOrDefault(o => o.KeyProperty.Name == property.Name);
             if (option is IHaveValueOption valOption && !string.IsNullOrWhiteSpace(valOption.DefaultValue))
             {
                 // all scalar-command and non-command options may have a default option.
@@ -314,9 +315,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
 
         var baseOption = (option as BaseOption)!;
-        if (!string.IsNullOrWhiteSpace(baseOption.CountProperty))
+        if (baseOption.CountProperty is not null)
         {
-            var countProp = _propertyInfos!.First(p => p.Name == baseOption.CountProperty);
+            var countProp = _propertyInfos!.First(p => p.Name == baseOption.CountProperty.Name);
             if (countProp.PropertyType == typeof(bool))
             {
                 countProp.SetValue(AppOptions, true);
@@ -327,7 +328,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        var keyProp = _propertyInfos!.First(p => p.Name == baseOption.KeyProperty);
+        var keyProp = _propertyInfos!.First(p => p.Name == baseOption.KeyProperty.Name);
         var type = keyProp.PropertyType;
         if (option is SwitchOption)
         {
@@ -364,11 +365,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private List<string> GetRegisteredPropertyNames(IReadOnlyList<BaseOption> options)
     {
         var propertyNames = options
-            .Where(o => !string.IsNullOrWhiteSpace(o.CountProperty))
-            .Select(a => a.CountProperty!)
+            .Where(o => !string.IsNullOrWhiteSpace(o.CountProperty?.Name))
+            .Select(a => a.CountProperty!.Name)
             .ToList();
 
-        propertyNames.AddRange(options.Select(o => o.KeyProperty));
+        propertyNames.AddRange(options.Select(o => o.KeyProperty.Name));
 
         return propertyNames;
     }

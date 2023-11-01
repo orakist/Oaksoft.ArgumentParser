@@ -6,7 +6,7 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Extensions;
 
-public static partial class OptionsExtensions
+public static class ConfigureExtensions
 {
     public static IBaseOption WithName(this IBaseOption option, string name)
     {

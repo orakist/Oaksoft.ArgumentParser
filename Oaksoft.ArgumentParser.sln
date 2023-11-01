@@ -3,9 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oaksoft.ArgumentParser", "src\Glowy.CLxParser\Oaksoft.ArgumentParser.csproj", "{24854C8D-5115-4F98-A985-139AC3675B1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oaksoft.ArgumentParser", "src\Oaksoft.ArgumentParser\Oaksoft.ArgumentParser.csproj", "{1D347CC7-04A8-479E-8731-2FB53CC70E24}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oaksoft.ArgumentParser.Console", "test\Glowy.CLxParser.Console\Oaksoft.ArgumentParser.Console.csproj", "{2346AD08-2A7E-4B60-974A-24AB6C7F75C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oaksoft.ArgumentParser.Console", "test\Oaksoft.ArgumentParser.Console\Oaksoft.ArgumentParser.Console.csproj", "{3324675B-CF48-4E51-940C-5E7ADC30B53F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69BFAD59-3555-4F09-BBF2-20F182DBDC86}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +18,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{24854C8D-5115-4F98-A985-139AC3675B1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{24854C8D-5115-4F98-A985-139AC3675B1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{24854C8D-5115-4F98-A985-139AC3675B1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{24854C8D-5115-4F98-A985-139AC3675B1B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2346AD08-2A7E-4B60-974A-24AB6C7F75C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2346AD08-2A7E-4B60-974A-24AB6C7F75C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2346AD08-2A7E-4B60-974A-24AB6C7F75C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2346AD08-2A7E-4B60-974A-24AB6C7F75C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D347CC7-04A8-479E-8731-2FB53CC70E24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D347CC7-04A8-479E-8731-2FB53CC70E24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D347CC7-04A8-479E-8731-2FB53CC70E24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D347CC7-04A8-479E-8731-2FB53CC70E24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3324675B-CF48-4E51-940C-5E7ADC30B53F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3324675B-CF48-4E51-940C-5E7ADC30B53F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3324675B-CF48-4E51-940C-5E7ADC30B53F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3324675B-CF48-4E51-940C-5E7ADC30B53F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

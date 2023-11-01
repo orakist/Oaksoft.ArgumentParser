@@ -3,7 +3,7 @@
 ################################################################################
 
 /.vs
-/src/Glowy.CLxParser/obj
-/src/Glowy.CLxParser/bin
-/test/Glowy.CLxParser.Console/bin
-/test/Glowy.CLxParser.Console/obj
+/src/Oaksoft.ArgumentParser/obj
+/src/Oaksoft.ArgumentParser/bin
+/test/Oaksoft.ArgumentParser.Console/bin
+/test/Oaksoft.ArgumentParser.Console/obj

@@ -5,14 +5,14 @@
     <Nullable>enable</Nullable>
     <TargetFramework>net7.0</TargetFramework>
     <Version>0.9.0-beta</Version>
-    <Product>Glowy Command Line Arguments Parser Tester</Product>
-    <Company>Glowy Tech Software</Company>
+    <Product>Command Line Arguments Parser Tester</Product>
+    <Company>Oaksoft Tech.</Company>
     <Copyright>Copyright (C) 2023 All Rights Reserved</Copyright>
-    <Description>This Console App tests Glowy.CLxParser library.</Description>
+    <Description>This Console App tests Oaksoft.ArgumentParser library.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Glowy.CLxParser\Oaksoft.ArgumentParser.csproj" />
+    <ProjectReference Include="..\..\src\Oaksoft.ArgumentParser\Oaksoft.ArgumentParser.csproj" />
   </ItemGroup>
 
 </Project>

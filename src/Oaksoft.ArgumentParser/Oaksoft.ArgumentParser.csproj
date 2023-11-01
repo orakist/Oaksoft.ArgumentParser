@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <Product>Turquoise Command Line Arguments Parser</Product>
+    <Product>Oaksoft Command Line Arguments Parser</Product>
   </PropertyGroup>
 
   <ItemGroup>

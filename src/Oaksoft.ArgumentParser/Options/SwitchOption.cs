@@ -6,6 +6,8 @@ namespace Oaksoft.ArgumentParser.Options;
 
 internal sealed class SwitchOption : CommandOption
 {
+    public override int ValidInputCount => _validated ? _commandTokens.Count : 0;
+
     public SwitchOption(int requiredTokenCount = 0, int maximumTokenCount = 1)
         : base(requiredTokenCount, maximumTokenCount)
     {

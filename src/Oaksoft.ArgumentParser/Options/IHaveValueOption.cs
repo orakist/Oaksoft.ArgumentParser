@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Oaksoft.ArgumentParser.Options;
 
@@ -6,13 +7,19 @@ public interface IHaveValueOption : IBaseOption
 {
     List<string> ValueTokens { get; }
 
+    List<string> InputValues { get; }
+
     bool EnableValueTokenSplitting { get; }
+}
 
-    string? DefaultValue { get; }
+public interface IHaveValueOption<TValue> : IHaveValueOption
+    where TValue : IComparable, IEquatable<TValue>
+{
+    TValue? DefaultValue { get; }
 
-    List<string?> Constraints { get; }
+    List<TValue?> Constraints { get; }
 
-    List<string> AllowedValues { get; }
+    List<TValue> AllowedValues { get; }
 
-    List<string> ParsedValues { get; }
+    List<TValue> ResultValues { get; }
 }

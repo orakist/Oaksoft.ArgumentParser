@@ -12,5 +12,5 @@ public interface IBaseOption
 
     int MaximumTokenCount { get; }
 
-    int ValidatedTokenCount { get; }
+    int ValidInputCount { get; }
 }

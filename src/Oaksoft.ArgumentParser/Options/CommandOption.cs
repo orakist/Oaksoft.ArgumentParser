@@ -13,13 +13,11 @@ internal abstract class CommandOption : BaseOption, ICommandOption
 
     public List<string> CommandTokens => _commandTokens.ToList();
 
-    public override int ValidatedTokenCount => _validated ? _commandTokens.Count : 0;
-
     protected List<string> _commands;
     protected List<string> _commandTokens;
     private static readonly char[] _trimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
 
-    protected CommandOption(int requiredTokenCount = 0, int maximumTokenCount = 1)
+    protected CommandOption(int requiredTokenCount, int maximumTokenCount)
         : base(requiredTokenCount, maximumTokenCount)
     {
         _commands = new List<string>();

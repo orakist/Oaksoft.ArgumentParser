@@ -16,7 +16,7 @@ internal abstract class BaseOption : IBaseOption
 
     public int MaximumTokenCount { get; }
 
-    public abstract int ValidatedTokenCount { get; }
+    public abstract int ValidInputCount { get; }
 
     public PropertyInfo KeyProperty { get; private set; } = default!;
 
@@ -24,7 +24,7 @@ internal abstract class BaseOption : IBaseOption
 
     protected bool _validated;
 
-    protected BaseOption(int requiredTokenCount = 0, int maximumTokenCount = 1)
+    protected BaseOption(int requiredTokenCount, int maximumTokenCount)
     {
         RequiredTokenCount = requiredTokenCount;
         MaximumTokenCount = maximumTokenCount;

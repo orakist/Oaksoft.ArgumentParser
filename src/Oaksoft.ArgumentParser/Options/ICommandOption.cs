@@ -11,6 +11,6 @@ public interface ICommandOption : IBaseOption
     List<string> CommandTokens { get; }
 }
 
-public interface INonCommandOption : IHaveValueOption
+public interface INonCommandOption : IHaveValueOption<string>
 {
 }

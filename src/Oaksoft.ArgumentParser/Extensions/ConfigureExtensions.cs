@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Reflection;
+using System.Linq;
 using Oaksoft.ArgumentParser.Callbacks;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Parser;
@@ -26,6 +26,14 @@ public static class ConfigureExtensions
         return option;
     }
 
+    public static IScalarCommandOption<TValue> WithCommands<TValue>(
+        this IScalarCommandOption<TValue> option, params string[] commands)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        ((CommandOption)option).SetCommands(commands);
+        return option;
+    }
+
     public static IScalarCommandOption WithCommands(this IScalarCommandOption option, params string[] commands)
     {
         ((CommandOption)option).SetCommands(commands);
@@ -38,83 +46,86 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static IHaveValueOption WithDefaultValue(this IHaveValueOption option, string? defaultValue)
+    public static IHaveValueOption<TValue> WithDefaultValue<TValue>(
+        this IHaveValueOption<TValue> option, TValue defaultValue)
+        where TValue : IComparable, IEquatable<TValue>
     {
         switch (option)
         {
-            case ScalarCommandOption scalarCommand:
+            case ScalarCommandOption<TValue> scalarCommand:
                 scalarCommand.SetDefaultValue(defaultValue);
                 break;
             case NonCommandOption nonCommand:
-                nonCommand.SetDefaultValue(defaultValue);
+                nonCommand.SetDefaultValue(defaultValue as string);
                 break;
         }
 
         return option;
     }
 
-    public static IHaveValueOption WithConstraints(this IHaveValueOption option, params string?[] constraints)
+    public static IHaveValueOption<TValue> WithConstraints<TValue>(
+        this IHaveValueOption<TValue> option, params TValue?[] constraints)
+        where TValue : IComparable, IEquatable<TValue>
     {
         switch (option)
         {
-            case ScalarCommandOption scalarCommand:
+            case ScalarCommandOption<TValue> scalarCommand:
                 scalarCommand.SetConstraints(constraints);
                 break;
             case NonCommandOption nonCommand:
-                nonCommand.SetConstraints(constraints);
+                nonCommand.SetConstraints(constraints.Cast<string>().ToArray());
                 break;
         }
 
         return option;
     }
 
-    public static IHaveValueOption WithAllowedValues(this IHaveValueOption option, params string[] allowedValues)
+    public static IHaveValueOption<TValue> WithAllowedValues<TValue>(
+        this IHaveValueOption<TValue> option, params TValue[] allowedValues) 
+        where TValue : IComparable, IEquatable<TValue>
     {
         switch (option)
         {
-            case ScalarCommandOption scalarCommand:
+            case ScalarCommandOption<TValue> scalarCommand:
                 scalarCommand.SetAllowedValues(allowedValues);
                 break;
             case NonCommandOption nonCommand:
-                nonCommand.SetAllowedValues(allowedValues);
+                nonCommand.SetAllowedValues(allowedValues.Cast<string>().ToArray());
                 break;
         }
 
         return option;
     }
 
-    public static IScalarCommandOption WithParsingCallbacks(
-        this IScalarCommandOption option, IParsingCallbacks optionCallbacks)
+    public static IScalarCommandOption<TValue> WithParsingCallbacks<TValue>(
+        this IScalarCommandOption<TValue> option, IParsingCallbacks<TValue> optionCallbacks)
+        where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarCommandOption)option).SetParsingCallbacks(optionCallbacks);
+        ((ScalarCommandOption<TValue>)option).SetParsingCallbacks(optionCallbacks);
         return option;
     }
 
-    public static IScalarCommandOption WithValueValidator(
-        this IScalarCommandOption option, Func<string, bool> validator)
+    public static IScalarCommandOption<TValue> WithValueValidator<TValue>(
+        this IScalarCommandOption<TValue> option, Func<string, bool> validator)
+        where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarCommandOption)option).SetBaseValidator(validator);
+        ((ScalarCommandOption<TValue>)option).SetValueValidator(validator);
         return option;
     }
 
-    public static IScalarCommandOption WithOptionValidator(
-        this IScalarCommandOption option, Func<IValueContext, IArgumentParser, bool> validator)
+    public static IScalarCommandOption<TValue> WithValueConvertor<TValue>(
+        this IScalarCommandOption<TValue> option, Func<string, TValue> validator)
+        where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarCommandOption)option).SetOptionValidator(validator);
+        ((ScalarCommandOption<TValue>)option).SetValueConvertor(validator);
         return option;
     }
 
-    public static IScalarCommandOption WithDefaultValueSetterAction(
-        this IScalarCommandOption option, Action<IValueContext, IApplicationOptions, PropertyInfo> setterAction)
+    public static IScalarCommandOption<TValue> WithOptionValidator<TValue>(
+        this IScalarCommandOption<TValue> option, Func<IValueContext<TValue>, IArgumentParser, bool> validator)
+        where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarCommandOption)option).SetDefaultValueSetterAction(setterAction);
-        return option;
-    }
-
-    public static IScalarCommandOption WithOptionValueSetterAction(
-        this IScalarCommandOption option, Action<IValueContext, IApplicationOptions, PropertyInfo> setterAction)
-    {
-        ((ScalarCommandOption)option).SetOptionValueSetterAction(setterAction);
+        ((ScalarCommandOption<TValue>)option).SetOptionValidator(validator);
         return option;
     }
 }

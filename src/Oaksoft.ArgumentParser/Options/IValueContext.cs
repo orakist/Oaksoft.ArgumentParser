@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-public interface IValueContext 
+public interface IValueContext<TValue>
+    where TValue : IComparable, IEquatable<TValue>
 {
-    string? DefaultValue { get; }
+    List<string> InputValues { get; }
 
-    List<string?> Constraints { get; }
+    TValue? DefaultValue { get; }
 
-    List<string> AllowedValues { get; }
+    List<TValue?> Constraints { get; }
 
-    List<string> ParsedValues { get; }
+    List<TValue> AllowedValues { get; }
 }

@@ -287,21 +287,22 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             var type = property.PropertyType;
             var option = options.FirstOrDefault(o => o.KeyProperty.Name == property.Name);
-            if (option is IHaveValueOption valOption && !string.IsNullOrWhiteSpace(valOption.DefaultValue))
+
+            // all scalar-command and non-command options may have a default value.
+            // so apply default option to registered property if default value exists.
+            if (option is NonCommandOption nonCommand)
             {
-                // all scalar-command and non-command options may have a default option.
-                // so apply default option to registered property if it exists.
                 if (type.IsAssignableFrom(typeof(string)))
                 {
-                    property.SetValue(AppOptions, valOption.DefaultValue);
+                    property.SetValue(AppOptions, nonCommand.DefaultValue);
                     continue;
                 }
+            }
 
-                if (option is ScalarCommandOption scalarOption)
-                {
-                    scalarOption.ApplyDefaultValue(AppOptions, property);
-                    continue;
-                }
+            if (option is ScalarCommandOption scalarOption)
+            {
+                scalarOption.ApplyDefaultValue(AppOptions, property);
+                continue;
             }
 
             var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
@@ -311,7 +312,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void UpdateOptionPropertiesByReflection(IBaseOption option)
     {
-        if (option.ValidatedTokenCount < 1)
+        if (option.ValidInputCount < 1)
             return;
 
         var baseOption = (option as BaseOption)!;
@@ -324,7 +325,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
             else if (countProp.PropertyType == typeof(int))
             {
-                countProp.SetValue(AppOptions, option.ValidatedTokenCount);
+                countProp.SetValue(AppOptions, option.ValidInputCount);
             }
         }
 
@@ -338,22 +339,22 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
             else if (type == typeof(int))
             {
-                keyProp.SetValue(AppOptions, option.ValidatedTokenCount);
+                keyProp.SetValue(AppOptions, option.ValidInputCount);
             }
         }
         else if (option is IHaveValueOption valOption)
         {
             if (type.IsAssignableFrom(typeof(List<string>)))
             {
-                keyProp.SetValue(AppOptions, valOption.ParsedValues);
+                keyProp.SetValue(AppOptions, valOption.InputValues);
             }
             else if (type.IsAssignableFrom(typeof(string[])))
             {
-                keyProp.SetValue(AppOptions, valOption.ParsedValues.ToArray());
+                keyProp.SetValue(AppOptions, valOption.InputValues.ToArray());
             }
             else if (type.IsAssignableFrom(typeof(string)))
             {
-                keyProp.SetValue(AppOptions, valOption.ParsedValues.First());
+                keyProp.SetValue(AppOptions, valOption.InputValues.First());
             }
             else if (option is ScalarCommandOption scalarOption)
             {

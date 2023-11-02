@@ -49,8 +49,8 @@ internal static class Program
             .WithDescription("Enables the division operator.");
 
         options.AddScalarOption(o => o.AddCount, valueTokenMustExist: false)
-            .WithDefaultValue("1")
-            .WithConstraints("1", "20")
+            .WithDefaultValue(1)
+            .WithConstraints(1, 20)
             .WithDescription("Sets addition count. If no option value is given, a random value is generated. Value must be between 1 and 20.");
 
         options.AddScalarOption(o => o.SubtractCount)
@@ -58,11 +58,11 @@ internal static class Program
             .WithDescription("Sets subtraction count.");
 
         options.AddScalarOption(o => o.MultiplyCount)
-            .WithDefaultValue("0")
+            .WithDefaultValue(0F)
             .WithDescription("Sets multiplication count.");
 
         options.AddScalarOption(o => o.DivideCount)
-            .WithDefaultValue("0")
+            .WithDefaultValue(0L)
             .WithDescription("Sets division count.");
 
         options.AddScalarOption(o => o.AddNumbers, valueTokenMustExist: false)

@@ -8,7 +8,183 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal sealed class ScalarCommandOption : CommandOption, IScalarCommandOption, IValueContext
+internal sealed class ScalarCommandOption<TValue> 
+    : ScalarCommandOption, IScalarCommandOption<TValue>, IValueContext<TValue>
+    where TValue : IComparable, IEquatable<TValue>
+{
+    public override int ValidInputCount => _validated ? _resultValues.Count : 0;
+
+    public TValue? DefaultValue { get; private set; }
+
+    public List<TValue?> Constraints => _constraints.ToList();
+
+    public List<TValue> AllowedValues => _allowedValues.ToList();
+
+    public List<TValue> ResultValues => _resultValues.ToList();
+
+    private Func<string, bool>? _validateValueDelegate;
+    private Func<string, TValue>? _convertValueDelegate;
+    private Func<IValueContext<TValue>, IArgumentParser, bool>? _validateOptionDelegate;
+
+    private readonly List<TValue?> _constraints;
+    private readonly HashSet<TValue> _allowedValues;
+    private readonly List<TValue> _resultValues;
+
+    public ScalarCommandOption(
+        bool valueTokenMustExist = true, int requiredTokenCount = 0, int maximumTokenCount = 1)
+        : base(valueTokenMustExist, requiredTokenCount, maximumTokenCount)
+    {
+        _constraints = new List<TValue?>();
+        _resultValues = new List<TValue>();
+        _allowedValues = new HashSet<TValue>();
+        ValueTokenMustExist = valueTokenMustExist;
+    }
+
+    public void SetDefaultValue(TValue? defaultValue)
+    {
+        if (defaultValue is string strValue)
+        {
+            var value = string.IsNullOrWhiteSpace(strValue) ? null : strValue.Trim();
+            defaultValue = (TValue?)(object?)value;
+        }
+
+        DefaultValue = defaultValue;
+    }
+
+    public void SetConstraints(params TValue?[] constraints)
+    {
+        _constraints.AddRange(
+            constraints.Select(s => s is string value ? (TValue)(object)value.Trim() : s));
+    }
+
+    public void SetAllowedValues(params TValue[] allowedValues)
+    {
+        var values = allowedValues
+            .Where(s => s is not string value || !string.IsNullOrWhiteSpace(value))
+            .Select(s => s is string value ? (TValue)(object)value.Trim() : s);
+
+        foreach (var value in values)
+            _allowedValues.Add(value);
+    }
+
+    public void SetParsingCallbacks(IParsingCallbacks<TValue> optionCallbacks)
+    {
+        var type = optionCallbacks.GetType();
+
+        // only use overriden methods
+        var methodName = nameof(IParsingCallbacks<TValue>.ValidateValue);
+        if (type.GetMethod(methodName)?.DeclaringType == type)
+            _validateValueDelegate ??= optionCallbacks.ValidateValue;
+        
+        methodName = nameof(IParsingCallbacks<TValue>.ConvertValue);
+        if (type.GetMethod(methodName)?.DeclaringType == type)
+            _convertValueDelegate ??= optionCallbacks.ConvertValue;
+
+        methodName = nameof(IParsingCallbacks<TValue>.ValidateOption);
+        if (type.GetMethod(methodName)?.DeclaringType == type)
+            _validateOptionDelegate ??= optionCallbacks.ValidateOption;
+    }
+
+    public void SetValueValidator(Func<string, bool> validator)
+    {
+        _validateValueDelegate = validator;
+    }
+
+    public void SetValueConvertor(Func<string, TValue> convertor)
+    {
+        _convertValueDelegate = convertor;
+    }
+
+    public void SetOptionValidator(Func<IValueContext<TValue>, IArgumentParser, bool> validator)
+    {
+        _validateOptionDelegate = validator;
+    }
+
+    public override void Initialize(IArgumentParser parser)
+    {
+        base.Initialize(parser);
+
+        if(DefaultParsingCallbacks<TValue>.Instance.IsValidParser)
+            SetParsingCallbacks(DefaultParsingCallbacks<TValue>.Instance);
+
+        CallbackValidatorGuard();
+    }
+
+    public override void Validate(IArgumentParser parser)
+    {
+        base.Validate(parser);
+
+        if (_validateOptionDelegate is not null)
+        {
+            if (!_validateOptionDelegate.Invoke(this, parser))
+                throw new Exception("Option values cannot be validated.");
+        }
+        else
+        {
+            CallbackValidatorGuard();
+
+            foreach (var inputValue in _inputValues.Where(v => !_validateValueDelegate!.Invoke(v)))
+            {
+                throw new Exception($"Invalid input value found!. Value: {inputValue}");
+            }
+
+            var values = _inputValues.Select(v => _convertValueDelegate!.Invoke(v)).ToList();
+            parser.ValidateByAllowedValues(values, _allowedValues);
+
+            _resultValues.AddRange(values);
+        }
+
+        _validated = true;
+    }
+
+    public override void ApplyDefaultValue(IApplicationOptions appOptions, PropertyInfo keyProperty)
+    {
+        if (DefaultValue is null)
+            return;
+
+        if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
+            return;
+
+        keyProperty.SetValue(appOptions, DefaultValue);
+    }
+
+    public override void UpdatePropertyValue(IApplicationOptions appOptions, PropertyInfo keyProperty)
+    {
+        if (keyProperty.PropertyType.IsAssignableFrom(typeof(List<TValue>)))
+        {
+            keyProperty.SetValue(appOptions, _resultValues);
+        }
+        else if (keyProperty.PropertyType.IsAssignableFrom(typeof(TValue[])))
+        {
+            keyProperty.SetValue(appOptions, _resultValues.ToArray());
+        }
+        else if (keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
+        {
+            keyProperty.SetValue(appOptions, _resultValues.First());
+        }
+    }
+
+    public override void Clear()
+    {
+        base.Clear();
+        _resultValues.Clear();
+    }
+
+    private void CallbackValidatorGuard()
+    {
+        if (_validateOptionDelegate is null)
+        {
+            throw new Exception($"Missing value validator! Configure a value validator for type '{typeof(TValue).Name}'.");
+        }
+
+        if (_convertValueDelegate is null)
+        {
+            throw new Exception($"Missing value convertor! Configure a value convertor for type '{typeof(TValue).Name}'.");
+        }
+    }
+}
+
+internal abstract class ScalarCommandOption : CommandOption, IScalarCommandOption
 {
     public bool EnableValueTokenSplitting { get; init; }
 
@@ -16,98 +192,20 @@ internal sealed class ScalarCommandOption : CommandOption, IScalarCommandOption,
 
     public bool AllowSequentialValues { get; init; }
 
-    public string? DefaultValue { get; private set; }
-
-    public List<string?> Constraints => _constraints.ToList();
-
-    public List<string> AllowedValues => _allowedValues.ToList();
-
     public List<string> ValueTokens => _valueTokens.ToList();
 
-    public List<string> ParsedValues => _parsedValues.ToList();
+    public List<string> InputValues => _inputValues.ToList();
 
-    private Func<string, bool>? _validateValueAction;
-    private Func<IValueContext, IArgumentParser, bool>? _validateOptionAction;
-    private Action<IValueContext, IApplicationOptions, PropertyInfo>? _applyDefaultValueAction;
-    private Action<IValueContext, IApplicationOptions, PropertyInfo>? _updateOptionValueAction;
-
-    private readonly List<string?> _constraints;
-    private readonly HashSet<string> _allowedValues;
     private readonly List<string> _valueTokens;
-    private readonly List<string> _parsedValues;
+    protected readonly List<string> _inputValues;
 
-    public ScalarCommandOption(
-        bool valueTokenMustExist = true, int requiredTokenCount = 0, int maximumTokenCount = 1)
+    protected ScalarCommandOption(
+        bool valueTokenMustExist, int requiredTokenCount, int maximumTokenCount)
         : base(requiredTokenCount, maximumTokenCount)
     {
-        _constraints = new List<string?>();
         _valueTokens = new List<string>();
-        _parsedValues = new List<string>();
-        _allowedValues = new HashSet<string>();
+        _inputValues = new List<string>();
         ValueTokenMustExist = valueTokenMustExist;
-    }
-
-    public void SetDefaultValue(string? defaultValue)
-    {
-        DefaultValue = string.IsNullOrWhiteSpace(defaultValue)
-            ? null : defaultValue.Trim();
-    }
-
-    public void SetConstraints(params string?[] constraints)
-    {
-
-        _constraints.AddRange(constraints.Select(s => s?.Trim()));
-    }
-
-    public void SetAllowedValues(params string[] allowedValues)
-    {
-        var values = allowedValues
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Select(s => s.Trim());
-
-        foreach (var value in values)
-            _allowedValues.Add(value);
-    }
-
-    public void SetParsingCallbacks(IParsingCallbacks optionCallbacks)
-    {
-        var type = optionCallbacks.GetType();
-
-        var methodName = nameof(IParsingCallbacks.ValidateValue);
-        if (type.GetMethod(methodName)?.DeclaringType == type)
-            _validateValueAction ??= optionCallbacks.ValidateValue;
-
-        methodName = nameof(IParsingCallbacks.ValidateOption);
-        if (type.GetMethod(methodName)?.DeclaringType == type)
-            _validateOptionAction ??= optionCallbacks.ValidateOption;
-
-        methodName = nameof(IParsingCallbacks.ApplyDefaultValue);
-        if (type.GetMethod(methodName)?.DeclaringType == type)
-            _applyDefaultValueAction ??= optionCallbacks.ApplyDefaultValue;
-
-        methodName = nameof(IParsingCallbacks.UpdateOptionValue);
-        if (type.GetMethod(methodName)?.DeclaringType == type)
-            _updateOptionValueAction ??= optionCallbacks.UpdateOptionValue;
-    }
-
-    public void SetBaseValidator(Func<string, bool> validator)
-    {
-        _validateValueAction = validator;
-    }
-
-    public void SetOptionValidator(Func<IValueContext, IArgumentParser, bool> validator)
-    {
-        _validateOptionAction = validator;
-    }
-
-    public void SetDefaultValueSetterAction(Action<IValueContext, IApplicationOptions, PropertyInfo> setterAction)
-    {
-        _applyDefaultValueAction = setterAction;
-    }
-
-    public void SetOptionValueSetterAction(Action<IValueContext, IApplicationOptions, PropertyInfo> setterAction)
-    {
-        _updateOptionValueAction = setterAction;
     }
 
     public override void Initialize(IArgumentParser parser)
@@ -118,15 +216,6 @@ internal sealed class ScalarCommandOption : CommandOption, IScalarCommandOption,
         {
             Usage = $"{Command}{(ValueTokenMustExist ? " <value>" : " (value)")}";
         }
-
-        if (KeyProperty.IsAssignableFrom<string>())
-            SetParsingCallbacks(DefaultParsingCallbacks.Instance);
-        else if (KeyProperty.IsAssignableFrom<int>())
-            SetParsingCallbacks(IntegerParsingCallbacks.Instance);
-
-        _validateValueAction?.ValidateDefaultValue(DefaultValue);
-        _validateValueAction?.ValidateAllowedValues(_allowedValues);
-        _validateValueAction?.ValidateConstraints(_constraints);
     }
 
     public override void Parse(string[] arguments, IArgumentParser parser)
@@ -175,8 +264,8 @@ internal sealed class ScalarCommandOption : CommandOption, IScalarCommandOption,
         }
 
         // parse multiple values 'str1;str2;str3'
-        var parsedValues = parser.GetParsedValues(_valueTokens, EnableValueTokenSplitting);
-        _parsedValues.AddRange(parsedValues);
+        var inputValues = parser.GetInputValues(_valueTokens, EnableValueTokenSplitting);
+        _inputValues.AddRange(inputValues);
     }
 
     public override void Validate(IArgumentParser parser)
@@ -191,34 +280,16 @@ internal sealed class ScalarCommandOption : CommandOption, IScalarCommandOption,
 
         if (_valueTokens.Any(string.IsNullOrWhiteSpace))
             throw new Exception("Any provided option value cannot be empty.");
-
-        if (_validateOptionAction is not null)
-        {
-            if (!_validateOptionAction.Invoke(this, parser))
-                throw new Exception("Option values cannot be validated.");
-        }
-        else
-        {
-            parser.ValidateByAllowedValues(_parsedValues, _allowedValues);
-        }
-
-        _validated = true;
     }
+
+    public abstract void ApplyDefaultValue(IApplicationOptions appOptions, PropertyInfo keyProperty);
+
+    public abstract void UpdatePropertyValue(IApplicationOptions appOptions, PropertyInfo keyProperty);
 
     public override void Clear()
     {
         base.Clear();
         _valueTokens.Clear();
-        _parsedValues.Clear();
-    }
-
-    public void ApplyDefaultValue(IApplicationOptions appOptions, PropertyInfo keyProperty)
-    {
-        _applyDefaultValueAction?.Invoke(this, appOptions, keyProperty);
-    }
-
-    public void UpdatePropertyValue(IApplicationOptions appOptions, PropertyInfo keyProperty)
-    {
-        _updateOptionValueAction?.Invoke(this, appOptions, keyProperty);
+        _inputValues.Clear();
     }
 }

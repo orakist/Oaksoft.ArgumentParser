@@ -149,8 +149,8 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
         var options = _appOptions.Options;
         foreach (var option in options)
         {
-            var command = option as ICommandOption;
-            var commandName = command?.Command ?? string.Empty;
+            var command = option as IAliasedOption;
+            var commandName = command?.ShortAlias ?? string.Empty;
             sb.Pastel($"[{commandName,-4}] ", ConsoleColor.DarkGreen);
             sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
             sb.AppendLine(option.Usage);
@@ -158,7 +158,7 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
             if (command is not null)
             {
                 sb.Pastel("       Commands:", ConsoleColor.DarkYellow);
-                sb.AppendLine($" {string.Join(", ", command.Commands)} ");
+                sb.AppendLine($" {string.Join(", ", command.Aliases)} ");
             }
 
             if (option.Description is not null)

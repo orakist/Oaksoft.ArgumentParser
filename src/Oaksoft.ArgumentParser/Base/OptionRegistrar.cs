@@ -10,7 +10,7 @@ namespace Oaksoft.ArgumentParser.Base;
 
 internal static class OptionRegistrar
 {
-    public static ICommandOption RegisterSwitchOption<TSource, TValue>(
+    public static ISwitchOption RegisterSwitchOption<TSource, TValue>(
         this TSource source, Expression<Func<TSource, TValue>> keyPropExpr, bool mandatory)
         where TSource : BaseApplicationOptions
     {
@@ -23,7 +23,7 @@ internal static class OptionRegistrar
         return command;
     }
 
-    public static ICommandOption RegisterSwitchOption<TSource, TValue>(
+    public static ISwitchOption RegisterSwitchOption<TSource, TValue>(
         this TSource source, Expression<Func<TSource, TValue>> keyPropExpr,
         int requiredTokenCount, int maximumTokenCount)
         where TSource : BaseApplicationOptions
@@ -37,27 +37,27 @@ internal static class OptionRegistrar
         return command;
     }
 
-    public static IScalarCommandOption<TValue> RegisterScalarOption<TSource, TValue>(
+    public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
         this TSource source, PropertyInfo keyProperty, 
         bool valueTokenMustExist, bool mandatory)
         where TSource : BaseApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var command = new ScalarCommandOption<TValue>(valueTokenMustExist, mandatory ? 1 : 0);
+        var command = new ScalarOption<TValue>(valueTokenMustExist, mandatory ? 1 : 0);
 
         source.RegisterOptionProperty(command, keyProperty);
 
         return command;
     }
 
-    public static IScalarCommandOption<TValue> RegisterScalarOption<TSource, TValue>(
+    public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
         this TSource source, PropertyInfo keyProperty, 
         bool valueTokenMustExist, bool enableValueTokenSplitting,
         bool allowSequentialValues, int requiredTokenCount, int maximumTokenCount)
         where TSource : BaseApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var command = new ScalarCommandOption<TValue>(valueTokenMustExist, requiredTokenCount, maximumTokenCount)
+        var command = new ScalarOption<TValue>(valueTokenMustExist, requiredTokenCount, maximumTokenCount)
         {
             EnableValueTokenSplitting = enableValueTokenSplitting,
             AllowSequentialValues = allowSequentialValues
@@ -68,27 +68,27 @@ internal static class OptionRegistrar
         return command;
     }
 
-    public static IScalarCommandOption<TValue> RegisterScalarOption<TSource, TValue>(
+    public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
         this TSource source, PropertyInfo keyProperty, PropertyInfo flagProperty,
         bool valueTokenMustExist, bool mandatory)
         where TSource : BaseApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var command = new ScalarCommandOption<TValue>(valueTokenMustExist, mandatory ? 1 : 0);
+        var command = new ScalarOption<TValue>(valueTokenMustExist, mandatory ? 1 : 0);
 
         source.RegisterOptionProperty(command, keyProperty, flagProperty);
 
         return command;
     }
 
-    public static IScalarCommandOption<TValue> RegisterScalarOption<TSource, TValue>(
+    public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
         this TSource source, PropertyInfo keyProperty, PropertyInfo countProperty,
         bool valueTokenMustExist, bool enableValueTokenSplitting, 
         bool allowSequentialValues, int requiredTokenCount, int maximumTokenCount) 
         where TSource : BaseApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var command = new ScalarCommandOption<TValue>(valueTokenMustExist, requiredTokenCount, maximumTokenCount)
+        var command = new ScalarOption<TValue>(valueTokenMustExist, requiredTokenCount, maximumTokenCount)
         {
             EnableValueTokenSplitting = enableValueTokenSplitting,
             AllowSequentialValues = allowSequentialValues
@@ -99,27 +99,27 @@ internal static class OptionRegistrar
         return command;
     }
 
-    public static INonCommandOption RegisterDefaultOption<TSource>(
+    public static IValueOption<string> RegisterValueOption<TSource>(
         this TSource source, Expression<Func<TSource, string?>> keyPropExpr, bool mandatory)
         where TSource : BaseApplicationOptions
     {
         var keyProperty = source.ValidateExpression(keyPropExpr);
 
-        var command = new NonCommandOption(mandatory ? 1 : 0);
+        var command = new ValueOption(mandatory ? 1 : 0);
 
         source.RegisterOptionProperty(command, keyProperty);
 
         return command;
     }
 
-    public static INonCommandOption RegisterDefaultOption<TSource>(
+    public static IValueOption<string> RegisterValueOption<TSource>(
         this TSource source, Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
         bool enableValueTokenSplitting, int requiredTokenCount, int maximumTokenCount)
         where TSource : BaseApplicationOptions
     {
         var keyProperty = source.ValidateExpression(keyPropExpr);
 
-        var command = new NonCommandOption(requiredTokenCount, maximumTokenCount)
+        var command = new ValueOption(requiredTokenCount, maximumTokenCount)
         {
             EnableValueTokenSplitting = enableValueTokenSplitting
         };
@@ -129,7 +129,7 @@ internal static class OptionRegistrar
         return command;
     }
 
-    public static INonCommandOption RegisterDefaultOption<TSource>(
+    public static IValueOption<string> RegisterValueOption<TSource>(
         this TSource source, 
         Expression<Func<TSource, string?>> keyPropExpr,
         Expression<Func<TSource, bool>> countPropExpr, 
@@ -139,14 +139,14 @@ internal static class OptionRegistrar
         var keyProperty = source.ValidateExpression(keyPropExpr);
         var countProperty = source.ValidateExpression(countPropExpr);
 
-        var command = new NonCommandOption(mandatory ? 1 : 0);
+        var command = new ValueOption(mandatory ? 1 : 0);
 
         source.RegisterOptionProperty(command, keyProperty, countProperty);
 
         return command;
     }
 
-    public static INonCommandOption RegisterDefaultOption<TSource>(
+    public static IValueOption<string> RegisterValueOption<TSource>(
         this TSource source,
         Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
         Expression<Func<TSource, int>> countPropExpr,
@@ -156,7 +156,7 @@ internal static class OptionRegistrar
         var keyProperty = source.ValidateExpression(keyPropExpr);
         var countProperty = source.ValidateExpression(countPropExpr);
 
-        var command = new NonCommandOption(requiredTokenCount, maximumTokenCount)
+        var command = new ValueOption(requiredTokenCount, maximumTokenCount)
         {
             EnableValueTokenSplitting = enableValueTokenSplitting
         };

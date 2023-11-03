@@ -5,32 +5,32 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal abstract class CommandOption : BaseOption, ICommandOption
+internal abstract class AliasedOption : BaseOption, IAliasedOption
 {
-    public string Command => _commands.MinBy(k => k.Length)!;
+    public string ShortAlias => _aliases.MinBy(k => k.Length)!;
 
-    public List<string> Commands => _commands.ToList();
+    public List<string> Aliases => _aliases.ToList();
 
     public List<string> CommandTokens => _commandTokens.ToList();
 
-    protected List<string> _commands;
+    protected List<string> _aliases;
     protected List<string> _commandTokens;
     private static readonly char[] _trimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
 
-    protected CommandOption(int requiredTokenCount, int maximumTokenCount)
+    protected AliasedOption(int requiredTokenCount, int maximumTokenCount)
         : base(requiredTokenCount, maximumTokenCount)
     {
-        _commands = new List<string>();
+        _aliases = new List<string>();
         _commandTokens = new List<string>();
     }
 
-    public void SetCommands(params string[] commands)
+    public void SetAliases(params string[] aliases)
     {
-        var values = commands
+        var values = aliases
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Select(s => s.Trim());
 
-        _commands.AddRange(values);
+        _aliases.AddRange(values);
     }
 
     public override void Initialize(IArgumentParser parser)
@@ -39,13 +39,13 @@ internal abstract class CommandOption : BaseOption, ICommandOption
 
         AddCommandsHeuristically();
 
-        if (_commands.Count < 1)
+        if (_aliases.Count < 1)
             throw new ArgumentException($"Command name not found! Use AddCommands() to set commands of an option. Property: {KeyProperty}");
 
-        for (var index = 0; index < _commands.Count; ++index)
+        for (var index = 0; index < _aliases.Count; ++index)
         {
-            if (!_commands[index].StartsWith(parser.CommandPrefix))
-                _commands[index] = $"{parser.CommandPrefix}{_commands[index]}";
+            if (!_aliases[index].StartsWith(parser.CommandPrefix))
+                _aliases[index] = $"{parser.CommandPrefix}{_aliases[index]}";
         }
 
         if (string.IsNullOrWhiteSpace(Name))
@@ -80,16 +80,16 @@ internal abstract class CommandOption : BaseOption, ICommandOption
 
     private void AddCommandsHeuristically()
     {
-        if (_commands.Count > 0)
+        if (_aliases.Count > 0)
             return;
 
         var firstWord = GetFirstWordOfKeyProperty();
         if (firstWord.Length < 1)
             return;
 
-        _commands.Add(firstWord.Length < 3 ? firstWord : firstWord[..1]);
+        _aliases.Add(firstWord.Length < 3 ? firstWord : firstWord[..1]);
         if (firstWord.Length > 2)
-            _commands.Add(firstWord);
+            _aliases.Add(firstWord);
     }
 
     private string GetFirstWordOfKeyProperty()

@@ -8,12 +8,10 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal sealed class ScalarCommandOption<TValue> 
-    : ScalarCommandOption, IScalarCommandOption<TValue>, IValueContext<TValue>
+internal sealed class ScalarOption<TValue>
+    : ScalarOption, IScalarOption<TValue>, IValueContext<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    public override int ValidInputCount => _validated ? _resultValues.Count : 0;
-
     public TValue? DefaultValue { get; private set; }
 
     public List<TValue?> Constraints => _constraints.ToList();
@@ -21,6 +19,8 @@ internal sealed class ScalarCommandOption<TValue>
     public List<TValue> AllowedValues => _allowedValues.ToList();
 
     public List<TValue> ResultValues => _resultValues.ToList();
+
+    public override int ValidInputCount => _validated ? _resultValues.Count : 0;
 
     private Func<string, bool>? _validateValueDelegate;
     private Func<string, TValue>? _convertValueDelegate;
@@ -30,7 +30,7 @@ internal sealed class ScalarCommandOption<TValue>
     private readonly HashSet<TValue> _allowedValues;
     private readonly List<TValue> _resultValues;
 
-    public ScalarCommandOption(
+    public ScalarOption(
         bool valueTokenMustExist = true, int requiredTokenCount = 0, int maximumTokenCount = 1)
         : base(valueTokenMustExist, requiredTokenCount, maximumTokenCount)
     {
@@ -75,7 +75,7 @@ internal sealed class ScalarCommandOption<TValue>
         var methodName = nameof(IParsingCallbacks<TValue>.ValidateValue);
         if (type.GetMethod(methodName)?.DeclaringType == type)
             _validateValueDelegate ??= optionCallbacks.ValidateValue;
-        
+
         methodName = nameof(IParsingCallbacks<TValue>.ConvertValue);
         if (type.GetMethod(methodName)?.DeclaringType == type)
             _convertValueDelegate ??= optionCallbacks.ConvertValue;
@@ -104,7 +104,7 @@ internal sealed class ScalarCommandOption<TValue>
     {
         base.Initialize(parser);
 
-        if(DefaultParsingCallbacks<TValue>.Instance.IsValidParser)
+        if (DefaultParsingCallbacks<TValue>.Instance.IsValidParser)
             SetParsingCallbacks(DefaultParsingCallbacks<TValue>.Instance);
 
         CallbackValidatorGuard();
@@ -174,17 +174,19 @@ internal sealed class ScalarCommandOption<TValue>
     {
         if (_validateOptionDelegate is null)
         {
-            throw new Exception($"Missing value validator! Configure a value validator for type '{typeof(TValue).Name}'.");
+            throw new Exception(
+                $"Missing value validator! Configure a value validator for type '{typeof(TValue).Name}'.");
         }
 
         if (_convertValueDelegate is null)
         {
-            throw new Exception($"Missing value convertor! Configure a value convertor for type '{typeof(TValue).Name}'.");
+            throw new Exception(
+                $"Missing value convertor! Configure a value convertor for type '{typeof(TValue).Name}'.");
         }
     }
 }
 
-internal abstract class ScalarCommandOption : CommandOption, IScalarCommandOption
+internal abstract class ScalarOption : AliasedOption, IScalarOption
 {
     public bool EnableValueTokenSplitting { get; init; }
 
@@ -199,7 +201,7 @@ internal abstract class ScalarCommandOption : CommandOption, IScalarCommandOptio
     private readonly List<string> _valueTokens;
     protected readonly List<string> _inputValues;
 
-    protected ScalarCommandOption(
+    protected ScalarOption(
         bool valueTokenMustExist, int requiredTokenCount, int maximumTokenCount)
         : base(requiredTokenCount, maximumTokenCount)
     {
@@ -214,7 +216,7 @@ internal abstract class ScalarCommandOption : CommandOption, IScalarCommandOptio
 
         if (string.IsNullOrWhiteSpace(Usage))
         {
-            Usage = $"{Command}{(ValueTokenMustExist ? " <value>" : " (value)")}";
+            Usage = $"{ShortAlias}{(ValueTokenMustExist ? " <value>" : " (value)")}";
         }
     }
 
@@ -226,13 +228,13 @@ internal abstract class ScalarCommandOption : CommandOption, IScalarCommandOptio
         {
             var argument = arguments[index];
 
-            if (!Commands.Any(c => argument.StartsWith(c, flag)))
+            if (!Aliases.Any(c => argument.StartsWith(c, flag)))
                 continue;
 
             // parse --cmd (optional value)
             // parse --cmd val (single value)
             // parse --cmd val1 val2 val3 (sequential values)
-            if (Commands.Any(c => argument.Equals(c, flag)))
+            if (Aliases.Any(c => argument.Equals(c, flag)))
             {
                 _commandTokens.Add(argument);
 
@@ -251,7 +253,7 @@ internal abstract class ScalarCommandOption : CommandOption, IScalarCommandOptio
             }
 
             // parse --cmd=val
-            else if (Commands.Any(c => argument.StartsWith($"{c}{separator}", flag)))
+            else if (Aliases.Any(c => argument.StartsWith($"{c}{separator}", flag)))
             {
                 if (argument.Split(separator).Length > 2)
                     throw new Exception($"Invalid argument '{argument}' found! Multiple token separator usage!");

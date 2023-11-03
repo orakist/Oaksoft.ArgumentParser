@@ -2,14 +2,14 @@
 
 namespace Oaksoft.ArgumentParser.Options;
 
-public interface IScalarCommandOption : ICommandOption, IHaveValueOption
+public interface IScalarOption : IAliasedOption, IValueOption
 {
     bool ValueTokenMustExist { get; }
 
     bool AllowSequentialValues { get; }
 }
 
-public interface IScalarCommandOption<TValue> : IScalarCommandOption, IHaveValueOption<TValue>
+public interface IScalarOption<TValue> : IScalarOption, IValueOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
 }

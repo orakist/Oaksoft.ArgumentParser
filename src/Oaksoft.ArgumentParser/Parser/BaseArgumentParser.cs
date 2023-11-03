@@ -93,8 +93,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
         foreach (var option in options)
             ((BaseOption)option).Initialize(this);
 
-        var commands = options.OfType<ICommandOption>()
-            .SelectMany(o => o.Commands)
+        var commands = options.OfType<IAliasedOption>()
+            .SelectMany(o => o.Aliases)
             .Select(a => a.ToLowerInvariant())
             .GroupBy(c => c)
             .Where(c => c.Count() > 1)
@@ -148,8 +148,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         ValidateHelpToken(options);
 
-        var values = options.OfType<IHaveValueOption>().SelectMany(a => a.ValueTokens).ToList();
-        var inputs = options.OfType<ICommandOption>().SelectMany(a => a.CommandTokens).ToList();
+        var values = options.OfType<IValueOption>().SelectMany(a => a.ValueTokens).ToList();
+        var inputs = options.OfType<IAliasedOption>().SelectMany(a => a.CommandTokens).ToList();
         var invalidOptions = arguments.Where(s => !values.Contains(s)).ToList();
         invalidOptions = invalidOptions.Where(s => !inputs.Contains(s)).ToList();
 
@@ -199,8 +199,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         var optionCount = option switch
         {
-            ICommandOption c => c.CommandTokens.Count,
-            IHaveValueOption d => d.ValueTokens.Count,
+            IAliasedOption c => c.CommandTokens.Count,
+            IValueOption d => d.ValueTokens.Count,
             _ => 0
         };
 
@@ -209,8 +209,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         var totalInputCount = options.Sum(o => o switch
         {
-            ICommandOption c => c.CommandTokens.Count,
-            IHaveValueOption d => d.ValueTokens.Count,
+            IAliasedOption c => c.CommandTokens.Count,
+            IValueOption d => d.ValueTokens.Count,
             _ => 0
         });
 
@@ -228,13 +228,13 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
         else if (helpOption.CommandTokens.Count > 0)
         {
-            _errors.Add($"{helpOption.Name} ({helpOption.Command}) command cannot be combined with other commands.");
+            _errors.Add($"{helpOption.Name} ({helpOption.ShortAlias}) command cannot be combined with other commands.");
         }
     }
 
     private void AddErrorMessage(IBaseOption option, Exception ex)
     {
-        var name = (option as ICommandOption)?.Command ?? option.Name;
+        var name = (option as IAliasedOption)?.ShortAlias ?? option.Name;
         var comma = ex.Message.EndsWith(".") ? string.Empty : ",";
         _errors.Add($"{ex.Message}{comma} Name: {name}");
     }
@@ -290,7 +290,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
             // all scalar-command and non-command options may have a default value.
             // so apply default option to registered property if default value exists.
-            if (option is NonCommandOption nonCommand)
+            if (option is ValueOption nonCommand)
             {
                 if (type.IsAssignableFrom(typeof(string)))
                 {
@@ -299,7 +299,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 }
             }
 
-            if (option is ScalarCommandOption scalarOption)
+            if (option is ScalarOption scalarOption)
             {
                 scalarOption.ApplyDefaultValue(AppOptions, property);
                 continue;
@@ -342,7 +342,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 keyProp.SetValue(AppOptions, option.ValidInputCount);
             }
         }
-        else if (option is IHaveValueOption valOption)
+        else if (option is IValueOption valOption)
         {
             if (type.IsAssignableFrom(typeof(List<string>)))
             {
@@ -356,7 +356,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 keyProp.SetValue(AppOptions, valOption.InputValues.First());
             }
-            else if (option is ScalarCommandOption scalarOption)
+            else if (option is ScalarOption scalarOption)
             {
                 scalarOption.UpdatePropertyValue(AppOptions, keyProp);
             }

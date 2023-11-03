@@ -57,6 +57,10 @@ internal static class Program
             .WithDefaultValue("2")
             .WithDescription("Sets subtraction count.");
 
+        options.AddScalarOption(o => o.StartTime)
+            .WithDefaultValue(DateTime.Now)
+            .WithDescription("Sets the start time.");
+
         options.AddScalarOption(o => o.MultiplyCount)
             .WithDefaultValue(0F)
             .WithDescription("Sets multiplication count.");
@@ -84,7 +88,7 @@ internal static class Program
         options.AddScalarOption(o => o.FormulaResults, o => o.FormulaCount)
             .WithDescription("Defines formula expressions.");
 
-        options.AddDefaultOption(o => o.Variables, requiredTokenCount: 0, maximumTokenCount: 10)
+        options.AddValueOption(o => o.Variables, requiredTokenCount: 0, maximumTokenCount: 10)
             .WithUsage("variable-names")
             .WithDescription("Defines variables to use them in formulas.");
     }

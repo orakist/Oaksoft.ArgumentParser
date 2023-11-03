@@ -8,7 +8,7 @@ namespace Oaksoft.ArgumentParser.Extensions;
 
 public static partial class OptionsExtensions
 {
-    public static ICommandOption AddSwitchOption<TSource>(
+    public static ISwitchOption AddSwitchOption<TSource>(
         this TSource source, 
         Expression<Func<TSource, bool>> keyPropExpr, 
         bool mandatory = false)
@@ -17,7 +17,7 @@ public static partial class OptionsExtensions
         return source.RegisterSwitchOption(keyPropExpr, mandatory);
     }
 
-    public static ICommandOption AddSwitchOption<TSource>(
+    public static ISwitchOption AddSwitchOption<TSource>(
         this TSource source,
         Expression<Func<TSource, bool?>> keyPropExpr,
         bool mandatory = false)
@@ -26,7 +26,7 @@ public static partial class OptionsExtensions
         return source.RegisterSwitchOption(keyPropExpr, mandatory);
     }
 
-    public static ICommandOption AddCountOption<TSource>(
+    public static ISwitchOption AddCountOption<TSource>(
         this TSource source,
         Expression<Func<TSource, int>> keyPropExpr,
         int requiredTokenCount = 0, int maximumTokenCount = 10)
@@ -35,7 +35,7 @@ public static partial class OptionsExtensions
         return source.RegisterSwitchOption(keyPropExpr, requiredTokenCount, maximumTokenCount);
     }
 
-    public static ICommandOption AddCountOption<TSource>(
+    public static ISwitchOption AddCountOption<TSource>(
         this TSource source,
         Expression<Func<TSource, int?>> keyPropExpr,
         int requiredTokenCount = 0, int maximumTokenCount = 10)

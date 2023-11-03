@@ -4,8 +4,10 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal sealed class SwitchOption : CommandOption
+internal sealed class SwitchOption : AliasedOption, ISwitchOption
 {
+    public bool? DefaultValue { get; private set; }
+
     public override int ValidInputCount => _validated ? _commandTokens.Count : 0;
 
     public SwitchOption(int requiredTokenCount = 0, int maximumTokenCount = 1)
@@ -13,19 +15,24 @@ internal sealed class SwitchOption : CommandOption
     {
     }
 
+    public void SetDefaultValue(bool? defaultValue)
+    {
+        DefaultValue = defaultValue;
+    }
+
     public override void Initialize(IArgumentParser parser)
     {
         base.Initialize(parser);
 
         if (string.IsNullOrWhiteSpace(Usage))
-            Usage = Command;
+            Usage = ShortAlias;
     }
 
     public override void Parse(string[] arguments, IArgumentParser parser)
     {
         foreach (var argument in arguments)
         {
-            if (!_commands.Any(c => c.Equals(argument, parser.ComparisonFlag())))
+            if (!_aliases.Any(c => c.Equals(argument, parser.ComparisonFlag())))
                 continue;
 
             _commandTokens.Add(argument);

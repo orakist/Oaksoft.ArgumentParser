@@ -6,7 +6,8 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal sealed class NonCommandOption : BaseOption, INonCommandOption
+internal sealed class ValueOption 
+    : BaseOption, IValueOption<string>, IValueContext<string>
 {
     public override int ValidInputCount => _validated ? _resultValues.Count : 0;
 
@@ -30,7 +31,7 @@ internal sealed class NonCommandOption : BaseOption, INonCommandOption
     private readonly List<string> _inputValues;
     private readonly List<string> _resultValues;
 
-    public NonCommandOption(int requiredTokenCount = 0, int maximumTokenCount = 1)
+    public ValueOption(int requiredTokenCount = 0, int maximumTokenCount = 1)
         : base(requiredTokenCount, maximumTokenCount)
     {
         _constraints = new List<string?>();
@@ -83,8 +84,8 @@ internal sealed class NonCommandOption : BaseOption, INonCommandOption
             if (!argument.StartsWith(parser.CommandPrefix))
                 _valueTokens.Add(argument);
 
-            var scalarCommand = options.OfType<IScalarCommandOption>()
-                .FirstOrDefault(o => o.Commands.Any(c => c.Equals(argument, compareFlag)));
+            var scalarCommand = options.OfType<IScalarOption>()
+                .FirstOrDefault(o => o.Aliases.Any(c => c.Equals(argument, compareFlag)));
 
             if (scalarCommand is null)
                 continue;

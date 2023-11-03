@@ -26,36 +26,56 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static IScalarCommandOption<TValue> WithCommands<TValue>(
-        this IScalarCommandOption<TValue> option, params string[] commands)
+    public static IScalarOption<TValue> WithAliases<TValue>(
+        this IScalarOption<TValue> option, params string[] aliases)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((CommandOption)option).SetCommands(commands);
+        ((AliasedOption)option).SetAliases(aliases);
         return option;
     }
 
-    public static IScalarCommandOption WithCommands(this IScalarCommandOption option, params string[] commands)
+    public static IScalarOption WithAliases(this IScalarOption option, params string[] aliases)
     {
-        ((CommandOption)option).SetCommands(commands);
+        ((AliasedOption)option).SetAliases(aliases);
         return option;
     }
 
-    public static ICommandOption WithCommands(this ICommandOption option, params string[] commands)
+    public static ISwitchOption WithAliases(this ISwitchOption option, params string[] aliases)
     {
-        ((CommandOption)option).SetCommands(commands);
+        ((AliasedOption)option).SetAliases(aliases);
         return option;
     }
 
-    public static IHaveValueOption<TValue> WithDefaultValue<TValue>(
-        this IHaveValueOption<TValue> option, TValue defaultValue)
+    public static IAliasedOption WithAliases(this IAliasedOption option, params string[] aliases)
+    {
+        ((AliasedOption)option).SetAliases(aliases);
+        return option;
+    }
+
+    public static ISwitchOption WithDefaultValue(this ISwitchOption option, bool? defaultValue)
+    {
+        ((SwitchOption)option).SetDefaultValue(defaultValue);
+        return option;
+    }
+
+    public static IScalarOption<TValue> WithDefaultValue<TValue>(
+        this IScalarOption<TValue> option, TValue defaultValue)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        ((ScalarOption<TValue>)option).SetDefaultValue(defaultValue);
+        return option;
+    }
+
+    public static IValueOption<TValue> WithDefaultValue<TValue>(
+        this IValueOption<TValue> option, TValue defaultValue)
         where TValue : IComparable, IEquatable<TValue>
     {
         switch (option)
         {
-            case ScalarCommandOption<TValue> scalarCommand:
+            case ScalarOption<TValue> scalarCommand:
                 scalarCommand.SetDefaultValue(defaultValue);
                 break;
-            case NonCommandOption nonCommand:
+            case ValueOption nonCommand:
                 nonCommand.SetDefaultValue(defaultValue as string);
                 break;
         }
@@ -63,16 +83,24 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static IHaveValueOption<TValue> WithConstraints<TValue>(
-        this IHaveValueOption<TValue> option, params TValue?[] constraints)
+    public static IScalarOption<TValue> WithConstraints<TValue>(
+        this IScalarOption<TValue> option, params TValue?[] constraints)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        ((ScalarOption<TValue>)option).SetConstraints(constraints);
+        return option;
+    }
+
+    public static IValueOption<TValue> WithConstraints<TValue>(
+        this IValueOption<TValue> option, params TValue?[] constraints)
         where TValue : IComparable, IEquatable<TValue>
     {
         switch (option)
         {
-            case ScalarCommandOption<TValue> scalarCommand:
+            case ScalarOption<TValue> scalarCommand:
                 scalarCommand.SetConstraints(constraints);
                 break;
-            case NonCommandOption nonCommand:
+            case ValueOption nonCommand:
                 nonCommand.SetConstraints(constraints.Cast<string>().ToArray());
                 break;
         }
@@ -80,16 +108,24 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static IHaveValueOption<TValue> WithAllowedValues<TValue>(
-        this IHaveValueOption<TValue> option, params TValue[] allowedValues) 
+    public static IScalarOption<TValue> WithAllowedValues<TValue>(
+        this IScalarOption<TValue> option, params TValue[] allowedValues)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        ((ScalarOption<TValue>)option).SetAllowedValues(allowedValues);
+        return option;
+    }
+
+    public static IValueOption<TValue> WithAllowedValues<TValue>(
+        this IValueOption<TValue> option, params TValue[] allowedValues) 
         where TValue : IComparable, IEquatable<TValue>
     {
         switch (option)
         {
-            case ScalarCommandOption<TValue> scalarCommand:
+            case ScalarOption<TValue> scalarCommand:
                 scalarCommand.SetAllowedValues(allowedValues);
                 break;
-            case NonCommandOption nonCommand:
+            case ValueOption nonCommand:
                 nonCommand.SetAllowedValues(allowedValues.Cast<string>().ToArray());
                 break;
         }
@@ -97,35 +133,35 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static IScalarCommandOption<TValue> WithParsingCallbacks<TValue>(
-        this IScalarCommandOption<TValue> option, IParsingCallbacks<TValue> optionCallbacks)
+    public static IScalarOption<TValue> WithParsingCallbacks<TValue>(
+        this IScalarOption<TValue> option, IParsingCallbacks<TValue> optionCallbacks)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarCommandOption<TValue>)option).SetParsingCallbacks(optionCallbacks);
+        ((ScalarOption<TValue>)option).SetParsingCallbacks(optionCallbacks);
         return option;
     }
 
-    public static IScalarCommandOption<TValue> WithValueValidator<TValue>(
-        this IScalarCommandOption<TValue> option, Func<string, bool> validator)
+    public static IScalarOption<TValue> WithValueValidator<TValue>(
+        this IScalarOption<TValue> option, Func<string, bool> validator)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarCommandOption<TValue>)option).SetValueValidator(validator);
+        ((ScalarOption<TValue>)option).SetValueValidator(validator);
         return option;
     }
 
-    public static IScalarCommandOption<TValue> WithValueConvertor<TValue>(
-        this IScalarCommandOption<TValue> option, Func<string, TValue> validator)
+    public static IScalarOption<TValue> WithValueConvertor<TValue>(
+        this IScalarOption<TValue> option, Func<string, TValue> validator)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarCommandOption<TValue>)option).SetValueConvertor(validator);
+        ((ScalarOption<TValue>)option).SetValueConvertor(validator);
         return option;
     }
 
-    public static IScalarCommandOption<TValue> WithOptionValidator<TValue>(
-        this IScalarCommandOption<TValue> option, Func<IValueContext<TValue>, IArgumentParser, bool> validator)
+    public static IScalarOption<TValue> WithOptionValidator<TValue>(
+        this IScalarOption<TValue> option, Func<IValueContext<TValue>, IArgumentParser, bool> validator)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarCommandOption<TValue>)option).SetOptionValidator(validator);
+        ((ScalarOption<TValue>)option).SetOptionValidator(validator);
         return option;
     }
 }

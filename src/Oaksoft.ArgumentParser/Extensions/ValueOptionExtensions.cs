@@ -9,37 +9,37 @@ namespace Oaksoft.ArgumentParser.Extensions;
 
 public static partial class OptionsExtensions
 { 
-    public static INonCommandOption AddDefaultOption<TSource>(
+    public static IValueOption<string> AddValueOption<TSource>(
         this TSource source,
         Expression<Func<TSource, string?>> keyPropExpr,
         bool mandatory = false)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterDefaultOption(keyPropExpr, mandatory);
+        return source.RegisterValueOption(keyPropExpr, mandatory);
     }
 
-    public static INonCommandOption AddDefaultOption<TSource>(
+    public static IValueOption<string> AddValueOption<TSource>(
         this TSource source,
         Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
         bool enableValueTokenSplitting = true, 
         int requiredTokenCount = 0, int maximumTokenCount = 10)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterDefaultOption(
+        return source.RegisterValueOption(
             keyPropExpr, enableValueTokenSplitting, requiredTokenCount, maximumTokenCount);
     }
 
-    public static INonCommandOption AddDefaultOption<TSource>(
+    public static IValueOption<string> AddValueOption<TSource>(
         this TSource source,
         Expression<Func<TSource, string?>> keyPropExpr,
         Expression<Func<TSource, bool>> countPropExpr,
         bool mandatory = false)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterDefaultOption(keyPropExpr, countPropExpr, mandatory);
+        return source.RegisterValueOption(keyPropExpr, countPropExpr, mandatory);
     }
 
-    public static INonCommandOption AddDefaultOption<TSource>(
+    public static IValueOption<string> AddValueOption<TSource>(
         this TSource source,
         Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
         Expression<Func<TSource, int>> countPropExpr,
@@ -47,7 +47,7 @@ public static partial class OptionsExtensions
         int requiredTokenCount = 0, int maximumTokenCount = 10)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterDefaultOption(
+        return source.RegisterValueOption(
             keyPropExpr, countPropExpr, enableValueTokenSplitting, 
             requiredTokenCount, maximumTokenCount);
     }

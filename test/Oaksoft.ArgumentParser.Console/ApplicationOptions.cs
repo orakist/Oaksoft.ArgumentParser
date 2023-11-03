@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Console;
@@ -14,6 +15,7 @@ internal class ApplicationOptions : BaseApplicationOptions
     public string? SubtractCount { get; set; }
     public float? MultiplyCount { get; set; }
     public long? DivideCount { get; set; }
+    public DateTime? StartTime { get; set; }
 
     public IEnumerable<int>? AddNumbers { get; set; }
     public ICollection<string>? SubtractNumbers { get; set; }

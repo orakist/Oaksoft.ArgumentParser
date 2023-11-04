@@ -42,7 +42,7 @@ internal sealed class SwitchOption : BaseOption, ISwitchOption
         OptionArity = (requiredOptionCount, maximumOptionCount);
     }
     
-    public void SetAliases(params string[] aliases)
+    public override void SetAliases(params string[] aliases)
     {
         var values = aliases
             .Where(s => !string.IsNullOrWhiteSpace(s))
@@ -68,8 +68,8 @@ internal sealed class SwitchOption : BaseOption, ISwitchOption
 
         for (var index = 0; index < _aliases.Count; ++index)
         {
-            if (!_aliases[index].StartsWith(parser.CommandPrefix))
-                _aliases[index] = $"{parser.CommandPrefix}{_aliases[index]}";
+            if (!_aliases[index].StartsWith(parser.OptionPrefix))
+                _aliases[index] = $"{parser.OptionPrefix}{_aliases[index]}";
         }
     }
 

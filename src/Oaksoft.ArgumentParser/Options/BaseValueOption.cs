@@ -20,9 +20,9 @@ internal abstract class BaseValueOption<TValue>
 
     public List<TValue> ResultValues => _resultValues.ToList();
 
-    private Func<string, bool>? _validateValueDelegate;
-    private Func<string, TValue>? _convertValueDelegate;
-    private Func<IValueContext<TValue>, IArgumentParser, bool>? _validateOptionDelegate;
+    private Func<string, bool>? _validateValueCallback;
+    private Func<string, TValue>? _convertValueCallback;
+    private Func<IValueContext<TValue>, IArgumentParser, bool>? _validateOptionCallback;
 
     private readonly List<TValue?> _constraints;
     private readonly HashSet<TValue> _allowedValues;
@@ -72,30 +72,30 @@ internal abstract class BaseValueOption<TValue>
         // only use overriden methods
         var methodName = nameof(IParsingCallbacks<TValue>.ValidateValue);
         if (type.GetMethod(methodName)?.DeclaringType == type)
-            _validateValueDelegate ??= optionCallbacks.ValidateValue;
+            _validateValueCallback ??= optionCallbacks.ValidateValue;
 
         methodName = nameof(IParsingCallbacks<TValue>.ConvertValue);
         if (type.GetMethod(methodName)?.DeclaringType == type)
-            _convertValueDelegate ??= optionCallbacks.ConvertValue;
+            _convertValueCallback ??= optionCallbacks.ConvertValue;
 
         methodName = nameof(IParsingCallbacks<TValue>.ValidateOption);
         if (type.GetMethod(methodName)?.DeclaringType == type)
-            _validateOptionDelegate ??= optionCallbacks.ValidateOption;
+            _validateOptionCallback ??= optionCallbacks.ValidateOption;
     }
 
     public void SetValueValidator(Func<string, bool> validator)
     {
-        _validateValueDelegate = validator;
+        _validateValueCallback = validator;
     }
 
     public void SetValueConvertor(Func<string, TValue> convertor)
     {
-        _convertValueDelegate = convertor;
+        _convertValueCallback = convertor;
     }
 
     public void SetOptionValidator(Func<IValueContext<TValue>, IArgumentParser, bool> validator)
     {
-        _validateOptionDelegate = validator;
+        _validateOptionCallback = validator;
     }
 
     public override void Initialize(IArgumentParser parser)
@@ -112,21 +112,21 @@ internal abstract class BaseValueOption<TValue>
     {
         base.Validate(parser);
 
-        if (_validateOptionDelegate is not null)
+        if (_validateOptionCallback is not null)
         {
-            if (!_validateOptionDelegate.Invoke(this, parser))
+            if (!_validateOptionCallback.Invoke(this, parser))
                 throw new Exception("Option values cannot be validated.");
         }
         else
         {
             CallbackValidatorGuard();
 
-            foreach (var inputValue in _inputValues.Where(v => !_validateValueDelegate!.Invoke(v)))
+            foreach (var inputValue in _inputValues.Where(v => !_validateValueCallback!.Invoke(v)))
             {
                 throw new Exception($"Invalid input value found!. Value: {inputValue}");
             }
 
-            var values = _inputValues.Select(v => _convertValueDelegate!.Invoke(v)).ToList();
+            var values = _inputValues.Select(v => _convertValueCallback!.Invoke(v)).ToList();
             parser.ValidateByAllowedValues(values, _allowedValues);
 
             _resultValues.AddRange(values);
@@ -168,16 +168,16 @@ internal abstract class BaseValueOption<TValue>
 
     private void CallbackValidatorGuard()
     {
-        if (_validateOptionDelegate is null)
+        if (_validateOptionCallback is null)
         {
             throw new Exception(
-                $"Missing value validator! Configure a value validator for type '{typeof(TValue).Name}'.");
+                $"Missing value validator callback! Configure a value validator for type '{typeof(TValue).Name}'.");
         }
 
-        if (_convertValueDelegate is null)
+        if (_convertValueCallback is null)
         {
             throw new Exception(
-                $"Missing value convertor! Configure a value convertor for type '{typeof(TValue).Name}'.");
+                $"Missing value convertor callback! Configure a value convertor for type '{typeof(TValue).Name}'.");
         }
     }
 }
@@ -211,41 +211,6 @@ internal abstract class BaseValueOption : BaseOption, IValueOption
     public void SetValueArity(int requiredValueCount, int maximumValueCount)
     {
         ValueArity = (requiredValueCount, maximumValueCount);
-    }
-
-    public override void Parse(string[] arguments, IArgumentParser parser)
-    {
-        var options = ((BaseArgumentParser)parser).AppOptions.Options;
-
-        var compareFlag = parser.ComparisonFlag();
-        for (var index = 0; index < arguments.Length; ++index)
-        {
-            var argument = arguments[index];
-
-            if (!argument.StartsWith(parser.CommandPrefix))
-                _valueTokens.Add(argument);
-
-            var scalarCommand = options.OfType<IScalarOption>()
-                .FirstOrDefault(o => o.Aliases.Any(c => c.Equals(argument, compareFlag)));
-
-            if (scalarCommand is null)
-                continue;
-
-            for (; index + 1 < arguments.Length; ++index)
-            {
-                var value = arguments[index + 1];
-                if (value.StartsWith(parser.CommandPrefix))
-                    break;
-
-                ++index;
-
-                if (!scalarCommand.AllowSequentialValues)
-                    break;
-            }
-        }
-
-        var inputValues = parser.GetInputValues(_valueTokens, EnableValueTokenSplitting);
-        _inputValues.AddRange(inputValues);
     }
 
     public abstract void ApplyDefaultValue(IApplicationOptions appOptions, PropertyInfo keyProperty);

@@ -17,13 +17,13 @@ internal static class Program
             {
                 var result = parser.Parse(args);
 
-                System.Console.WriteLine("Type the commands and press enter. Type 'q' to quit.");
+                System.Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
                 System.Console.Write("./> ");
-                var commands = System.Console.In.ReadLine();
-                if (commands is "q" or "Q")
+                var options = System.Console.In.ReadLine();
+                if (options is "q" or "Q")
                     break;
 
-                var arguments = commands?.Split(" ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 args = arguments ?? Array.Empty<string>();
             }
         }

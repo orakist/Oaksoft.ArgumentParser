@@ -22,8 +22,8 @@ internal static class OptionValueHelper
                 if (allowedValues.Cast<string>().Any(a => a.Equals(inputValue, flag)))
                     continue;
 
-                var values = string.Join(parser.ValueSeparator, allowedValues);
-                throw new Exception($"Invalid input value found. Value: {inputValue}, Allowed Values: : {values}");
+                var values = string.Join(parser.ValueDelimiter, allowedValues);
+                throw new Exception($"Option value '{inputValue}' not recognized. Must be one of: {values}");
             }
         }
         else
@@ -33,8 +33,8 @@ internal static class OptionValueHelper
                 if (allowedValues.Any(a => a.Equals(inputValue)))
                     continue;
 
-                var values = string.Join(parser.ValueSeparator, allowedValues);
-                throw new Exception($"Invalid input value found. Value: {inputValue}, Allowed Values: : {values}");
+                var values = string.Join(parser.ValueDelimiter, allowedValues);
+                throw new Exception($"Option value '{inputValue}' not recognized. Must be one of: {values}");
             }
         }
     }
@@ -46,7 +46,7 @@ internal static class OptionValueHelper
         {
             if (enableValueTokenSplitting)
             {
-                foreach (var value in valueToken.EnumerateBySeparator(parser.ValueSeparator))
+                foreach (var value in valueToken.EnumerateByDelimiter(parser.ValueDelimiter))
                 {
                     yield return value;
                 }
@@ -63,12 +63,12 @@ internal static class OptionValueHelper
         return parser.CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
     }
 
-    public static IEnumerable<string> EnumerateBySeparator(this string textValue, string separator)
+    public static IEnumerable<string> EnumerateByDelimiter(this string textValue, string delimiter)
     {
         if (string.IsNullOrWhiteSpace(textValue))
             yield break;
 
-        foreach (var value in textValue.Split(separator))
+        foreach (var value in textValue.Split(delimiter))
         {
             if (!string.IsNullOrWhiteSpace(value))
                 yield return value.Trim();

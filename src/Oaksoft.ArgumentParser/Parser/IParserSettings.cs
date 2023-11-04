@@ -21,4 +21,6 @@ public interface IParserSettings
     string? Title { get; set; }
 
     string? Description { get; set; }
+
+    int? MaxAliasLength { get; set; }
 }

@@ -6,41 +6,41 @@ namespace Oaksoft.ArgumentParser;
 
 public static class CommandLine
 {
-    private static readonly string[] _commandPrefixes = { "-", "--", "/" };
-    private static readonly string[] _valueSeparators = { ";", ",", "|" };
-    private static readonly string[] _tokenSeparators = { "=", ":" };
+    private static readonly string[] _optionPrefixes = { "-", "--", "/" };
+    private static readonly string[] _valueDelimiters = { ";", ",", "|" };
+    private static readonly string[] _tokenDelimiters = { "=", ":" };
 
     public static IArgumentParser<TOptions> CreateParser<TOptions>(
-        string commandPrefix = "--", string valueSeparator = ";", 
-        string tokenSeparator = "=", bool caseSensitive = false)
+        string optionPrefix = "--", string valueDelimiter = ";", 
+        string tokenDelimiter = "=", bool caseSensitive = false)
         where TOptions : BaseApplicationOptions, new()
     {
-        ValidateParameters(commandPrefix, valueSeparator, tokenSeparator);
+        ValidateParameters(optionPrefix, valueDelimiter, tokenDelimiter);
 
         var applicationOptions = new TOptions();
         return new ArgumentParser<TOptions>(
-            applicationOptions, commandPrefix, valueSeparator, 
-            tokenSeparator, caseSensitive);
+            applicationOptions, optionPrefix, valueDelimiter,
+            tokenDelimiter, caseSensitive);
     }
 
-    private static void ValidateParameters(string commandPrefix, string valueSeparator, string tokenSeparator)
+    private static void ValidateParameters(string optionPrefix, string valueDelimiter, string tokenDelimiter)
     {
-        if (!_commandPrefixes.Contains(commandPrefix))
+        if (!_optionPrefixes.Contains(optionPrefix))
         {
-            throw new ArgumentOutOfRangeException(nameof(commandPrefix),
-                $"Invalid command prefix! Valid prefixes are '{string.Join(", ", _commandPrefixes)}'.");
+            throw new ArgumentOutOfRangeException(nameof(optionPrefix),
+                $"Invalid option prefix! Valid prefixes are '{string.Join(", ", _optionPrefixes)}'.");
         }
 
-        if (!_valueSeparators.Contains(valueSeparator))
+        if (!_valueDelimiters.Contains(valueDelimiter))
         {
-            throw new ArgumentOutOfRangeException(nameof(valueSeparator),
-                $"Invalid value separator! Valid separators are '{string.Join(", ", _valueSeparators)}'.");
+            throw new ArgumentOutOfRangeException(nameof(valueDelimiter),
+                $"Invalid value delimiter! Valid delimiters are '{string.Join(", ", _valueDelimiters)}'.");
         }
 
-        if (!_tokenSeparators.Contains(tokenSeparator))
+        if (!_tokenDelimiters.Contains(tokenDelimiter))
         {
-            throw new ArgumentOutOfRangeException(nameof(tokenSeparator),
-                $"Invalid token separator! Valid separators are '{string.Join(", ", _tokenSeparators)}'.");
+            throw new ArgumentOutOfRangeException(nameof(tokenDelimiter),
+                $"Invalid token delimiter! Valid delimiters are '{string.Join(", ", _tokenDelimiters)}'.");
         }
     }
 }

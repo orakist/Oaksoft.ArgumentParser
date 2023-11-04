@@ -5,11 +5,11 @@ namespace Oaksoft.ArgumentParser.Parser;
 
 public interface IArgumentParser
 {
-    string CommandPrefix { get; }
+    string OptionPrefix { get; }
 
-    string ValueSeparator { get; }
+    string ValueDelimiter { get; }
 
-    string TokenSeparator { get; }
+    string TokenDelimiter { get; }
 
     bool CaseSensitive { get; }
 

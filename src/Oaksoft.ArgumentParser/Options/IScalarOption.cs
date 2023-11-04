@@ -2,7 +2,7 @@
 
 namespace Oaksoft.ArgumentParser.Options;
 
-public interface IScalarOption : IAliasedOption, IValueOption
+public interface IScalarOption : INamedOption, IValueOption
 {
     bool AllowSequentialValues { get; }
 }

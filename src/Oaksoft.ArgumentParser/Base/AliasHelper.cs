@@ -4,15 +4,20 @@ using System.Linq;
 
 namespace Oaksoft.ArgumentParser.Base;
 
-public static class AliasHelper
+internal static class AliasHelper
 {
     private static readonly char[] _trimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
 
-    public static IEnumerable<string> GetAliasesHeuristically(string name, HashSet<string> filter, int maxAliasLength)
+    public static IEnumerable<string> GetAliasesHeuristically(
+        string name, ICollection<string> filter, int maxAliasLength, bool caseSensitive)
     {
         var words = GetHumanizedWords(name).ToList();
         if(words.Count < 1)
             yield break;
+
+        var compareFlag = caseSensitive 
+            ? StringComparison.Ordinal 
+            : StringComparison.OrdinalIgnoreCase;
 
         // find a short alias
         for (var i = 0; i < 4; ++i)
@@ -23,13 +28,13 @@ public static class AliasHelper
                 if (char.IsDigit(word[i]))
                     continue;
 
-                var candidate = word.Substring(i, 1).ToLowerInvariant();
-                if (filter.Contains(candidate))
+                var candidate = word.Substring(i, 1);
+                if (filter.Any(f => f.Equals(candidate, compareFlag)))
                     continue;
 
                 candidateFound = true;
                 yield return candidate;
-                yield break;
+                break;
             }
 
             if (candidateFound)
@@ -39,8 +44,8 @@ public static class AliasHelper
         // find a long alias by using first 2 words
         if (words.Count > 1 && words.Take(2).Sum(s => s.Length) + 1 < maxAliasLength)
         {
-            var candidate = string.Join('-', words.Take(2)).ToLowerInvariant();
-            if (!filter.Contains(candidate))
+            var candidate = string.Join('-', words.Take(2));
+            if (!filter.Any(f => f.Equals(candidate, compareFlag)))
             {
                 yield return candidate;
                 yield break;
@@ -50,8 +55,8 @@ public static class AliasHelper
         // find a long alias by using first word
         if (words[0].Length < maxAliasLength)
         {
-            var candidate = words[0].ToLowerInvariant();
-            if (!filter.Contains(candidate))
+            var candidate = words[0];
+            if (!filter.Any(f => f.Equals(candidate, compareFlag)))
             {
                 yield return candidate;
                 yield break;
@@ -61,8 +66,8 @@ public static class AliasHelper
         // find a long alias by using first 3 words
         if (words.Count > 2 && words.Take(3).Sum(s => s.Length) + 2 < maxAliasLength)
         {
-            var candidate = string.Join('-', words.Take(3)).ToLowerInvariant();
-            if (!filter.Contains(candidate))
+            var candidate = string.Join('-', words.Take(3));
+            if (!filter.Any(f => f.Equals(candidate, compareFlag)))
             {
                 yield return candidate;
             }

@@ -10,11 +10,11 @@ namespace Oaksoft.ArgumentParser.Parser;
 
 internal abstract class BaseArgumentParser : IArgumentParser
 {
-    public string CommandPrefix { get; }
+    public string OptionPrefix { get; }
 
-    public string ValueSeparator { get; }
+    public string ValueDelimiter { get; }
 
-    public string TokenSeparator { get; }
+    public string TokenDelimiter { get; }
 
     public bool CaseSensitive { get; }
 
@@ -31,11 +31,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private List<string>? _registeredPropertyNames;
 
     protected BaseArgumentParser(
-        string commandPrefix, string valueSeparator, string tokenSeparator, bool caseSensitive)
+        string optionPrefix, string valueDelimiter, string tokenDelimiter, bool caseSensitive)
     {
-        CommandPrefix = commandPrefix;
-        ValueSeparator = valueSeparator;
-        TokenSeparator = tokenSeparator;
+        OptionPrefix = optionPrefix;
+        ValueDelimiter = valueDelimiter;
+        TokenDelimiter = tokenDelimiter;
         CaseSensitive = caseSensitive;
 
         Settings = new ParserSettings();
@@ -48,7 +48,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public abstract string GetErrorText(bool? colorized = default);
 
-    protected void CreateDefaultSettings()
+    protected void BuildDefaultSettings()
     {
         Settings.AutoPrintHeader ??= true;
         Settings.AutoPrintHelp ??= true;
@@ -58,6 +58,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         Settings.ShowTitle ??= true;
         Settings.ShowDescription ??= true;
         Settings.EnableColoring ??= true;
+        Settings.MaxAliasLength ??= 32;
 
         ValidateParserSettings();
     }
@@ -70,6 +71,12 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 "Invalid Help Display Width value! Valid interval is [40, 320].");
         }
 
+        if (Settings.MaxAliasLength is < 4 or > 64)
+        {
+            throw new ArgumentOutOfRangeException(nameof(Settings.MaxAliasLength),
+                "Invalid Max Alias Length value! Valid interval is [4, 64].");
+        }
+
         if (string.IsNullOrWhiteSpace(Settings.Title))
             Settings.Title = BuildTitleLine();
 
@@ -77,7 +84,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             Settings.Description = BuildDescriptionLine();
     }
 
-    protected void CreateDefaultOptions()
+    protected void BuildDefaultOptions()
     {
         var options = AppOptions.Options.Cast<BaseOption>();
         if (options.Any(o => o.KeyProperty.Name == nameof(AppOptions.Help)))
@@ -90,22 +97,25 @@ internal abstract class BaseArgumentParser : IArgumentParser
     protected void InitializeOptions()
     {
         var options = AppOptions.Options;
-        foreach (var option in options)
-            ((BaseOption)option).Initialize(this);
+        var aliases = new List<string>();
 
-        var commands = options.OfType<IAliasedOption>()
-            .SelectMany(o => o.Aliases)
-            .Select(a => a.ToLowerInvariant())
-            .GroupBy(c => c)
+        foreach (var option in options.Cast<BaseOption>())
+        {
+            ValidateOptionAliases(option, aliases);
+
+            option.Initialize(this);
+        }
+
+        aliases = aliases.GroupBy(c => c)
             .Where(c => c.Count() > 1)
             .Select(c => c.Key)
             .ToList();
 
-        if (!commands.Any())
+        if (!aliases.Any())
             return;
 
-        var commandText = string.Join(", ", commands);
-        throw new Exception($"Option command names must be unique. Duplicate Commands: {commandText}");
+        var aliasText = string.Join(", ", aliases);
+        throw new Exception($"Option aliases must be unique. Duplicate Aliases: {aliasText}");
     }
 
     protected void ClearOptions()
@@ -149,12 +159,12 @@ internal abstract class BaseArgumentParser : IArgumentParser
         ValidateHelpToken(options);
 
         var values = options.OfType<IValueOption>().SelectMany(a => a.ValueTokens).ToList();
-        var inputs = options.OfType<IAliasedOption>().SelectMany(a => a.OptionTokens).ToList();
+        var inputs = options.OfType<INamedOption>().SelectMany(a => a.OptionTokens).ToList();
         var invalidOptions = arguments.Where(s => !values.Contains(s)).ToList();
         invalidOptions = invalidOptions.Where(s => !inputs.Contains(s)).ToList();
 
         foreach (var option in invalidOptions)
-            _errors.Add($"Unknown command found. Command: {option}");
+            _errors.Add($"Unknown option found. Option: {option}");
     }
 
     protected void BindOptionsToAttributes()
@@ -199,7 +209,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         var optionCount = option switch
         {
-            IAliasedOption c => c.OptionTokens.Count,
+            INamedOption c => c.OptionTokens.Count,
             IValueOption d => d.ValueTokens.Count,
             _ => 0
         };
@@ -209,7 +219,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         var totalInputCount = options.Sum(o => o switch
         {
-            IAliasedOption c => c.OptionTokens.Count,
+            INamedOption c => c.OptionTokens.Count,
             IValueOption d => d.ValueTokens.Count,
             _ => 0
         });
@@ -228,13 +238,40 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
         else if (helpOption.OptionTokens.Count > 0)
         {
-            _errors.Add($"{helpOption.Name} ({helpOption.ShortAlias}) command cannot be combined with other commands.");
+            _errors.Add($"{helpOption.Name} ({helpOption.ShortAlias}) option cannot be combined with other options.");
         }
+    }
+
+    private void ValidateOptionAliases(BaseOption option, List<string> aliases)
+    {
+        if (option is not INamedOption namedOption)
+            return;
+
+        if (namedOption.Aliases.Count > 0)
+        {
+            var optionAliases = CaseSensitive
+                ? namedOption.Aliases
+                : namedOption.Aliases.Select(a => a.ToLowerInvariant());
+
+            aliases.AddRange(optionAliases);
+            return;
+        }
+
+        // suggest aliases for option by using the registered property name
+        var autoAliases = AliasHelper.GetAliasesHeuristically(
+            option.KeyProperty.Name, aliases, Settings.MaxAliasLength!.Value, CaseSensitive);
+
+        if (!CaseSensitive)
+            autoAliases = autoAliases.Select(a => a.ToLowerInvariant());
+
+        var suggestedAliases = autoAliases.ToArray();
+        option.SetAliases(suggestedAliases);
+        aliases.AddRange(suggestedAliases);
     }
 
     private void AddErrorMessage(IBaseOption option, Exception ex)
     {
-        var name = (option as IAliasedOption)?.ShortAlias ?? option.Name;
+        var name = (option as INamedOption)?.ShortAlias ?? option.Name;
         var comma = ex.Message.EndsWith(".") ? string.Empty : ",";
         _errors.Add($"{ex.Message}{comma} Name: {name}");
     }
@@ -306,7 +343,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
             else if (countProp.PropertyType == typeof(int))
             {
-                countProp.SetValue(AppOptions, option is ValueOption ? option.ValueCount : option.OptionCount);
+                countProp.SetValue(AppOptions, option is INamedOption ? option.OptionCount : option.ValueCount);
             }
         }
 
@@ -320,7 +357,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
             else if (type == typeof(int))
             {
-                keyProp.SetValue(AppOptions, option is ValueOption ? option.ValueCount : option.OptionCount);
+                keyProp.SetValue(AppOptions, option is INamedOption ? option.OptionCount : option.ValueCount);
             }
         }
         else if (option is BaseValueOption valOption)
@@ -329,7 +366,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
     }
 
-    private List<string> GetRegisteredPropertyNames(IReadOnlyList<BaseOption> options)
+    private static List<string> GetRegisteredPropertyNames(IReadOnlyList<BaseOption> options)
     {
         var propertyNames = options
             .Where(o => !string.IsNullOrWhiteSpace(o.CountProperty?.Name))

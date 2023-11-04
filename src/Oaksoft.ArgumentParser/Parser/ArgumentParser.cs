@@ -17,8 +17,8 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
     private Action<IParserSettings>? _configureParser;
 
     public ArgumentParser(
-        TOptions options, string commandPrefix, string valueSeparator, string tokenSeparator, bool caseSensitive)
-        : base(commandPrefix, valueSeparator, tokenSeparator, caseSensitive)
+        TOptions options, string optionPrefix, string valueDelimiter, string tokenDelimiter, bool caseSensitive)
+        : base(optionPrefix, valueDelimiter, tokenDelimiter, caseSensitive)
     {
         _appOptions = options;
     }
@@ -45,9 +45,9 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
         _configureParser?.Invoke(Settings);
         _configureOptions?.Invoke(_appOptions);
 
-        CreateDefaultSettings();
+        BuildDefaultSettings();
 
-        CreateDefaultOptions();
+        BuildDefaultOptions();
 
         InitializeOptions();
 
@@ -149,16 +149,16 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
         var options = _appOptions.Options;
         foreach (var option in options)
         {
-            var command = option as IAliasedOption;
-            var commandName = command?.ShortAlias ?? string.Empty;
-            sb.Pastel($"[{commandName,-4}] ", ConsoleColor.DarkGreen);
+            var namedOption = option as INamedOption;
+            var shortAlias = namedOption?.ShortAlias ?? string.Empty;
+            sb.Pastel($"[{shortAlias,-4}] ", ConsoleColor.DarkGreen);
             sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
             sb.AppendLine(option.Usage);
 
-            if (command is not null)
+            if (namedOption is not null)
             {
-                sb.Pastel("       Commands:", ConsoleColor.DarkYellow);
-                sb.AppendLine($" {string.Join(", ", command.Aliases)} ");
+                sb.Pastel("       Options:", ConsoleColor.DarkYellow);
+                sb.AppendLine($" {string.Join(", ", namedOption.Aliases)} ");
             }
 
             if (option.Description is not null)

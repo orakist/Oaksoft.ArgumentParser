@@ -53,6 +53,10 @@ internal abstract class BaseOption : IBaseOption
         Description = string.IsNullOrWhiteSpace(description) 
             ? null : description.Trim();
     }
+    
+    public virtual void SetAliases(params string[] aliases)
+    {
+    }
 
     public virtual void Initialize(IArgumentParser parser)
     {

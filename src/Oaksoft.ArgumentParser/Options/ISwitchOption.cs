@@ -1,6 +1,6 @@
 ﻿namespace Oaksoft.ArgumentParser.Options;
 
-public interface ISwitchOption : IAliasedOption
+public interface ISwitchOption : INamedOption
 {
     bool? DefaultValue { get; }
 }

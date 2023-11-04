@@ -43,7 +43,7 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
         OptionArity = (requiredOptionCount, maximumOptionCount);
     }
 
-    public void SetAliases(params string[] aliases)
+    public override void SetAliases(params string[] aliases)
     {
         var values = aliases
             .Where(s => !string.IsNullOrWhiteSpace(s))
@@ -66,15 +66,18 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
 
         for (var index = 0; index < _aliases.Count; ++index)
         {
-            if (!_aliases[index].StartsWith(parser.CommandPrefix))
-                _aliases[index] = $"{parser.CommandPrefix}{_aliases[index]}";
+            if (!_aliases[index].StartsWith(parser.OptionPrefix))
+                _aliases[index] = $"{parser.OptionPrefix}{_aliases[index]}";
+
+            if (!parser.CaseSensitive)
+                _aliases[index] = _aliases[index].ToLowerInvariant();
         }
     }
 
     public override void Parse(string[] arguments, IArgumentParser parser)
     {
         var flag = parser.ComparisonFlag();
-        var delimiter = parser.TokenSeparator;
+        var delimiter = parser.TokenDelimiter;
         for (var index = 0; index < arguments.Length; ++index)
         {
             var argument = arguments[index];
@@ -92,7 +95,7 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
                 for (; index + 1 < arguments.Length; ++index)
                 {
                     var value = arguments[index + 1];
-                    if (value.StartsWith(parser.CommandPrefix))
+                    if (value.StartsWith(parser.OptionPrefix))
                         break;
 
                     _valueTokens.Add(value);
@@ -109,7 +112,7 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
                 if (argument.Split(delimiter).Length > 2)
                     throw new Exception($"Invalid (option=value) token '{argument}' found! Multiple token delimiter usage!");
 
-                var keyValue = argument.EnumerateBySeparator(delimiter).ToArray();
+                var keyValue = argument.EnumerateByDelimiter(delimiter).ToArray();
                 _optionTokens.Add(keyValue[0]);
                 if (keyValue.Length > 1)
                     _valueTokens.Add(keyValue[1]);

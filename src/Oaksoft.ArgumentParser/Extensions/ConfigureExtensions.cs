@@ -25,6 +25,20 @@ public static class ConfigureExtensions
         return option;
     }
 
+    public static IScalarOption<TValue> WithAliases<TValue>(
+        this IScalarOption<TValue> option, params string[] aliases)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        ((BaseOption)option).SetAliases(aliases);
+        return option;
+    }
+
+    public static ISwitchOption WithAliases(this ISwitchOption option, params string[] aliases)
+    {
+        ((BaseOption)option).SetAliases(aliases);
+        return option;
+    }
+
     public static IScalarOption<TValue> WithValueArity<TValue>(
         this IScalarOption<TValue> option, ArityType valueArity)
         where TValue : IComparable, IEquatable<TValue>
@@ -84,20 +98,6 @@ public static class ConfigureExtensions
         this ISwitchOption option, int requiredOptionCount, int maximumOptionCount)
     {
         ((SwitchOption)option).SetOptionArity(requiredOptionCount, maximumOptionCount);
-        return option;
-    }
-
-    public static IScalarOption<TValue> WithAliases<TValue>(
-        this IScalarOption<TValue> option, params string[] aliases)
-        where TValue : IComparable, IEquatable<TValue>
-    {
-        ((ScalarOption<TValue>)option).SetAliases(aliases);
-        return option;
-    }
-
-    public static ISwitchOption WithAliases(this ISwitchOption option, params string[] aliases)
-    {
-        ((SwitchOption)option).SetAliases(aliases);
         return option;
     }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 
@@ -79,7 +80,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     protected void CreateDefaultOptions()
     {
         var options = AppOptions.Options.Cast<BaseOption>();
-        if (options.Any(o => o.KeyProperty == nameof(AppOptions.Help)))
+        if (options.Any(o => o.KeyProperty.Name == nameof(AppOptions.Help)))
             return;
 
         AppOptions.AddSwitchOption(o => o.Help)
@@ -92,8 +93,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
         foreach (var option in options)
             ((BaseOption)option).Initialize(this);
 
-        var commands = options.OfType<ICommandOption>()
-            .SelectMany(o => o.Commands)
+        var commands = options.OfType<IAliasedOption>()
+            .SelectMany(o => o.Aliases)
             .Select(a => a.ToLowerInvariant())
             .GroupBy(c => c)
             .Where(c => c.Count() > 1)
@@ -147,8 +148,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         ValidateHelpToken(options);
 
-        var values = options.OfType<IHaveValueOption>().SelectMany(a => a.ValueTokens).ToList();
-        var inputs = options.OfType<ICommandOption>().SelectMany(a => a.CommandTokens).ToList();
+        var values = options.OfType<IValueOption>().SelectMany(a => a.ValueTokens).ToList();
+        var inputs = options.OfType<IAliasedOption>().SelectMany(a => a.OptionTokens).ToList();
         var invalidOptions = arguments.Where(s => !values.Contains(s)).ToList();
         invalidOptions = invalidOptions.Where(s => !inputs.Contains(s)).ToList();
 
@@ -198,8 +199,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         var optionCount = option switch
         {
-            ICommandOption c => c.CommandTokens.Count,
-            IHaveValueOption d => d.ValueTokens.Count,
+            IAliasedOption c => c.OptionTokens.Count,
+            IValueOption d => d.ValueTokens.Count,
             _ => 0
         };
 
@@ -208,8 +209,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         var totalInputCount = options.Sum(o => o switch
         {
-            ICommandOption c => c.CommandTokens.Count,
-            IHaveValueOption d => d.ValueTokens.Count,
+            IAliasedOption c => c.OptionTokens.Count,
+            IValueOption d => d.ValueTokens.Count,
             _ => 0
         });
 
@@ -219,21 +220,21 @@ internal abstract class BaseArgumentParser : IArgumentParser
     protected void ValidateHelpToken(IReadOnlyList<IBaseOption> options)
     {
         var helpOption = options.OfType<SwitchOption>().
-            First(o => o.KeyProperty == nameof(IApplicationOptions.Help));
+            First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
 
         if (IsOnlyOption(helpOption, options))
         {
             _errors.Clear();
         }
-        else if (helpOption.CommandTokens.Count > 0)
+        else if (helpOption.OptionTokens.Count > 0)
         {
-            _errors.Add($"{helpOption.Name} ({helpOption.Command}) command cannot be combined with other commands.");
+            _errors.Add($"{helpOption.Name} ({helpOption.ShortAlias}) command cannot be combined with other commands.");
         }
     }
 
     private void AddErrorMessage(IBaseOption option, Exception ex)
     {
-        var name = (option as ICommandOption)?.Command ?? option.Name;
+        var name = (option as IAliasedOption)?.ShortAlias ?? option.Name;
         var comma = ex.Message.EndsWith(".") ? string.Empty : ",";
         _errors.Add($"{ex.Message}{comma} Name: {name}");
     }
@@ -285,24 +286,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         foreach (var property in _propertyInfos)
         {
             var type = property.PropertyType;
-            var option = options.FirstOrDefault(o => o.KeyProperty == property.Name);
-            if (option is IHaveValueOption valOption && !string.IsNullOrWhiteSpace(valOption.DefaultValue))
-            {
-                // all scalar-command and non-command options may have a default option.
-                // so apply default option to registered property if it exists.
-                if (type.IsAssignableFrom(typeof(string)))
-                {
-                    property.SetValue(AppOptions, valOption.DefaultValue);
-                    continue;
-                }
-
-                if (option is ScalarCommandOption scalarOption)
-                {
-                    scalarOption.ApplyDefaultValue(AppOptions, property);
-                    continue;
-                }
-            }
-
             var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
             property.SetValue(AppOptions, defaultValue);
         }
@@ -310,24 +293,24 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void UpdateOptionPropertiesByReflection(IBaseOption option)
     {
-        if (option.ValidatedTokenCount < 1)
+        if (!option.IsValid)
             return;
 
         var baseOption = (option as BaseOption)!;
-        if (!string.IsNullOrWhiteSpace(baseOption.CountProperty))
+        if (baseOption.CountProperty is not null)
         {
-            var countProp = _propertyInfos!.First(p => p.Name == baseOption.CountProperty);
+            var countProp = _propertyInfos!.First(p => p.Name == baseOption.CountProperty.Name);
             if (countProp.PropertyType == typeof(bool))
             {
                 countProp.SetValue(AppOptions, true);
             }
             else if (countProp.PropertyType == typeof(int))
             {
-                countProp.SetValue(AppOptions, option.ValidatedTokenCount);
+                countProp.SetValue(AppOptions, option is ValueOption ? option.ValueCount : option.OptionCount);
             }
         }
 
-        var keyProp = _propertyInfos!.First(p => p.Name == baseOption.KeyProperty);
+        var keyProp = _propertyInfos!.First(p => p.Name == baseOption.KeyProperty.Name);
         var type = keyProp.PropertyType;
         if (option is SwitchOption)
         {
@@ -337,38 +320,23 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
             else if (type == typeof(int))
             {
-                keyProp.SetValue(AppOptions, option.ValidatedTokenCount);
+                keyProp.SetValue(AppOptions, option is ValueOption ? option.ValueCount : option.OptionCount);
             }
         }
-        else if (option is IHaveValueOption valOption)
+        else if (option is BaseValueOption valOption)
         {
-            if (type.IsAssignableFrom(typeof(List<string>)))
-            {
-                keyProp.SetValue(AppOptions, valOption.ParsedValues);
-            }
-            else if (type.IsAssignableFrom(typeof(string[])))
-            {
-                keyProp.SetValue(AppOptions, valOption.ParsedValues.ToArray());
-            }
-            else if (type.IsAssignableFrom(typeof(string)))
-            {
-                keyProp.SetValue(AppOptions, valOption.ParsedValues.First());
-            }
-            else if (option is ScalarCommandOption scalarOption)
-            {
-                scalarOption.UpdatePropertyValue(AppOptions, keyProp);
-            }
+            valOption.UpdatePropertyValue(AppOptions, keyProp);
         }
     }
 
     private List<string> GetRegisteredPropertyNames(IReadOnlyList<BaseOption> options)
     {
         var propertyNames = options
-            .Where(o => !string.IsNullOrWhiteSpace(o.CountProperty))
-            .Select(a => a.CountProperty!)
+            .Where(o => !string.IsNullOrWhiteSpace(o.CountProperty?.Name))
+            .Select(a => a.CountProperty!.Name)
             .ToList();
 
-        propertyNames.AddRange(options.Select(o => o.KeyProperty));
+        propertyNames.AddRange(options.Select(o => o.KeyProperty.Name));
 
         return propertyNames;
     }

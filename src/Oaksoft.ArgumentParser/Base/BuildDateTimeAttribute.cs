@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Oaksoft.ArgumentParser.Attributes;
+namespace Oaksoft.ArgumentParser.Base;
 
 [AttributeUsage(AttributeTargets.Assembly)]
 internal sealed class BuildDateTimeAttribute : Attribute

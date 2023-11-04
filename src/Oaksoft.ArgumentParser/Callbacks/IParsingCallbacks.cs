@@ -1,16 +1,15 @@
-﻿using System.Reflection;
-using Oaksoft.ArgumentParser.Options;
+﻿using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Parser;
+using System;
 
 namespace Oaksoft.ArgumentParser.Callbacks;
 
-public interface IParsingCallbacks
+public interface IParsingCallbacks<TValue>
+    where TValue : IComparable, IEquatable<TValue>
 {
     bool ValidateValue(string value);
 
-    bool ValidateOption(IValueContext context, IArgumentParser parser);
+    TValue ConvertValue(string value);
 
-    void ApplyDefaultValue(IValueContext context, IApplicationOptions appOptions, PropertyInfo property);
-
-    void UpdateOptionValue(IValueContext context, IApplicationOptions appOptions, PropertyInfo property);
+    bool ValidateOption(IValueContext<TValue> context, IArgumentParser parser);
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -7,9 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AssemblyAttribute Include="Oaksoft.ArgumentParser.Attributes.BuildDateTimeAttribute">
+    <AssemblyAttribute Include="Oaksoft.ArgumentParser.Base.BuildDateTimeAttribute">
       <_Parameter1>$([System.DateTime]::Now.ToString("yyyy-MM-dd HH:mm:ss"))</_Parameter1>
     </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandDotNet" Version="7.0.2" />
   </ItemGroup>
 
 </Project>

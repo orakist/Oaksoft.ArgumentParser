@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
@@ -11,32 +12,26 @@ internal abstract class BaseOption : IBaseOption
 
     public string? Description { get; protected set; }
 
-    public int RequiredTokenCount { get; }
+    public (int Min, int Max) OptionArity { get; protected set; }
 
-    public int MaximumTokenCount { get; }
+    public (int Min, int Max) ValueArity { get; protected set; }
 
-    public abstract int ValidatedTokenCount { get; }
+    public bool IsValid { get; protected set; }
 
-    public string KeyProperty { get; private set; } = default!;
+    public abstract int OptionCount { get; }
 
-    public string? CountProperty { get; private set; }
+    public abstract int ValueCount { get; }
 
-    protected bool _validated;
+    public PropertyInfo KeyProperty { get; private set; } = default!;
 
-    protected BaseOption(int requiredTokenCount = 0, int maximumTokenCount = 1)
-    {
-        RequiredTokenCount = requiredTokenCount;
-        MaximumTokenCount = maximumTokenCount;
-        if (RequiredTokenCount > MaximumTokenCount)
-            MaximumTokenCount = RequiredTokenCount;
-    }
+    public PropertyInfo? CountProperty { get; private set; }
 
-    public void SetKeyProperty(string property)
+    public void SetKeyProperty(PropertyInfo property)
     {
         KeyProperty = property;
     }
 
-    public void SetCountProperty(string? property)
+    public void SetCountProperty(PropertyInfo? property)
     {
         CountProperty = property;
     }
@@ -61,27 +56,67 @@ internal abstract class BaseOption : IBaseOption
 
     public virtual void Initialize(IArgumentParser parser)
     {
-        if (RequiredTokenCount is < 0 or > 100)
+        if (ValueArity.Min < 0 || ValueArity.Max < ValueArity.Min)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(RequiredTokenCount),
-                $"Invalid required token count value. Valid interval is [0, 100]. Property: {KeyProperty}");
+            throw new ArgumentException(
+                nameof(ValueArity),
+                $"Invalid value arity. Do not use negative or inconsistent values. Arity: {ValueArity}");
         }
 
-        if (MaximumTokenCount is < 1 or > 100)
+        if (OptionArity.Min < 0 || OptionArity.Max < OptionArity.Min)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(MaximumTokenCount),
-                $"Invalid maximum token count value. Valid interval is [1, 100]. Property: {KeyProperty}");
+            throw new ArgumentException(
+                nameof(OptionArity),
+                $"Invalid option arity. Do not use negative or inconsistent values. Arity: {OptionArity}");
+        }
+
+        if (string.IsNullOrWhiteSpace(Name))
+        {
+            Name = KeyProperty.Name;
+        }
+
+        if (string.IsNullOrWhiteSpace(Description))
+        {
+            Description = $"Performs '{Name}' option.";
         }
     }
 
     public abstract void Parse(string[] arguments, IArgumentParser parser);
 
-    public abstract void Validate(IArgumentParser parser);
+    public virtual void Validate(IArgumentParser parser)
+    {
+        if (OptionCount < OptionArity.Min)
+        {
+            throw new Exception(
+                $"At least '{OptionArity.Min}' option{S(OptionArity.Min)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
+        }
+
+        if (OptionCount > OptionArity.Max)
+        {
+            throw new Exception(
+                $"At most '{OptionArity.Max}' option{S(OptionArity.Max)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
+        }
+
+        if (ValueCount < ValueArity.Min)
+        {
+            throw new Exception(
+                $"At least '{ValueArity.Min}' value{S(ValueArity.Min)} expected but '{ValueCount}' value{S(ValueCount)} provided.");
+        }
+
+        if (ValueCount > ValueArity.Max)
+        {
+            throw new Exception(
+                $"At most '{ValueArity.Max}' value{S(ValueArity.Max)} expected but '{ValueCount}' value{S(ValueCount)} provided.");
+        }
+    }
 
     public virtual void Clear()
     {
-        _validated = false;
+        IsValid = false;
+    }
+
+    protected static string S(int value)
+    {
+        return value < 2 ? " was" : "s were";
     }
 }

@@ -12,43 +12,38 @@ public static partial class OptionsExtensions
     public static IValueOption<string> AddValueOption<TSource>(
         this TSource source,
         Expression<Func<TSource, string?>> keyPropExpr,
-        bool mandatory = false)
+        bool mustHaveOneValue = false)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterValueOption(keyPropExpr, mandatory);
+        return source.RegisterValueOption(keyPropExpr, mustHaveOneValue);
     }
 
     public static IValueOption<string> AddValueOption<TSource>(
         this TSource source,
         Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
-        bool enableValueTokenSplitting = true, 
-        int requiredTokenCount = 0, int maximumTokenCount = 10)
+        bool enableValueTokenSplitting = true, ArityType valueArity = ArityType.ZeroOrMore)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterValueOption(
-            keyPropExpr, enableValueTokenSplitting, requiredTokenCount, maximumTokenCount);
+        return source.RegisterValueOption(keyPropExpr, enableValueTokenSplitting, valueArity);
     }
 
     public static IValueOption<string> AddValueOption<TSource>(
         this TSource source,
         Expression<Func<TSource, string?>> keyPropExpr,
-        Expression<Func<TSource, bool>> countPropExpr,
-        bool mandatory = false)
+        Expression<Func<TSource, bool>> flagPropExpr,
+        bool mustHaveOneValue = false)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterValueOption(keyPropExpr, countPropExpr, mandatory);
+        return source.RegisterValueOption(keyPropExpr, flagPropExpr, mustHaveOneValue);
     }
 
     public static IValueOption<string> AddValueOption<TSource>(
         this TSource source,
         Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
         Expression<Func<TSource, int>> countPropExpr,
-        bool enableValueTokenSplitting = true, 
-        int requiredTokenCount = 0, int maximumTokenCount = 10)
+        bool enableValueTokenSplitting = true, ArityType valueArity = ArityType.ZeroOrMore)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterValueOption(
-            keyPropExpr, countPropExpr, enableValueTokenSplitting, 
-            requiredTokenCount, maximumTokenCount);
+        return source.RegisterValueOption(keyPropExpr, countPropExpr, enableValueTokenSplitting, valueArity);
     }
 }

@@ -11,159 +11,173 @@ namespace Oaksoft.ArgumentParser.Base;
 internal static class OptionRegistrar
 {
     public static ISwitchOption RegisterSwitchOption<TSource, TValue>(
-        this TSource source, Expression<Func<TSource, TValue>> keyPropExpr, bool mandatory)
+        this TSource source, Expression<Func<TSource, TValue>> keyPropExpr, bool mandatoryOption)
         where TSource : BaseApplicationOptions
     {
         var keyProperty = source.ValidateExpression(keyPropExpr);
 
-        var command = new SwitchOption(mandatory ? 1 : 0);
+        var optionLimits = (mandatoryOption ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
+        var option = new SwitchOption(optionLimits.Min, optionLimits.Max);
 
-        source.RegisterOptionProperty(command, keyProperty);
+        source.RegisterOptionProperty(option, keyProperty);
 
-        return command;
+        return option;
     }
 
     public static ISwitchOption RegisterSwitchOption<TSource, TValue>(
-        this TSource source, Expression<Func<TSource, TValue>> keyPropExpr,
-        int requiredTokenCount, int maximumTokenCount)
+        this TSource source, Expression<Func<TSource, TValue>> keyPropExpr, ArityType optionArity)
         where TSource : BaseApplicationOptions
     {
         var keyProperty = source.ValidateExpression(keyPropExpr);
 
-        var command = new SwitchOption(requiredTokenCount, maximumTokenCount);
+        var optionLimits = optionArity.GetLimits();
+        var option = new SwitchOption(optionLimits.Min, optionLimits.Max);
 
-        source.RegisterOptionProperty(command, keyProperty);
+        source.RegisterOptionProperty(option, keyProperty);
 
-        return command;
+        return option;
     }
 
     public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
         this TSource source, PropertyInfo keyProperty, 
-        bool valueTokenMustExist, bool mandatory)
+        bool mustHaveOneValue, bool mandatoryOption)
         where TSource : BaseApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var command = new ScalarOption<TValue>(valueTokenMustExist, mandatory ? 1 : 0);
+        var optionLimits = (mandatoryOption ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
+        var valueLimits = (mustHaveOneValue ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
+        var option = new ScalarOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max);
 
-        source.RegisterOptionProperty(command, keyProperty);
+        source.RegisterOptionProperty(option, keyProperty);
 
-        return command;
+        return option;
     }
 
     public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
         this TSource source, PropertyInfo keyProperty, 
-        bool valueTokenMustExist, bool enableValueTokenSplitting,
-        bool allowSequentialValues, int requiredTokenCount, int maximumTokenCount)
+        bool enableValueTokenSplitting, bool allowSequentialValues,
+        ArityType valueArity, ArityType optionArity)
         where TSource : BaseApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var command = new ScalarOption<TValue>(valueTokenMustExist, requiredTokenCount, maximumTokenCount)
+        var optionLimits = optionArity.GetLimits();
+        var valueLimits = valueArity.GetLimits();
+        var option = new ScalarOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max)
         {
             EnableValueTokenSplitting = enableValueTokenSplitting,
             AllowSequentialValues = allowSequentialValues
         };
 
-        source.RegisterOptionProperty(command, keyProperty);
+        source.RegisterOptionProperty(option, keyProperty);
 
-        return command;
+        return option;
     }
 
     public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
         this TSource source, PropertyInfo keyProperty, PropertyInfo flagProperty,
-        bool valueTokenMustExist, bool mandatory)
+        bool mustHaveOneValue, bool mandatoryOption)
         where TSource : BaseApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var command = new ScalarOption<TValue>(valueTokenMustExist, mandatory ? 1 : 0);
+        var optionLimits = (mandatoryOption ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
+        var valueLimits = (mustHaveOneValue ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
+        var option = new ScalarOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max);
 
-        source.RegisterOptionProperty(command, keyProperty, flagProperty);
+        source.RegisterOptionProperty(option, keyProperty, flagProperty);
 
-        return command;
+        return option;
     }
 
     public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
         this TSource source, PropertyInfo keyProperty, PropertyInfo countProperty,
-        bool valueTokenMustExist, bool enableValueTokenSplitting, 
-        bool allowSequentialValues, int requiredTokenCount, int maximumTokenCount) 
+        bool enableValueTokenSplitting, bool allowSequentialValues, 
+        ArityType valueArity, ArityType optionArity)
         where TSource : BaseApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var command = new ScalarOption<TValue>(valueTokenMustExist, requiredTokenCount, maximumTokenCount)
+
+        var optionLimits = optionArity.GetLimits();
+        var valueLimits = valueArity.GetLimits();
+        var option = new ScalarOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max)
         {
             EnableValueTokenSplitting = enableValueTokenSplitting,
             AllowSequentialValues = allowSequentialValues
         };
 
-        source.RegisterOptionProperty(command, keyProperty, countProperty);
+        source.RegisterOptionProperty(option, keyProperty, countProperty);
 
-        return command;
+        return option;
     }
 
     public static IValueOption<string> RegisterValueOption<TSource>(
-        this TSource source, Expression<Func<TSource, string?>> keyPropExpr, bool mandatory)
+        this TSource source, Expression<Func<TSource, string?>> keyPropExpr, bool mustHaveOneValue)
         where TSource : BaseApplicationOptions
     {
         var keyProperty = source.ValidateExpression(keyPropExpr);
 
-        var command = new ValueOption(mandatory ? 1 : 0);
+        var valueLimits = (mustHaveOneValue ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
+        var option = new ValueOption(valueLimits.Min, valueLimits.Max);
 
-        source.RegisterOptionProperty(command, keyProperty);
+        source.RegisterOptionProperty(option, keyProperty);
 
-        return command;
+        return option;
     }
 
     public static IValueOption<string> RegisterValueOption<TSource>(
         this TSource source, Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
-        bool enableValueTokenSplitting, int requiredTokenCount, int maximumTokenCount)
+        bool enableValueTokenSplitting, ArityType valueArity)
         where TSource : BaseApplicationOptions
     {
         var keyProperty = source.ValidateExpression(keyPropExpr);
 
-        var command = new ValueOption(requiredTokenCount, maximumTokenCount)
+        var valueLimits = valueArity.GetLimits();
+        var option = new ValueOption(valueLimits.Min, valueLimits.Max)
         {
             EnableValueTokenSplitting = enableValueTokenSplitting
         };
 
-        source.RegisterOptionProperty(command, keyProperty);
+        source.RegisterOptionProperty(option, keyProperty);
 
-        return command;
+        return option;
     }
 
     public static IValueOption<string> RegisterValueOption<TSource>(
         this TSource source, 
         Expression<Func<TSource, string?>> keyPropExpr,
-        Expression<Func<TSource, bool>> countPropExpr, 
-        bool mandatory)
+        Expression<Func<TSource, bool>> flagPropExpr, 
+        bool mustHaveOneValue)
         where TSource : BaseApplicationOptions
     {
         var keyProperty = source.ValidateExpression(keyPropExpr);
-        var countProperty = source.ValidateExpression(countPropExpr);
+        var flagProperty = source.ValidateExpression(flagPropExpr);
 
-        var command = new ValueOption(mandatory ? 1 : 0);
+        var valueLimits = (mustHaveOneValue ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
+        var option = new ValueOption(valueLimits.Min, valueLimits.Max);
 
-        source.RegisterOptionProperty(command, keyProperty, countProperty);
+        source.RegisterOptionProperty(option, keyProperty, flagProperty);
 
-        return command;
+        return option;
     }
 
     public static IValueOption<string> RegisterValueOption<TSource>(
         this TSource source,
         Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
         Expression<Func<TSource, int>> countPropExpr,
-        bool enableValueTokenSplitting, int requiredTokenCount, int maximumTokenCount)
+        bool enableValueTokenSplitting, ArityType valueArity)
         where TSource : BaseApplicationOptions
     {
         var keyProperty = source.ValidateExpression(keyPropExpr);
         var countProperty = source.ValidateExpression(countPropExpr);
 
-        var command = new ValueOption(requiredTokenCount, maximumTokenCount)
+        var valueLimits = valueArity.GetLimits();
+        var option = new ValueOption(valueLimits.Min, valueLimits.Max)
         {
             EnableValueTokenSplitting = enableValueTokenSplitting
         };
 
-        source.RegisterOptionProperty(command, keyProperty, countProperty);
+        source.RegisterOptionProperty(option, keyProperty, countProperty);
 
-        return command;
+        return option;
     }
 
     public static PropertyInfo ValidateExpression<TSource, TValue>(
@@ -217,5 +231,18 @@ internal static class OptionRegistrar
         option.SetCountProperty(countProperty);
 
         options[keyProperty.Name] = option;
+    }
+
+    public static (int Min, int Max) GetLimits(this ArityType arityType)
+    {
+        return arityType switch
+        {
+            ArityType.Zero => (0, 0),
+            ArityType.ZeroOrOne => (0, 1),
+            ArityType.ExactlyOne => (1, 1),
+            ArityType.ZeroOrMore => (0, int.MaxValue),
+            ArityType.OneOrMore => (1, int.MaxValue),
+            _ => throw new ArgumentOutOfRangeException(nameof(ArityType), arityType, "Invalid ArityType enum value.")
+        };
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Oaksoft.ArgumentParser.Options;
+﻿using System.Collections.Generic;
+
+namespace Oaksoft.ArgumentParser.Options;
 
 public interface IBaseOption
 {
@@ -8,9 +10,22 @@ public interface IBaseOption
 
     string? Description { get; }
 
-    int RequiredTokenCount { get; }
+    (int Min, int Max) OptionArity { get; }
 
-    int MaximumTokenCount { get; }
+    (int Min, int Max) ValueArity { get; }
 
-    int ValidInputCount { get; }
+    bool IsValid { get; }
+
+    int OptionCount { get; }
+
+    int ValueCount { get; }
+}
+
+public interface IAliasedOption : IBaseOption
+{
+    string ShortAlias { get; }
+
+    List<string> Aliases { get; }
+
+    List<string> OptionTokens { get; }
 }

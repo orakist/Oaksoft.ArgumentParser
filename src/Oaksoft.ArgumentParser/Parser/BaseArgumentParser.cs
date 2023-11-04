@@ -149,7 +149,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         ValidateHelpToken(options);
 
         var values = options.OfType<IValueOption>().SelectMany(a => a.ValueTokens).ToList();
-        var inputs = options.OfType<IAliasedOption>().SelectMany(a => a.CommandTokens).ToList();
+        var inputs = options.OfType<IAliasedOption>().SelectMany(a => a.OptionTokens).ToList();
         var invalidOptions = arguments.Where(s => !values.Contains(s)).ToList();
         invalidOptions = invalidOptions.Where(s => !inputs.Contains(s)).ToList();
 
@@ -199,7 +199,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         var optionCount = option switch
         {
-            IAliasedOption c => c.CommandTokens.Count,
+            IAliasedOption c => c.OptionTokens.Count,
             IValueOption d => d.ValueTokens.Count,
             _ => 0
         };
@@ -209,7 +209,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         var totalInputCount = options.Sum(o => o switch
         {
-            IAliasedOption c => c.CommandTokens.Count,
+            IAliasedOption c => c.OptionTokens.Count,
             IValueOption d => d.ValueTokens.Count,
             _ => 0
         });
@@ -226,7 +226,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             _errors.Clear();
         }
-        else if (helpOption.CommandTokens.Count > 0)
+        else if (helpOption.OptionTokens.Count > 0)
         {
             _errors.Add($"{helpOption.Name} ({helpOption.ShortAlias}) command cannot be combined with other commands.");
         }
@@ -286,25 +286,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         foreach (var property in _propertyInfos)
         {
             var type = property.PropertyType;
-            var option = options.FirstOrDefault(o => o.KeyProperty.Name == property.Name);
-
-            // all scalar-command and non-command options may have a default value.
-            // so apply default option to registered property if default value exists.
-            if (option is ValueOption nonCommand)
-            {
-                if (type.IsAssignableFrom(typeof(string)))
-                {
-                    property.SetValue(AppOptions, nonCommand.DefaultValue);
-                    continue;
-                }
-            }
-
-            if (option is ScalarOption scalarOption)
-            {
-                scalarOption.ApplyDefaultValue(AppOptions, property);
-                continue;
-            }
-
             var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
             property.SetValue(AppOptions, defaultValue);
         }
@@ -312,7 +293,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void UpdateOptionPropertiesByReflection(IBaseOption option)
     {
-        if (option.ValidInputCount < 1)
+        if (!option.IsValid)
             return;
 
         var baseOption = (option as BaseOption)!;
@@ -325,7 +306,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
             else if (countProp.PropertyType == typeof(int))
             {
-                countProp.SetValue(AppOptions, option.ValidInputCount);
+                countProp.SetValue(AppOptions, option is ValueOption ? option.ValueCount : option.OptionCount);
             }
         }
 
@@ -339,27 +320,12 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
             else if (type == typeof(int))
             {
-                keyProp.SetValue(AppOptions, option.ValidInputCount);
+                keyProp.SetValue(AppOptions, option is ValueOption ? option.ValueCount : option.OptionCount);
             }
         }
-        else if (option is IValueOption valOption)
+        else if (option is BaseValueOption valOption)
         {
-            if (type.IsAssignableFrom(typeof(List<string>)))
-            {
-                keyProp.SetValue(AppOptions, valOption.InputValues);
-            }
-            else if (type.IsAssignableFrom(typeof(string[])))
-            {
-                keyProp.SetValue(AppOptions, valOption.InputValues.ToArray());
-            }
-            else if (type.IsAssignableFrom(typeof(string)))
-            {
-                keyProp.SetValue(AppOptions, valOption.InputValues.First());
-            }
-            else if (option is ScalarOption scalarOption)
-            {
-                scalarOption.UpdatePropertyValue(AppOptions, keyProp);
-            }
+            valOption.UpdatePropertyValue(AppOptions, keyProp);
         }
     }
 

@@ -4,8 +4,6 @@ namespace Oaksoft.ArgumentParser.Options;
 
 public interface IScalarOption : IAliasedOption, IValueOption
 {
-    bool ValueTokenMustExist { get; }
-
     bool AllowSequentialValues { get; }
 }
 

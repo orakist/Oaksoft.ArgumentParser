@@ -11,36 +11,36 @@ public static partial class OptionsExtensions
     public static ISwitchOption AddSwitchOption<TSource>(
         this TSource source, 
         Expression<Func<TSource, bool>> keyPropExpr, 
-        bool mandatory = false)
+        bool mandatoryOption = false)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterSwitchOption(keyPropExpr, mandatory);
+        return source.RegisterSwitchOption(keyPropExpr, mandatoryOption);
     }
 
     public static ISwitchOption AddSwitchOption<TSource>(
         this TSource source,
         Expression<Func<TSource, bool?>> keyPropExpr,
-        bool mandatory = false)
+        bool mandatoryOption = false)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterSwitchOption(keyPropExpr, mandatory);
+        return source.RegisterSwitchOption(keyPropExpr, mandatoryOption);
     }
 
     public static ISwitchOption AddCountOption<TSource>(
         this TSource source,
         Expression<Func<TSource, int>> keyPropExpr,
-        int requiredTokenCount = 0, int maximumTokenCount = 10)
+        ArityType optionArity = ArityType.ZeroOrMore)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterSwitchOption(keyPropExpr, requiredTokenCount, maximumTokenCount);
+        return source.RegisterSwitchOption(keyPropExpr, optionArity);
     }
 
     public static ISwitchOption AddCountOption<TSource>(
         this TSource source,
         Expression<Func<TSource, int?>> keyPropExpr,
-        int requiredTokenCount = 0, int maximumTokenCount = 10)
+        ArityType optionArity = ArityType.ZeroOrMore)
         where TSource : BaseApplicationOptions
     {
-        return source.RegisterSwitchOption(keyPropExpr, requiredTokenCount, maximumTokenCount);
+        return source.RegisterSwitchOption(keyPropExpr, optionArity);
     }
 }

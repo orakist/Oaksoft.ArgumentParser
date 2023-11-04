@@ -42,13 +42,14 @@ internal static class Program
         options.AddSwitchOption(o => o.SubtractSwitch)
             .WithDescription("Enables the subtraction operator.");
 
-        options.AddCountOption(o => o.MultiplySwitch, requiredTokenCount: 0, maximumTokenCount: 5)
+        options.AddCountOption(o => o.MultiplySwitch)
+            .WithOptionArity(0, 5)
             .WithDescription("Enables the multiplication operator.");
 
-        options.AddCountOption(o => o.DivideSwitch, requiredTokenCount: 0, maximumTokenCount: 2)
+        options.AddCountOption(o => o.DivideSwitch)
             .WithDescription("Enables the division operator.");
 
-        options.AddScalarOption(o => o.AddCount, valueTokenMustExist: false)
+        options.AddScalarOption(o => o.AddCount, mustHaveOneValue: false)
             .WithDefaultValue(1)
             .WithConstraints(1, 20)
             .WithDescription("Sets addition count. If no option value is given, a random value is generated. Value must be between 1 and 20.");
@@ -69,7 +70,9 @@ internal static class Program
             .WithDefaultValue(0L)
             .WithDescription("Sets division count.");
 
-        options.AddScalarOption(o => o.AddNumbers, valueTokenMustExist: false)
+        options.AddScalarOption(o => o.AddNumbers)
+            .WithOptionArity(0, 2)
+            .WithValueArity(0, 20)
             .WithDescription("Defines numbers for addition.");
 
         options.AddScalarOption(o => o.SubtractNumbers)
@@ -88,7 +91,7 @@ internal static class Program
         options.AddScalarOption(o => o.FormulaResults, o => o.FormulaCount)
             .WithDescription("Defines formula expressions.");
 
-        options.AddValueOption(o => o.Variables, requiredTokenCount: 0, maximumTokenCount: 10)
+        options.AddValueOption(o => o.Variables)
             .WithUsage("variable-names")
             .WithDescription("Defines variables to use them in formulas.");
     }

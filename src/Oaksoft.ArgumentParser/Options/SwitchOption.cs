@@ -1,31 +1,76 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal sealed class SwitchOption : AliasedOption, ISwitchOption
+internal sealed class SwitchOption : BaseOption, ISwitchOption
 {
+    public string ShortAlias => _aliases.MinBy(k => k.Length)!;
+
+    public List<string> Aliases => _aliases.ToList();
+
+    public List<string> OptionTokens => _optionTokens.ToList();
+
     public bool? DefaultValue { get; private set; }
 
-    public override int ValidInputCount => _validated ? _commandTokens.Count : 0;
+    public override int OptionCount => _optionTokens.Count;
 
-    public SwitchOption(int requiredTokenCount = 0, int maximumTokenCount = 1)
-        : base(requiredTokenCount, maximumTokenCount)
+    public override int ValueCount => 0;
+
+    private readonly List<string> _aliases;
+    private readonly List<string> _optionTokens;
+
+    public SwitchOption(int requiredOptionCount, int maximumOptionCount)
     {
+        OptionArity = (requiredOptionCount, maximumOptionCount);
+        ValueArity = (0, 0);
+
+        _aliases = new List<string>();
+        _optionTokens = new List<string>();
     }
 
-    public void SetDefaultValue(bool? defaultValue)
+    public void SetOptionArity(ArityType optionArity)
+    {
+        OptionArity = optionArity.GetLimits();
+    }
+
+    public void SetOptionArity(int requiredOptionCount, int maximumOptionCount)
+    {
+        OptionArity = (requiredOptionCount, maximumOptionCount);
+    }
+    
+    public void SetAliases(params string[] aliases)
+    {
+        var values = aliases
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => s.Trim());
+
+        _aliases.AddRange(values);
+    }
+
+    public void SetDefaultValue(bool defaultValue)
     {
         DefaultValue = defaultValue;
     }
-
+    
     public override void Initialize(IArgumentParser parser)
     {
         base.Initialize(parser);
 
         if (string.IsNullOrWhiteSpace(Usage))
             Usage = ShortAlias;
+
+        if (_aliases.Count < 1)
+            throw new ArgumentException("Option alias not found! Use WithAliases() to set aliases of the option.");
+
+        for (var index = 0; index < _aliases.Count; ++index)
+        {
+            if (!_aliases[index].StartsWith(parser.CommandPrefix))
+                _aliases[index] = $"{parser.CommandPrefix}{_aliases[index]}";
+        }
     }
 
     public override void Parse(string[] arguments, IArgumentParser parser)
@@ -35,7 +80,7 @@ internal sealed class SwitchOption : AliasedOption, ISwitchOption
             if (!_aliases.Any(c => c.Equals(argument, parser.ComparisonFlag())))
                 continue;
 
-            _commandTokens.Add(argument);
+            _optionTokens.Add(argument);
         }
     }
 
@@ -43,6 +88,12 @@ internal sealed class SwitchOption : AliasedOption, ISwitchOption
     {
         base.Validate(parser);
 
-        _validated = true;
+        IsValid = true;
+    }
+
+    public override void Clear()
+    {
+        base.Clear();
+        _optionTokens.Clear();
     }
 }

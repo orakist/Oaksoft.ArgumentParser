@@ -18,6 +18,8 @@ internal abstract class BaseOption : IBaseOption
 
     public bool IsValid { get; protected set; }
 
+    public bool IsActive => IsValid && OptionCount + ValueCount > 0;
+
     public abstract int OptionCount { get; }
 
     public abstract int ValueCount { get; }
@@ -100,6 +102,9 @@ internal abstract class BaseOption : IBaseOption
             throw new Exception(
                 $"At most '{OptionArity.Max}' option{S(OptionArity.Max)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
         }
+
+        if (OptionArity.Max >= 1 && OptionCount <= 0) 
+            return;
 
         if (ValueCount < ValueArity.Min)
         {

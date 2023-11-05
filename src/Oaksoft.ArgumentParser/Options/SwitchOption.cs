@@ -60,9 +60,6 @@ internal sealed class SwitchOption : BaseOption, ISwitchOption
     {
         base.Initialize(parser);
 
-        if (string.IsNullOrWhiteSpace(Usage))
-            Usage = ShortAlias;
-
         if (_aliases.Count < 1)
             throw new ArgumentException("Option alias not found! Use WithAliases() to set aliases of the option.");
 
@@ -71,6 +68,9 @@ internal sealed class SwitchOption : BaseOption, ISwitchOption
             if (!_aliases[index].StartsWith(parser.OptionPrefix))
                 _aliases[index] = $"{parser.OptionPrefix}{_aliases[index]}";
         }
+
+        if (string.IsNullOrWhiteSpace(Usage))
+            Usage = ShortAlias;
     }
 
     public override void Parse(string[] arguments, IArgumentParser parser)

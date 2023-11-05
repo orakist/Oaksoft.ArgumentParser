@@ -168,7 +168,7 @@ internal abstract class BaseValueOption<TValue>
 
     private void CallbackValidatorGuard()
     {
-        if (_validateOptionCallback is null)
+        if (_validateValueCallback is null)
         {
             throw new Exception(
                 $"Missing value validator callback! Configure a value validator for type '{typeof(TValue).Name}'.");

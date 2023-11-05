@@ -16,6 +16,8 @@ public interface IBaseOption
 
     bool IsValid { get; }
 
+    bool IsActive { get; }
+
     int OptionCount { get; }
 
     int ValueCount { get; }

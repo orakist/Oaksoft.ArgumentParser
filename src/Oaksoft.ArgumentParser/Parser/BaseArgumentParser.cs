@@ -273,7 +273,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         var name = (option as INamedOption)?.ShortAlias ?? option.Name;
         var comma = ex.Message.EndsWith(".") ? string.Empty : ",";
-        _errors.Add($"{ex.Message}{comma} Name: {name}");
+        _errors.Add($"{ex.Message}{comma} Option: {name}");
     }
 
     private static string? BuildTitleLine()
@@ -330,7 +330,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void UpdateOptionPropertiesByReflection(IBaseOption option)
     {
-        if (!option.IsValid)
+        if (!option.IsActive)
             return;
 
         var baseOption = (option as BaseOption)!;

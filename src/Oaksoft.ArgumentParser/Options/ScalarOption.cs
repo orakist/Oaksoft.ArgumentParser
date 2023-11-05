@@ -56,11 +56,6 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
     {
         base.Initialize(parser);
 
-        if (string.IsNullOrWhiteSpace(Usage))
-        {
-            Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
-        }
-
         if (_aliases.Count < 1)
             throw new ArgumentException("Option alias not found! Use WithAliases() to set aliases of the option.");
 
@@ -71,6 +66,11 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
 
             if (!parser.CaseSensitive)
                 _aliases[index] = _aliases[index].ToLowerInvariant();
+        }
+
+        if (string.IsNullOrWhiteSpace(Usage))
+        {
+            Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
         }
     }
 

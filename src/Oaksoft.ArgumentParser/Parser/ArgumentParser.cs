@@ -157,7 +157,7 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
 
             if (namedOption is not null)
             {
-                sb.Pastel("       Options:", ConsoleColor.DarkYellow);
+                sb.Pastel("       Aliases:", ConsoleColor.DarkYellow);
                 sb.AppendLine($" {string.Join(", ", namedOption.Aliases)} ");
             }
 

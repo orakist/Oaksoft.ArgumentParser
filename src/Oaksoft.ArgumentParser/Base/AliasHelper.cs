@@ -6,10 +6,16 @@ namespace Oaksoft.ArgumentParser.Base;
 
 internal static class AliasHelper
 {
-    private static readonly char[] _trimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
+    private static readonly char[] _prefixTrimChars = { '-', '/' };
+    private static readonly char[] _suggestionTrimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
+
+    public static string TrimAlias(this string name)
+    {
+        return name.TrimStart(_prefixTrimChars).TrimEnd();
+    }
 
     public static IEnumerable<string> GetAliasesHeuristically(
-        string name, ICollection<string> filter, int maxAliasLength, bool caseSensitive)
+        this string name, ICollection<string> filter, int maxAliasLength, bool caseSensitive)
     {
         var words = GetHumanizedWords(name).ToList();
         if(words.Count < 1)
@@ -77,7 +83,7 @@ internal static class AliasHelper
     private static IEnumerable<string> GetHumanizedWords(string name)
     {
         var candidates = name.Replace('_', ' ')
-            .TrimStart(_trimChars)
+            .TrimStart(_suggestionTrimChars)
             .Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
         foreach (var candidate in candidates)

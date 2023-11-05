@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CommandDotNet;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
@@ -101,9 +102,16 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         foreach (var option in options.Cast<BaseOption>())
         {
-            ValidateOptionAliases(option, aliases);
+            try
+            {
+                ValidateOptionAliases(option, aliases);
 
-            option.Initialize(this);
+                option.Initialize(this);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(BuildErrorMessage(option, ex));
+            }
         }
 
         aliases = aliases.GroupBy(c => c)
@@ -136,7 +144,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
             catch (Exception ex)
             {
-                AddErrorMessage(option, ex);
+                _errors.Add(BuildErrorMessage(option, ex));
             }
         }
     }
@@ -152,7 +160,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
             catch (Exception ex)
             {
-                AddErrorMessage(option, ex);
+                _errors.Add(BuildErrorMessage(option, ex));
             }
         }
 
@@ -180,7 +188,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
             catch (Exception ex)
             {
-                AddErrorMessage(option, ex);
+                _errors.Add(BuildErrorMessage(option, ex));
             }
         }
     }
@@ -269,11 +277,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
         aliases.AddRange(suggestedAliases);
     }
 
-    private void AddErrorMessage(IBaseOption option, Exception ex)
+    private static string BuildErrorMessage(IBaseOption option, Exception ex)
     {
         var name = (option as INamedOption)?.ShortAlias ?? option.Name;
         var comma = ex.Message.EndsWith(".") ? string.Empty : ",";
-        _errors.Add($"{ex.Message}{comma} Option: {name}");
+        return $"{ex.Message}{comma} Option: {name}";
     }
 
     private static string? BuildTitleLine()

@@ -65,8 +65,14 @@ internal sealed class SwitchOption : BaseOption, ISwitchOption
 
         for (var index = 0; index < _aliases.Count; ++index)
         {
-            if (!_aliases[index].StartsWith(parser.OptionPrefix))
-                _aliases[index] = $"{parser.OptionPrefix}{_aliases[index]}";
+            var alias = _aliases[index].TrimAlias();
+            if (string.IsNullOrWhiteSpace(alias))
+                throw new ArgumentException($"Invalid alias '{_aliases[index]}' found!");
+
+            _aliases[index] = $"{parser.OptionPrefix}{alias}";
+
+            if (!parser.CaseSensitive)
+                _aliases[index] = _aliases[index].ToLowerInvariant();
         }
 
         if (string.IsNullOrWhiteSpace(Usage))

@@ -1,5 +1,6 @@
 ﻿using System;
 using Oaksoft.ArgumentParser.Callbacks;
+using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Parser;
 

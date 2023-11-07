@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using CommandDotNet;
 using Oaksoft.ArgumentParser.Base;
+using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 
@@ -11,11 +11,11 @@ namespace Oaksoft.ArgumentParser.Parser;
 
 internal abstract class BaseArgumentParser : IArgumentParser
 {
-    public string OptionPrefix { get; }
+    public OptionPrefixRules OptionPrefix { get; }
 
-    public string ValueDelimiter { get; }
+    public TokenDelimiterRules TokenDelimiter { get; }
 
-    public string TokenDelimiter { get; }
+    public ValueDelimiterRules ValueDelimiter { get; }
 
     public bool CaseSensitive { get; }
 
@@ -30,16 +30,19 @@ internal abstract class BaseArgumentParser : IArgumentParser
     protected readonly List<string> _errors;
     private PropertyInfo[]? _propertyInfos;
     private List<string>? _registeredPropertyNames;
+    protected readonly IParserSettingsBuilder _settingsBuilder;
 
     protected BaseArgumentParser(
-        string optionPrefix, string valueDelimiter, string tokenDelimiter, bool caseSensitive)
+        OptionPrefixRules optionPrefix, TokenDelimiterRules tokenDelimiter, 
+        ValueDelimiterRules valueDelimiter, bool caseSensitive)
     {
         OptionPrefix = optionPrefix;
-        ValueDelimiter = valueDelimiter;
         TokenDelimiter = tokenDelimiter;
+        ValueDelimiter = valueDelimiter;
         CaseSensitive = caseSensitive;
 
         Settings = new ParserSettings();
+        _settingsBuilder = new ParserSettingsBuilder();
         _errors = new List<string>();
     }
 
@@ -49,23 +52,28 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public abstract string GetErrorText(bool? colorized = default);
 
-    protected void BuildDefaultSettings()
+    public bool StartsWithAnyAlias(string token)
     {
-        Settings.AutoPrintHeader ??= true;
-        Settings.AutoPrintHelp ??= true;
-        Settings.AutoPrintErrors ??= true;
-        Settings.HelpDisplayWidth ??= 75;
-        Settings.NewLineAfterOption ??= true;
-        Settings.ShowTitle ??= true;
-        Settings.ShowDescription ??= true;
-        Settings.EnableColoring ??= true;
-        Settings.MaxAliasLength ??= 32;
-
-        ValidateParserSettings();
+        var flag = this.ComparisonFlag();
+        return AppOptions.Options.Cast<BaseOption>()
+            .Any(option => option.StartsWithAnyAlias(token, flag));
     }
 
-    protected void ValidateParserSettings()
+    protected void BuildDefaultSettings()
     {
+        var settings = (ParserSettings)Settings;
+        settings.AutoPrintHeader = _settingsBuilder.AutoPrintHeader ?? true;
+        settings.AutoPrintHelp = _settingsBuilder.AutoPrintHelp ?? true;
+        settings.AutoPrintErrors = _settingsBuilder.AutoPrintErrors ?? true;
+        settings.HelpDisplayWidth = _settingsBuilder.HelpDisplayWidth ?? 75;
+        settings.NewLineAfterOption = _settingsBuilder.NewLineAfterOption ?? true;
+        settings.ShowTitle = _settingsBuilder.ShowTitle ?? true;
+        settings.ShowDescription = _settingsBuilder.ShowDescription ?? true;
+        settings.EnableColoring = _settingsBuilder.EnableColoring ??= true;
+        settings.MaxAliasLength = _settingsBuilder.MaxAliasLength ?? 32;
+        settings.Title = _settingsBuilder.Title;
+        settings.Description = _settingsBuilder.Description;
+
         if (Settings.HelpDisplayWidth is < 40 or > 320)
         {
             throw new ArgumentOutOfRangeException(nameof(Settings.HelpDisplayWidth),
@@ -79,10 +87,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
 
         if (string.IsNullOrWhiteSpace(Settings.Title))
-            Settings.Title = BuildTitleLine();
+            settings.Title = BuildTitleLine();
 
         if (string.IsNullOrWhiteSpace(Settings.Description))
-            Settings.Description = BuildDescriptionLine();
+            settings.Description = BuildDescriptionLine();
     }
 
     protected void BuildDefaultOptions()
@@ -133,14 +141,19 @@ internal abstract class BaseArgumentParser : IArgumentParser
         ClearOptionPropertiesByReflection();
     }
 
-    protected void ParseArguments(string[] arguments)
+    protected void ParseArguments(TokenValue[] tokens)
     {
         var options = AppOptions.Options;
-        foreach (var option in options.Cast<BaseOption>())
+        var orderedOptions = new List<IBaseOption>();
+        orderedOptions.AddRange(options.Where(o => o is ISwitchOption));
+        orderedOptions.AddRange(options.Where(o => o is IScalarOption));
+        orderedOptions.AddRange(options.Where(o => o is not INamedOption));
+
+        foreach (var option in orderedOptions.Cast<BaseOption>())
         {
             try
             {
-                option.Parse(arguments, this);
+                option.Parse(tokens, this);
             }
             catch (Exception ex)
             {
@@ -149,7 +162,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
     }
 
-    protected void ValidateOptions(string[] arguments)
+    protected void ValidateOptions(TokenValue[] tokens)
     {
         var options = AppOptions.Options;
         foreach (var option in options.Cast<BaseOption>())
@@ -166,13 +179,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         ValidateHelpToken(options);
 
-        var values = options.OfType<IValueOption>().SelectMany(a => a.ValueTokens).ToList();
-        var inputs = options.OfType<INamedOption>().SelectMany(a => a.OptionTokens).ToList();
-        var invalidOptions = arguments.Where(s => !values.Contains(s)).ToList();
-        invalidOptions = invalidOptions.Where(s => !inputs.Contains(s)).ToList();
-
-        foreach (var option in invalidOptions)
-            _errors.Add($"Unknown option found. Option: {option}");
+        foreach (var option in tokens.Where(s => !s.IsParsed && !s.Invalid))
+            _errors.Add($"Unknown option found. Option: {option.Argument}");
     }
 
     protected void BindOptionsToAttributes()
@@ -247,6 +255,22 @@ internal abstract class BaseArgumentParser : IArgumentParser
         else if (helpOption.OptionTokens.Count > 0)
         {
             _errors.Add($"{helpOption.Name} ({helpOption.ShortAlias}) option cannot be combined with other options.");
+        }
+    }
+
+    protected void ValidateArguments(TokenValue[] tokens)
+    {
+        foreach (var token in tokens)
+        {
+            try
+            {
+                token.Argument.ValidateArgument(OptionPrefix);
+            }
+            catch (Exception ex)
+            {
+                _errors.Add(ex.Message);
+                token.Invalid = true;
+            }
         }
     }
 

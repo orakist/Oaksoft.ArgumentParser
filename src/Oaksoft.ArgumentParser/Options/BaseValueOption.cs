@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Callbacks;
+using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
@@ -68,7 +69,6 @@ internal abstract class BaseValueOption<TValue>
     public void SetParsingCallbacks(IParsingCallbacks<TValue> optionCallbacks)
     {
         var type = optionCallbacks.GetType();
-
         // only use overriden methods
         var methodName = nameof(IParsingCallbacks<TValue>.ValidateValue);
         if (type.GetMethod(methodName)?.DeclaringType == type)
@@ -121,8 +121,11 @@ internal abstract class BaseValueOption<TValue>
         {
             CallbackValidatorGuard();
 
-            foreach (var inputValue in _inputValues.Where(v => !_validateValueCallback!.Invoke(v)))
+            foreach (var inputValue in _inputValues)
             {
+                if (_validateValueCallback!.Invoke(inputValue))
+                    continue;
+
                 throw new Exception($"Invalid input value found!. Value: {inputValue}");
             }
 

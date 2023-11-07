@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Oaksoft.ArgumentParser.Base;
+using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
@@ -10,9 +11,9 @@ namespace Oaksoft.ArgumentParser.Options;
 internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    public string ShortAlias => _aliases.MinBy(k => k.Length)!;
+    public string ShortAlias => _prefixAliases.MinBy(k => k.Length)!;
 
-    public List<string> Aliases => _aliases.ToList();
+    public List<string> Aliases => _prefixAliases.ToList();
 
     public List<string> OptionTokens => _optionTokens.ToList();
 
@@ -22,6 +23,7 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
 
     private readonly List<string> _aliases;
     private readonly List<string> _optionTokens;
+    private readonly List<string> _prefixAliases;
 
     public ScalarOption(
         int requiredOptionCount, int maximumOptionCount, int requiredValueCount, int maximumValueCount)
@@ -31,6 +33,7 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
 
         _aliases = new List<string>();
         _optionTokens = new List<string>();
+        _prefixAliases = new List<string>();
     }
 
     public void SetOptionArity(ArityType optionArity)
@@ -52,6 +55,11 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
         _aliases.AddRange(values);
     }
 
+    public override bool StartsWithAnyAlias(string token, StringComparison flag)
+    {
+        return _prefixAliases.Any(a => token.StartsWith(a, flag));
+    }
+
     public override void Initialize(IArgumentParser parser)
     {
         base.Initialize(parser);
@@ -62,68 +70,75 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
         for (var index = 0; index < _aliases.Count; ++index)
         {
             var alias = _aliases[index].TrimAlias();
-            if (string.IsNullOrWhiteSpace(alias))
+            if (string.IsNullOrWhiteSpace(alias) || !char.IsAsciiLetter(alias[0]))
                 throw new ArgumentException($"Invalid alias '{_aliases[index]}' found!");
 
-            _aliases[index] = $"{parser.OptionPrefix}{alias}";
-
-            if (!parser.CaseSensitive)
-                _aliases[index] = _aliases[index].ToLowerInvariant();
+            _aliases[index] = parser.CaseSensitive ? alias : alias.ToLowerInvariant();
         }
+
+        var aliases = parser.OptionPrefix.GetPrefixedAliases(_aliases);
+        _prefixAliases.AddRange(aliases.OrderByDescending(a => a.Length).ToList());
 
         if (string.IsNullOrWhiteSpace(Usage))
-        {
             Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
-        }
     }
 
-    public override void Parse(string[] arguments, IArgumentParser parser)
+    public override void Parse(TokenValue[] tokens, IArgumentParser parser)
     {
         var flag = parser.ComparisonFlag();
-        var delimiter = parser.TokenDelimiter;
-        for (var index = 0; index < arguments.Length; ++index)
-        {
-            var argument = arguments[index];
+        var baseParser = (BaseArgumentParser)parser;
 
-            if (!Aliases.Any(c => argument.StartsWith(c, flag)))
+        for (var i = 0; i < tokens.Length; ++i)
+        {
+            var token = tokens[i];
+            if (token.Invalid || token.IsParsed)
                 continue;
 
-            // parse --cmd (optional value)
-            // parse --cmd val (single value)
-            // parse --cmd val1 val2 val3 (sequential values)
-            if (Aliases.Any(c => argument.Equals(c, flag)))
+            var argument = token.Argument;
+            foreach (var alias in _prefixAliases)
             {
-                _optionTokens.Add(argument);
+                if (!token.Argument.StartsWith(alias, flag))
+                    continue;
 
-                for (; index + 1 < arguments.Length; ++index)
+                token.IsParsed = true;
+                _optionTokens.Add(alias);
+
+                // parse --option (optional value)
+                // parse --option val (single value)
+                // parse --option val1 val2 val3 (sequential values)
+                if (argument.Length == alias.Length)
                 {
-                    var value = arguments[index + 1];
-                    if (value.StartsWith(parser.OptionPrefix))
-                        break;
+                    for (; i + 1 < tokens.Length; ++i)
+                    {
+                        var nextToken = tokens[i + 1];
 
-                    _valueTokens.Add(value);
-                    ++index;
+                        if (baseParser.StartsWithAnyAlias(argument))
+                            break;
 
-                    if (!AllowSequentialValues)
-                        break;
+                        nextToken.IsParsed = true;
+                        _valueTokens.Add(nextToken.Argument);
+
+                        if (!AllowSequentialValues)
+                            break;
+                    }
+
+                    break;
                 }
-            }
 
-            // parse --cmd=val
-            else if (Aliases.Any(c => argument.StartsWith($"{c}{delimiter}", flag)))
-            {
-                if (argument.Split(delimiter).Length > 2)
-                    throw new Exception($"Invalid (option=value) token '{argument}' found! Multiple token delimiter usage!");
+                // parse --option=val or -o=val or -oval
+                // parse --option:val or -o:val
+                // parse "--option val" or "-o val"
+                var optionValue = argument.GetOptionValue(alias, parser.TokenDelimiter);
+                if (string.IsNullOrWhiteSpace(optionValue))
+                    continue;
 
-                var keyValue = argument.EnumerateByDelimiter(delimiter).ToArray();
-                _optionTokens.Add(keyValue[0]);
-                if (keyValue.Length > 1)
-                    _valueTokens.Add(keyValue[1]);
+                _valueTokens.Add(optionValue);
+                break;
             }
         }
 
         // parse multiple values 'str1;str2;str3'
-        var inputValues = parser.GetInputValues(_valueTokens, EnableValueTokenSplitting);
+        var inputValues = _valueTokens.GetInputValues(parser.ValueDelimiter, EnableValueTokenSplitting);
         _inputValues.AddRange(inputValues);
     }
 

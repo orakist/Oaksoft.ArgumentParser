@@ -3,4 +3,6 @@
 public interface ISwitchOption : INamedOption
 {
     bool? DefaultValue { get; }
+
+    bool? ResultValue { get; }
 }

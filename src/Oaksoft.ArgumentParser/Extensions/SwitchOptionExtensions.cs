@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Oaksoft.ArgumentParser.Base;
+using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Parser;
 

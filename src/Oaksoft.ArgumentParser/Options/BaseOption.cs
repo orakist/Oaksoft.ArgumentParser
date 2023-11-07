@@ -60,6 +60,11 @@ internal abstract class BaseOption : IBaseOption
     {
     }
 
+    public virtual bool StartsWithAnyAlias(string token, StringComparison flag)
+    {
+        return false;
+    }
+
     public virtual void Initialize(IArgumentParser parser)
     {
         if (ValueArity.Min < 0 || ValueArity.Max < ValueArity.Min)
@@ -87,7 +92,7 @@ internal abstract class BaseOption : IBaseOption
         }
     }
 
-    public abstract void Parse(string[] arguments, IArgumentParser parser);
+    public abstract void Parse(TokenValue[] tokens, IArgumentParser parser);
 
     public virtual void Validate(IArgumentParser parser)
     {

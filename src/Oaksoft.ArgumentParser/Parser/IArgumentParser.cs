@@ -1,15 +1,16 @@
-﻿using System;
+﻿using Oaksoft.ArgumentParser.Definitions;
+using System;
 using System.Collections.Generic;
 
 namespace Oaksoft.ArgumentParser.Parser;
 
 public interface IArgumentParser
 {
-    string OptionPrefix { get; }
+    OptionPrefixRules OptionPrefix { get; }
 
-    string ValueDelimiter { get; }
+    TokenDelimiterRules TokenDelimiter { get; }
 
-    string TokenDelimiter { get; }
+    ValueDelimiterRules ValueDelimiter { get; }
 
     bool CaseSensitive { get; }
 
@@ -33,7 +34,7 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
 
     IArgumentParser<TOptions> ConfigureOptions(Action<TOptions> action);
 
-    IArgumentParser<TOptions> ConfigureParser(Action<IParserSettings> action);
+    IArgumentParser<TOptions> ConfigureParser(Action<IParserSettingsBuilder> action);
 
     IArgumentParser<TOptions> Build();
 

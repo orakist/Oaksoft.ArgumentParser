@@ -2,6 +2,31 @@
 
 public interface IParserSettings
 {
+    bool? AutoPrintHeader { get; }
+
+    bool? AutoPrintErrors { get; }
+
+    bool? AutoPrintHelp { get; }
+
+    int? HelpDisplayWidth { get; }
+
+    bool? NewLineAfterOption { get; }
+
+    bool? ShowTitle { get; }
+
+    bool? ShowDescription { get; }
+
+    bool? EnableColoring { get; }
+
+    string? Title { get; }
+
+    string? Description { get; }
+
+    int? MaxAliasLength { get; }
+}
+
+public interface IParserSettingsBuilder
+{
     bool? AutoPrintHeader { get; set; }
 
     bool? AutoPrintErrors { get; set; }

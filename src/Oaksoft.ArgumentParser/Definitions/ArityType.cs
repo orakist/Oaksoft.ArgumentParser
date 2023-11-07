@@ -1,4 +1,4 @@
-﻿namespace Oaksoft.ArgumentParser.Options;
+﻿namespace Oaksoft.ArgumentParser.Definitions;
 
 public enum ArityType
 {

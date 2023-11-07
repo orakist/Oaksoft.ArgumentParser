@@ -12,8 +12,4 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommandDotNet" Version="7.0.2" />
-  </ItemGroup>
-
 </Project>

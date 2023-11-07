@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using Oaksoft.ArgumentParser.Base;
+using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
@@ -14,11 +15,12 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
 
     private readonly TOptions _appOptions;
     private Action<TOptions>? _configureOptions;
-    private Action<IParserSettings>? _configureParser;
+    private Action<IParserSettingsBuilder>? _configureParser;
 
     public ArgumentParser(
-        TOptions options, string optionPrefix, string valueDelimiter, string tokenDelimiter, bool caseSensitive)
-        : base(optionPrefix, valueDelimiter, tokenDelimiter, caseSensitive)
+        TOptions options, OptionPrefixRules optionPrefix, TokenDelimiterRules tokenDelimiter,
+        ValueDelimiterRules valueDelimiter, bool caseSensitive)
+        : base(optionPrefix, tokenDelimiter, valueDelimiter, caseSensitive)
     {
         _appOptions = options;
     }
@@ -34,7 +36,7 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
         return this;
     }
 
-    public IArgumentParser<TOptions> ConfigureParser(Action<IParserSettings> action)
+    public IArgumentParser<TOptions> ConfigureParser(Action<IParserSettingsBuilder> action)
     {
         _configureParser = action;
         return this;
@@ -42,7 +44,7 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
 
     public IArgumentParser<TOptions> Build()
     {
-        _configureParser?.Invoke(Settings);
+        _configureParser?.Invoke(_settingsBuilder);
         _configureOptions?.Invoke(_appOptions);
 
         BuildDefaultSettings();
@@ -60,11 +62,15 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
     {
         ClearOptions();
 
-        ValidateParserSettings();
+        var tokens = arguments
+            .Select(a => new TokenValue { Argument = a })
+            .ToArray();
 
-        ParseArguments(arguments);
+        ValidateArguments(tokens);
 
-        ValidateOptions(arguments);
+        ParseArguments(tokens);
+
+        ValidateOptions(tokens);
 
         BindOptionsToAttributes();
 
@@ -158,7 +164,7 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
             if (namedOption is not null)
             {
                 sb.Pastel("       Aliases:", ConsoleColor.DarkYellow);
-                sb.AppendLine($" {string.Join(", ", namedOption.Aliases)} ");
+                sb.AppendLine($" {string.Join(", ", namedOption.Aliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length))} ");
             }
 
             if (option.Description is not null)

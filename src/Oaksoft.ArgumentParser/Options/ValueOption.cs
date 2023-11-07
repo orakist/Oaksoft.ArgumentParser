@@ -24,38 +24,22 @@ internal sealed class ValueOption : BaseValueOption<string>
         }
     }
 
-    public override void Parse(string[] arguments, IArgumentParser parser)
+    public override void Parse(TokenValue[] tokens, IArgumentParser parser)
     {
-        var options = ((BaseArgumentParser)parser).AppOptions.Options;
-
-        var compareFlag = parser.ComparisonFlag();
-        for (var index = 0; index < arguments.Length; ++index)
+        foreach (var token in tokens)
         {
-            var argument = arguments[index];
-
-            if (!argument.StartsWith(parser.OptionPrefix))
-                _valueTokens.Add(argument);
-
-            var scalarOption = options.OfType<IScalarOption>()
-                .FirstOrDefault(o => o.Aliases.Any(c => c.Equals(argument, compareFlag)));
-
-            if (scalarOption is null)
+            if (token.Invalid || token.IsParsed)
                 continue;
 
-            for (; index + 1 < arguments.Length; ++index)
-            {
-                var value = arguments[index + 1];
-                if (value.StartsWith(parser.OptionPrefix))
-                    break;
+            var argument = token.Argument;
+            if (argument.IsAliasCandidate(parser.OptionPrefix))
+                continue;
 
-                ++index;
-
-                if (!scalarOption.AllowSequentialValues)
-                    break;
-            }
+            token.IsParsed = true;
+            _valueTokens.Add(argument);
         }
 
-        var inputValues = parser.GetInputValues(_valueTokens, EnableValueTokenSplitting);
+        var inputValues = _valueTokens.GetInputValues(parser.ValueDelimiter, EnableValueTokenSplitting);
         _inputValues.AddRange(inputValues);
     }
 

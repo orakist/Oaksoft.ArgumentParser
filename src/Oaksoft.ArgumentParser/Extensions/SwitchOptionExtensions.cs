@@ -10,38 +10,46 @@ namespace Oaksoft.ArgumentParser.Extensions;
 public static partial class OptionsExtensions
 {
     public static ISwitchOption AddSwitchOption<TSource>(
-        this TSource source, 
+        this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, bool>> keyPropExpr, 
         bool mandatoryOption = false)
-        where TSource : BaseApplicationOptions
+        where TSource : IApplicationOptions
     {
-        return source.RegisterSwitchOption(keyPropExpr, mandatoryOption);
+        var keyProperty = builder.ValidateExpression(keyPropExpr);
+
+        return builder.RegisterSwitchOption<TSource>(keyProperty, mandatoryOption);
     }
 
     public static ISwitchOption AddSwitchOption<TSource>(
-        this TSource source,
+        this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, bool?>> keyPropExpr,
         bool mandatoryOption = false)
-        where TSource : BaseApplicationOptions
+        where TSource : IApplicationOptions
     {
-        return source.RegisterSwitchOption(keyPropExpr, mandatoryOption);
+        var keyProperty = builder.ValidateExpression(keyPropExpr);
+
+        return builder.RegisterSwitchOption<TSource>(keyProperty, mandatoryOption);
     }
 
     public static ISwitchOption AddCountOption<TSource>(
-        this TSource source,
+        this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, int>> keyPropExpr,
         ArityType optionArity = ArityType.ZeroOrMore)
-        where TSource : BaseApplicationOptions
+        where TSource : IApplicationOptions
     {
-        return source.RegisterSwitchOption(keyPropExpr, optionArity);
+        var keyProperty = builder.ValidateExpression(keyPropExpr);
+
+        return builder.RegisterSwitchOption<TSource>(keyProperty, optionArity);
     }
 
     public static ISwitchOption AddCountOption<TSource>(
-        this TSource source,
+        this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, int?>> keyPropExpr,
         ArityType optionArity = ArityType.ZeroOrMore)
-        where TSource : BaseApplicationOptions
+        where TSource : IApplicationOptions
     {
-        return source.RegisterSwitchOption(keyPropExpr, optionArity);
+        var keyProperty = builder.ValidateExpression(keyPropExpr);
+
+        return builder.RegisterSwitchOption<TSource>(keyProperty, optionArity);
     }
 }

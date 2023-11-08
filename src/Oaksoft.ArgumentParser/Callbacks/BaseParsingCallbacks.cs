@@ -1,24 +1,20 @@
-﻿using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Parser;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Oaksoft.ArgumentParser.Callbacks;
 
 public abstract class BaseParsingCallbacks<TValue> : IParsingCallbacks<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    public virtual bool ValidateValue(string value)
+    public virtual bool TryParseValue(string value, out TValue result)
     {
-        return true;
+        result = default!;
+        return false;
     }
 
-    public virtual TValue ConvertValue(string value)
+    public virtual List<TValue> TryParseValues(List<string> values)
     {
-        return default!;
-    }
-
-    public virtual bool ValidateOption(IValueContext<TValue> context, IArgumentParser parser)
-    {
-        return true;
+        return Enumerable.Empty<TValue>().ToList();
     }
 }

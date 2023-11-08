@@ -1,28 +1,24 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
-using Oaksoft.ArgumentParser.Base;
-using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
 
-internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentParser<TOptions>
-    where TOptions : BaseApplicationOptions, new()
+internal sealed class ArgumentParser<TOptions> 
+    : BaseArgumentParser, IArgumentParser<TOptions>
+    where TOptions : IApplicationOptions
 {
-    public override BaseApplicationOptions AppOptions
-        => _appOptions;
+    public override IParserSettings Settings { get; }
 
     private readonly TOptions _appOptions;
-    private Action<TOptions>? _configureOptions;
-    private Action<IParserSettingsBuilder>? _configureParser;
 
-    public ArgumentParser(
-        TOptions options, OptionPrefixRules optionPrefix, TokenDelimiterRules tokenDelimiter,
-        ValueDelimiterRules valueDelimiter, bool caseSensitive)
-        : base(optionPrefix, tokenDelimiter, valueDelimiter, caseSensitive)
+    public ArgumentParser(TOptions options, ArgumentParserBuilder<TOptions> builder)
+        : base(builder.CaseSensitive, builder.OptionPrefix, builder.TokenDelimiter, builder.ValueDelimiter)
     {
+        Settings = builder.GetSettings();
+
         _appOptions = options;
+        _baseOptions.AddRange(builder.GetBaseOptions());
     }
 
     public TOptions GetApplicationOptions()
@@ -30,32 +26,13 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
         return _appOptions;
     }
 
-    public IArgumentParser<TOptions> ConfigureOptions(Action<TOptions> action)
+    public void Initialize()
     {
-        _configureOptions = action;
-        return this;
-    }
-
-    public IArgumentParser<TOptions> ConfigureParser(Action<IParserSettingsBuilder> action)
-    {
-        _configureParser = action;
-        return this;
-    }
-
-    public IArgumentParser<TOptions> Build()
-    {
-        _configureParser?.Invoke(_settingsBuilder);
-        _configureOptions?.Invoke(_appOptions);
-
-        BuildDefaultSettings();
-
-        BuildDefaultOptions();
+        InitializePropertyInfos();
 
         InitializeOptions();
 
-        PrintHeaderText();
-
-        return this;
+        AutoPrintHeaderText();
     }
 
     public TOptions Parse(string[] arguments)
@@ -74,9 +51,9 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
 
         BindOptionsToAttributes();
 
-        PrintHelpText();
+        AutoPrintHelpText();
 
-        PrintErrorText();
+        AutoPrintErrorText();
 
         return _appOptions;
     }
@@ -98,115 +75,59 @@ internal sealed class ArgumentParser<TOptions> : BaseArgumentParser, IArgumentPa
         return BuildErrorText(coloring).ToString();
     }
 
-    private void PrintHeaderText()
+    private void InitializePropertyInfos()
     {
-        if (Settings.AutoPrintHeader != true)
-            return;
+        var propertyNames = _baseOptions
+            .Where(o => !string.IsNullOrWhiteSpace(o.CountProperty?.Name))
+            .Select(a => a.CountProperty!.Name)
+            .ToList();
 
-        Console.Write(BuildHeaderText(true, true).ToString());
-        Console.WriteLine();
+        propertyNames.AddRange(_baseOptions.Select(o => o.KeyProperty.Name));
+
+        var properties = _appOptions.GetType().GetProperties()
+            .Where(p => propertyNames.Contains(p.Name));
+
+        _propertyInfos.AddRange(properties);
     }
 
-    private void PrintHelpText()
+    protected override void ClearOptionPropertiesByReflection()
     {
-        if (Settings.AutoPrintHelp != true || _errors.Count > 0)
-            return;
-
-        var options = _appOptions.Options;
-        var helpOption = _appOptions.Options.OfType<SwitchOption>().
-            First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
-
-        if (!IsOnlyOption(helpOption, options))
-            return;
-
-        Console.Write(BuildHelpText(Settings.EnableColoring ?? true).ToString());
-        Console.WriteLine();
-    }
-
-    private void PrintErrorText()
-    {
-        if (Settings.AutoPrintErrors != true || _errors.Count < 1)
-            return;
-
-        Console.Write(BuildErrorText(Settings.EnableColoring ?? true).ToString());
-        Console.WriteLine();
-    }
-
-    private StringBuilder BuildHeaderText(bool showTitle, bool showDescription)
-    {
-        var sb = new StringBuilder();
-
-        if (showTitle && !string.IsNullOrWhiteSpace(Settings.Title))
-            sb.AppendLine(Settings.Title);
-        if (showDescription && !string.IsNullOrWhiteSpace(Settings.Description))
-            sb.AppendLine(Settings.Description);
-
-        return sb;
-    }
-
-    private StringBuilder BuildHelpText(bool enableColoring)
-    {
-        TextColoring.SetEnabled(enableColoring);
-
-        var sb = BuildHeaderText(Settings.ShowTitle ?? true, Settings.ShowDescription ?? true);
-        sb.AppendLine("These are command line options of this application.");
-        sb.AppendLine();
-
-        var options = _appOptions.Options;
-        foreach (var option in options)
+        foreach (var option in _baseOptions)
         {
-            var namedOption = option as INamedOption;
-            var shortAlias = namedOption?.ShortAlias ?? string.Empty;
-            sb.Pastel($"[{shortAlias,-4}] ", ConsoleColor.DarkGreen);
-            sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
-            sb.AppendLine(option.Usage);
-
-            if (namedOption is not null)
-            {
-                sb.Pastel("       Aliases:", ConsoleColor.DarkYellow);
-                sb.AppendLine($" {string.Join(", ", namedOption.Aliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length))} ");
-            }
-
-            if (option.Description is not null)
-            {
-                var descriptionWords = option.Description.Split(' ');
-                var descriptionLines = CreateLinesByWidth(descriptionWords);
-                foreach (var description in descriptionLines)
-                    sb.AppendLine($"       {description}");
-            }
-
-            if (Settings.NewLineAfterOption is true)
-                sb.AppendLine();
+            option.Clear();
         }
 
-        var usageLines = CreateLinesByWidth(options.Select(o => o.Usage), true);
-        sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
-        sb.AppendLine(usageLines[0]);
-
-        for (var index = 1; index < usageLines.Count; ++index)
-            sb.AppendLine($"       {usageLines[index]}");
-
-        return sb;
+        foreach (var property in _propertyInfos)
+        {
+            var type = property.PropertyType;
+            var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
+            property.SetValue(_appOptions, defaultValue);
+        }
     }
 
-    private StringBuilder BuildErrorText(bool enableColoring)
+    protected override void UpdateOptionPropertiesByReflection(BaseOption option)
     {
-        var sb = new StringBuilder();
-        if (_errors.Count < 1)
-            return sb;
+        if (!option.IsParsed)
+            return;
 
-        TextColoring.SetEnabled(enableColoring);
-        
-        sb.Pastel("     Error(s)!", ConsoleColor.Red);
-        sb.AppendLine();
-
-        for (int i = 0; i < _errors.Count; i++)
+        if (option.CountProperty is not null)
         {
-            sb.Pastel($"{(i + 1):00} - ", ConsoleColor.DarkYellow);
-            sb.AppendLine(_errors[i]);
+            var countProp = _propertyInfos.First(p => p.Name == option.CountProperty.Name);
+            if (countProp.PropertyType == typeof(bool))
+            {
+                countProp.SetValue(_appOptions, true);
+            }
+            else if (countProp.PropertyType == typeof(int))
+            {
+                countProp.SetValue(_appOptions, option is INamedOption ? option.OptionCount : option.ValueCount);
+            }
         }
 
-        return sb;
+        var keyProp = _propertyInfos.First(p => p.Name == option.KeyProperty.Name);
+        if (option is BaseValueOption valOption)
+        {
+            valOption.ApplyOptionResult(_appOptions, keyProp);
+        }
     }
 }
 

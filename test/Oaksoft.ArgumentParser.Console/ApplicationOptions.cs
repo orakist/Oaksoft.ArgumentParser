@@ -4,7 +4,7 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Console;
 
-internal class ApplicationOptions : BaseApplicationOptions
+internal class ApplicationOptions : IApplicationOptions
 {
     public bool AddSwitch { get; set; }
     public bool? SubtractSwitch { get; set; }
@@ -18,7 +18,7 @@ internal class ApplicationOptions : BaseApplicationOptions
     public DateTime? StartTime { get; set; }
 
     public IEnumerable<int>? AddNumbers { get; set; }
-    public ICollection<string>? SubtractNumbers { get; set; }
+    public ICollection<string?>? SubtractNumbers { get; set; }
     public List<double?>? MultiplyNumbers { get; set; }
     public long[]? DivideNumbers { get; set; }
 
@@ -29,4 +29,6 @@ internal class ApplicationOptions : BaseApplicationOptions
     public List<string>? FormulaResults { get; set; }
 
     public IEnumerable<string>? Variables { get; set; }
+
+    public bool Help { get; set; }
 }

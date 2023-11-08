@@ -18,7 +18,7 @@ internal abstract class BaseOption : IBaseOption
 
     public bool IsValid { get; protected set; }
 
-    public bool IsActive => IsValid && OptionCount + ValueCount > 0;
+    public bool IsParsed => IsValid && OptionCount + ValueCount > 0;
 
     public abstract int OptionCount { get; }
 
@@ -58,11 +58,6 @@ internal abstract class BaseOption : IBaseOption
     
     public virtual void SetAliases(params string[] aliases)
     {
-    }
-
-    public virtual bool StartsWithAnyAlias(string token, StringComparison flag)
-    {
-        return false;
     }
 
     public virtual void Initialize(IArgumentParser parser)

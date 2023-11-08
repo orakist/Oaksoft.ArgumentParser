@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
+internal sealed class SequentialNamedOption<TValue> 
+    : BaseSequentialValueOption<TValue>, ISequentialNamedOption<TValue>
+    where TValue : IComparable, IEquatable<TValue>
 {
+    public bool AllowSequentialValues { get; init; }
+
     public string ShortAlias => _prefixAliases.MinBy(k => k.Length)!;
 
     public List<string> Aliases => _prefixAliases.ToList();
@@ -18,16 +21,13 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
 
     public override int OptionCount => _optionTokens.Count;
 
-    public Ref<bool>? DefaultValue { get; private set; }
-
-    public Ref<bool>? ResultValue { get; private set; }
-
     private readonly List<string> _aliases;
     private readonly List<string> _optionTokens;
     private readonly List<string> _prefixAliases;
 
-    public SwitchOption(int requiredOptionCount, int maximumOptionCount)
-        : base(0, 1)
+    public SequentialNamedOption(
+        int requiredOptionCount, int maximumOptionCount, int requiredValueCount, int maximumValueCount)
+        : base(requiredValueCount, maximumValueCount)
     {
         OptionArity = (requiredOptionCount, maximumOptionCount);
 
@@ -55,11 +55,6 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
         _aliases.AddRange(values);
     }
 
-    public void SetDefaultValue(bool defaultValue)
-    {
-        DefaultValue = new Ref<bool>(defaultValue);
-    }
-
     public override void Initialize(IArgumentParser parser)
     {
         base.Initialize(parser);
@@ -80,13 +75,13 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
         _prefixAliases.AddRange(aliases.OrderByDescending(a => a.Length).ToList());
 
         if (string.IsNullOrWhiteSpace(Usage))
-            Usage = ShortAlias;
+            Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
     }
 
     public override void Parse(TokenValue[] tokens, IArgumentParser parser)
     {
-        var compareFlag = parser.CaseSensitive
-            ? StringComparison.Ordinal
+        var compareFlag = parser.CaseSensitive 
+            ? StringComparison.Ordinal 
             : StringComparison.OrdinalIgnoreCase;
 
         for (var i = 0; i < tokens.Length; ++i)
@@ -98,78 +93,61 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
             var argument = token.Argument;
             foreach (var alias in _prefixAliases)
             {
-                if (!argument.StartsWith(alias, compareFlag))
+                if (!token.Argument.StartsWith(alias, compareFlag))
                     continue;
 
                 token.IsParsed = true;
                 _optionTokens.Add(alias);
-                _valueTokens.Add(string.Empty);
 
                 // parse --option (optional value)
-                // parse --option true (single value)
+                // parse --option val (single value)
+                // parse --option val1 val2 val3 (sequential values)
                 if (argument.Length == alias.Length)
                 {
-                    if (i + 1 < tokens.Length && !tokens[i + 1].IsParsed)
+                    for (; i + 1 < tokens.Length; ++i)
                     {
                         var nextToken = tokens[i + 1];
-                        if (bool.TryParse(nextToken.Argument, out _))
-                        {
-                            nextToken.IsParsed = true;
-                            _valueTokens[^1] = nextToken.Argument;
-                        }
+
+                        if (nextToken.Argument.IsAliasCandidate(parser.OptionPrefix))
+                            break;
+
+                        nextToken.IsParsed = true;
+                        _valueTokens.Add(nextToken.Argument);
+
+                        if (!AllowSequentialValues)
+                            break;
                     }
-                }
-                else
-                {
-                    // parse --option=true or -o=true or -otrue
-                    // parse --option:true or -o:true
-                    // parse "--option true" or "-o true"
-                    var optionValue = argument.GetOptionValue(alias, parser.TokenDelimiter);
-                    if (string.IsNullOrWhiteSpace(optionValue))
-                        continue;
 
-                    _valueTokens[^1] = optionValue;
+                    break;
                 }
 
+                // parse --option=val or -o=val or -oval
+                // parse --option:val or -o:val
+                // parse "--option val" or "-o val"
+                var optionValue = argument.GetOptionValue(alias, parser.TokenDelimiter);
+                if (string.IsNullOrWhiteSpace(optionValue))
+                    continue;
+
+                _valueTokens.Add(optionValue);
                 break;
             }
         }
 
-        _inputValues.AddRange(_valueTokens.Where(v => !string.IsNullOrWhiteSpace(v)));
+        // parse multiple values 'str1;str2;str3'
+        var inputValues = _valueTokens.GetInputValues(parser.ValueDelimiter, EnableValueTokenSplitting);
+        _inputValues.AddRange(inputValues);
     }
 
     public override void Validate(IArgumentParser parser)
     {
         base.Validate(parser);
 
-        if (_inputValues.Count > 0)
-        {
-            var resultValues = GetValidatedValues();
-
-            // if last switch option contains value assign it,
-            // otherwise we will use default value
-            if (!string.IsNullOrWhiteSpace(_valueTokens[^1]))
-            {
-                ResultValue = new Ref<bool>(resultValues[^1]);
-            }
-        }
-
         IsValid = true;
-    }
-
-    public override void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty)
-    {
-        if (!keyProperty.PropertyType.IsAssignableFrom(typeof(bool)))
-            return;
-
-        keyProperty.SetValue(appOptions, ResultValue?.Value ?? DefaultValue?.Value ?? true);
     }
 
     public override void Clear()
     {
         base.Clear();
         _optionTokens.Clear();
-        ResultValue = null;
     }
-
 }

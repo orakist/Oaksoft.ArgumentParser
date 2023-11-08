@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOption<TValue>
+internal sealed class ScalarNamedOption<TValue> 
+    : BaseScalarValueOption<TValue>, IScalarNamedOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
     public string ShortAlias => _prefixAliases.MinBy(k => k.Length)!;
@@ -19,13 +19,11 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
 
     public override int OptionCount => _optionTokens.Count;
 
-    public bool AllowSequentialValues { get; init; }
-
     private readonly List<string> _aliases;
     private readonly List<string> _optionTokens;
     private readonly List<string> _prefixAliases;
 
-    public ScalarOption(
+    public ScalarNamedOption(
         int requiredOptionCount, int maximumOptionCount, int requiredValueCount, int maximumValueCount)
         : base(requiredValueCount, maximumValueCount)
     {
@@ -55,11 +53,6 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
         _aliases.AddRange(values);
     }
 
-    public override bool StartsWithAnyAlias(string token, StringComparison flag)
-    {
-        return _prefixAliases.Any(a => token.StartsWith(a, flag));
-    }
-
     public override void Initialize(IArgumentParser parser)
     {
         base.Initialize(parser);
@@ -85,8 +78,9 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
 
     public override void Parse(TokenValue[] tokens, IArgumentParser parser)
     {
-        var flag = parser.ComparisonFlag();
-        var baseParser = (BaseArgumentParser)parser;
+        var compareFlag = parser.CaseSensitive
+            ? StringComparison.Ordinal
+            : StringComparison.OrdinalIgnoreCase;
 
         for (var i = 0; i < tokens.Length; ++i)
         {
@@ -97,29 +91,27 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
             var argument = token.Argument;
             foreach (var alias in _prefixAliases)
             {
-                if (!token.Argument.StartsWith(alias, flag))
+                if (!token.Argument.StartsWith(alias, compareFlag))
                     continue;
 
                 token.IsParsed = true;
                 _optionTokens.Add(alias);
+                _valueTokens.Add(string.Empty);
 
                 // parse --option (optional value)
                 // parse --option val (single value)
                 // parse --option val1 val2 val3 (sequential values)
                 if (argument.Length == alias.Length)
                 {
-                    for (; i + 1 < tokens.Length; ++i)
+                    if (i + 1 < tokens.Length && !tokens[i + 1].IsParsed)
                     {
                         var nextToken = tokens[i + 1];
 
-                        if (baseParser.StartsWithAnyAlias(argument))
-                            break;
-
-                        nextToken.IsParsed = true;
-                        _valueTokens.Add(nextToken.Argument);
-
-                        if (!AllowSequentialValues)
-                            break;
+                        if (!nextToken.Argument.IsAliasCandidate(parser.OptionPrefix))
+                        {
+                            nextToken.IsParsed = true;
+                            _valueTokens[^1] = nextToken.Argument;
+                        }
                     }
 
                     break;
@@ -132,14 +124,13 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
                 if (string.IsNullOrWhiteSpace(optionValue))
                     continue;
 
-                _valueTokens.Add(optionValue);
+                _valueTokens[^1] = optionValue;
                 break;
             }
         }
 
-        // parse multiple values 'str1;str2;str3'
-        var inputValues = _valueTokens.GetInputValues(parser.ValueDelimiter, EnableValueTokenSplitting);
-        _inputValues.AddRange(inputValues);
+        // add parsed values to input list for validation
+        _inputValues.AddRange(_valueTokens.Where(v => !string.IsNullOrWhiteSpace(v)));
     }
 
     public override void Validate(IArgumentParser parser)
@@ -147,33 +138,6 @@ internal sealed class ScalarOption<TValue> : BaseValueOption<TValue>, IScalarOpt
         base.Validate(parser);
 
         IsValid = true;
-    }
-
-    public override void ApplyDefaultValue(IApplicationOptions appOptions, PropertyInfo keyProperty)
-    {
-        if (DefaultValue is null)
-            return;
-
-        if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
-            return;
-
-        keyProperty.SetValue(appOptions, DefaultValue);
-    }
-
-    public override void UpdatePropertyValue(IApplicationOptions appOptions, PropertyInfo keyProperty)
-    {
-        if (keyProperty.PropertyType.IsAssignableFrom(typeof(List<TValue>)))
-        {
-            keyProperty.SetValue(appOptions, _resultValues);
-        }
-        else if (keyProperty.PropertyType.IsAssignableFrom(typeof(TValue[])))
-        {
-            keyProperty.SetValue(appOptions, _resultValues.ToArray());
-        }
-        else if (keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
-        {
-            keyProperty.SetValue(appOptions, _resultValues.First());
-        }
     }
 
     public override void Clear()

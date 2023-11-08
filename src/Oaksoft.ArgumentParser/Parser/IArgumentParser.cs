@@ -1,25 +1,24 @@
 ﻿using Oaksoft.ArgumentParser.Definitions;
-using System;
 using System.Collections.Generic;
 
 namespace Oaksoft.ArgumentParser.Parser;
 
 public interface IArgumentParser
 {
+    bool CaseSensitive { get; }
+
     OptionPrefixRules OptionPrefix { get; }
 
     TokenDelimiterRules TokenDelimiter { get; }
 
     ValueDelimiterRules ValueDelimiter { get; }
 
-    bool CaseSensitive { get; }
+    IParserSettings Settings { get; }
 
     bool IsValid { get; }
 
     List<string> Errors { get; }
-
-    IParserSettings Settings { get; }
-
+    
     string GetHeaderText();
 
     string GetHelpText(bool? enableColoring = default);
@@ -32,12 +31,5 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
 {
     TOptions GetApplicationOptions();
 
-    IArgumentParser<TOptions> ConfigureOptions(Action<TOptions> action);
-
-    IArgumentParser<TOptions> ConfigureParser(Action<IParserSettingsBuilder> action);
-
-    IArgumentParser<TOptions> Build();
-
     TOptions Parse(string[] args);
 }
-

@@ -1,14 +1,16 @@
 ﻿using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Parser;
+using System;
 using System.Linq;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal sealed class ValueOption : BaseValueOption<string>
+internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<TValue>
+    where TValue : IComparable, IEquatable<TValue>
 {
     public override int OptionCount => 0;
 
-    public ValueOption(int requiredValueCount, int maximumValueCount)
+    public SequentialValueOption(int requiredValueCount, int maximumValueCount)
         : base(requiredValueCount, maximumValueCount)
     {
         OptionArity = (0, 0);
@@ -33,6 +35,10 @@ internal sealed class ValueOption : BaseValueOption<string>
 
             var argument = token.Argument;
             if (argument.IsAliasCandidate(parser.OptionPrefix))
+                continue;
+
+            var value = argument.GetInputValues(parser.ValueDelimiter, EnableValueTokenSplitting).First();
+            if (!IsValidValue(value)) 
                 continue;
 
             token.IsParsed = true;

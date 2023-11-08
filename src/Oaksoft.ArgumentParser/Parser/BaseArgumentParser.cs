@@ -2,48 +2,45 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
-using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
 
 internal abstract class BaseArgumentParser : IArgumentParser
 {
+    public bool CaseSensitive { get; }
+
     public OptionPrefixRules OptionPrefix { get; }
 
     public TokenDelimiterRules TokenDelimiter { get; }
 
     public ValueDelimiterRules ValueDelimiter { get; }
 
-    public bool CaseSensitive { get; }
+    public abstract IParserSettings Settings { get; }
 
     public bool IsValid => _errors.Count < 1;
 
     public List<string> Errors => _errors.ToList();
 
-    public IParserSettings Settings { get; }
-
-    public abstract BaseApplicationOptions AppOptions { get; }
-
     protected readonly List<string> _errors;
-    private PropertyInfo[]? _propertyInfos;
-    private List<string>? _registeredPropertyNames;
-    protected readonly IParserSettingsBuilder _settingsBuilder;
+    protected readonly List<BaseOption> _baseOptions;
+    protected readonly List<PropertyInfo> _propertyInfos;
 
     protected BaseArgumentParser(
-        OptionPrefixRules optionPrefix, TokenDelimiterRules tokenDelimiter, 
-        ValueDelimiterRules valueDelimiter, bool caseSensitive)
+        bool caseSensitive, OptionPrefixRules optionPrefix, 
+        TokenDelimiterRules tokenDelimiter, ValueDelimiterRules valueDelimiter)
     {
+        CaseSensitive = caseSensitive;
         OptionPrefix = optionPrefix;
         TokenDelimiter = tokenDelimiter;
         ValueDelimiter = valueDelimiter;
-        CaseSensitive = caseSensitive;
 
-        Settings = new ParserSettings();
-        _settingsBuilder = new ParserSettingsBuilder();
         _errors = new List<string>();
+        _baseOptions = new List<BaseOption>();
+        _propertyInfos = new List<PropertyInfo>();
     }
 
     public abstract string GetHeaderText();
@@ -52,63 +49,15 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public abstract string GetErrorText(bool? colorized = default);
 
-    public bool StartsWithAnyAlias(string token)
-    {
-        var flag = this.ComparisonFlag();
-        return AppOptions.Options.Cast<BaseOption>()
-            .Any(option => option.StartsWithAnyAlias(token, flag));
-    }
+    protected abstract void ClearOptionPropertiesByReflection();
 
-    protected void BuildDefaultSettings()
-    {
-        var settings = (ParserSettings)Settings;
-        settings.AutoPrintHeader = _settingsBuilder.AutoPrintHeader ?? true;
-        settings.AutoPrintHelp = _settingsBuilder.AutoPrintHelp ?? true;
-        settings.AutoPrintErrors = _settingsBuilder.AutoPrintErrors ?? true;
-        settings.HelpDisplayWidth = _settingsBuilder.HelpDisplayWidth ?? 75;
-        settings.NewLineAfterOption = _settingsBuilder.NewLineAfterOption ?? true;
-        settings.ShowTitle = _settingsBuilder.ShowTitle ?? true;
-        settings.ShowDescription = _settingsBuilder.ShowDescription ?? true;
-        settings.EnableColoring = _settingsBuilder.EnableColoring ??= true;
-        settings.MaxAliasLength = _settingsBuilder.MaxAliasLength ?? 32;
-        settings.Title = _settingsBuilder.Title;
-        settings.Description = _settingsBuilder.Description;
-
-        if (Settings.HelpDisplayWidth is < 40 or > 320)
-        {
-            throw new ArgumentOutOfRangeException(nameof(Settings.HelpDisplayWidth),
-                "Invalid Help Display Width value! Valid interval is [40, 320].");
-        }
-
-        if (Settings.MaxAliasLength is < 4 or > 64)
-        {
-            throw new ArgumentOutOfRangeException(nameof(Settings.MaxAliasLength),
-                "Invalid Max Alias Length value! Valid interval is [4, 64].");
-        }
-
-        if (string.IsNullOrWhiteSpace(Settings.Title))
-            settings.Title = BuildTitleLine();
-
-        if (string.IsNullOrWhiteSpace(Settings.Description))
-            settings.Description = BuildDescriptionLine();
-    }
-
-    protected void BuildDefaultOptions()
-    {
-        var options = AppOptions.Options.Cast<BaseOption>();
-        if (options.Any(o => o.KeyProperty.Name == nameof(AppOptions.Help)))
-            return;
-
-        AppOptions.AddSwitchOption(o => o.Help)
-            .WithDescription("Prints this help information.");
-    }
+    protected abstract void UpdateOptionPropertiesByReflection(BaseOption option);
 
     protected void InitializeOptions()
     {
-        var options = AppOptions.Options;
         var aliases = new List<string>();
 
-        foreach (var option in options.Cast<BaseOption>())
+        foreach (var option in _baseOptions.Cast<BaseOption>())
         {
             try
             {
@@ -143,11 +92,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected void ParseArguments(TokenValue[] tokens)
     {
-        var options = AppOptions.Options;
         var orderedOptions = new List<IBaseOption>();
-        orderedOptions.AddRange(options.Where(o => o is ISwitchOption));
-        orderedOptions.AddRange(options.Where(o => o is IScalarOption));
-        orderedOptions.AddRange(options.Where(o => o is not INamedOption));
+        orderedOptions.AddRange(_baseOptions.Where(o => o is ISwitchOption));
+        orderedOptions.AddRange(_baseOptions.Where(o => o is IScalarNamedOption));
+        orderedOptions.AddRange(_baseOptions.Where(o => o is ISequentialNamedOption));
+        orderedOptions.AddRange(_baseOptions.Where(o => o is not INamedOption));
 
         foreach (var option in orderedOptions.Cast<BaseOption>())
         {
@@ -164,8 +113,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected void ValidateOptions(TokenValue[] tokens)
     {
-        var options = AppOptions.Options;
-        foreach (var option in options.Cast<BaseOption>())
+        foreach (var option in _baseOptions.Cast<BaseOption>())
         {
             try
             {
@@ -177,7 +125,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        ValidateHelpToken(options);
+        ValidateHelpToken();
 
         foreach (var option in tokens.Where(s => !s.IsParsed && !s.Invalid))
             _errors.Add($"Unknown option found. Option: {option.Argument}");
@@ -188,7 +136,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (_errors.Count > 0)
             return;
 
-        foreach (var option in AppOptions.Options)
+        foreach (var option in _baseOptions)
         {
             try
             {
@@ -201,27 +149,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
     }
 
-    protected List<string> CreateLinesByWidth(
-        IEnumerable<string> textWords, bool addBrackets = false)
-    {
-        var displayWidth = Settings.HelpDisplayWidth!.Value;
-        var textLines = new List<string> { string.Empty };
-
-        foreach (var word in textWords)
-        {
-            if (textLines[^1].Length > displayWidth)
-                textLines.Add(string.Empty);
-
-            var space = textLines[^1].Length > 0 ? " " : string.Empty;
-            var newWord = addBrackets ? $"[{word}]" : word;
-
-            textLines[^1] += $"{space}{newWord}";
-        }
-
-        return textLines;
-    }
-
-    protected static bool IsOnlyOption(IBaseOption option, IReadOnlyList<IBaseOption> options)
+    protected bool IsOnlyOption(IBaseOption option)
     {
         var optionCount = option switch
         {
@@ -233,7 +161,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (optionCount < 1)
             return false;
 
-        var totalInputCount = options.Sum(o => o switch
+        var totalInputCount = _baseOptions.Sum(o => o switch
         {
             INamedOption c => c.OptionTokens.Count,
             IValueOption d => d.ValueTokens.Count,
@@ -241,21 +169,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         });
 
         return totalInputCount - optionCount < 1;
-    }
-
-    protected void ValidateHelpToken(IReadOnlyList<IBaseOption> options)
-    {
-        var helpOption = options.OfType<SwitchOption>().
-            First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
-
-        if (IsOnlyOption(helpOption, options))
-        {
-            _errors.Clear();
-        }
-        else if (helpOption.OptionTokens.Count > 0)
-        {
-            _errors.Add($"{helpOption.Name} ({helpOption.ShortAlias}) option cannot be combined with other options.");
-        }
     }
 
     protected void ValidateArguments(TokenValue[] tokens)
@@ -272,6 +185,149 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 token.Invalid = true;
             }
         }
+    }
+
+    protected void AutoPrintHeaderText()
+    {
+        if (Settings.AutoPrintHeader != true)
+            return;
+
+        Console.Write(BuildHeaderText(true, true).ToString());
+        Console.WriteLine();
+    }
+
+    protected void AutoPrintHelpText()
+    {
+        if (Settings.AutoPrintHelp != true || _errors.Count > 0)
+            return;
+
+        var helpOption = _baseOptions.OfType<SwitchOption>().
+            First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
+
+        if (!IsOnlyOption(helpOption))
+            return;
+
+        Console.Write(BuildHelpText(Settings.EnableColoring ?? true).ToString());
+        Console.WriteLine();
+    }
+
+    protected void AutoPrintErrorText()
+    {
+        if (Settings.AutoPrintErrors != true || _errors.Count < 1)
+            return;
+
+        Console.Write(BuildErrorText(Settings.EnableColoring ?? true).ToString());
+        Console.WriteLine();
+    }
+
+    protected StringBuilder BuildHeaderText(bool showTitle, bool showDescription)
+    {
+        var sb = new StringBuilder();
+
+        if (showTitle && !string.IsNullOrWhiteSpace(Settings.Title))
+            sb.AppendLine(Settings.Title);
+        if (showDescription && !string.IsNullOrWhiteSpace(Settings.Description))
+            sb.AppendLine(Settings.Description);
+
+        return sb;
+    }
+
+    protected StringBuilder BuildHelpText(bool enableColoring)
+    {
+        TextColoring.SetEnabled(enableColoring);
+
+        var sb = BuildHeaderText(Settings.ShowTitle ?? true, Settings.ShowDescription ?? true);
+        sb.AppendLine("These are command line options of this application.");
+        sb.AppendLine();
+
+        foreach (var option in _baseOptions)
+        {
+            var namedOption = option as INamedOption;
+            var shortAlias = namedOption?.ShortAlias ?? string.Empty;
+            sb.Pastel($"[{shortAlias,-4}] ", ConsoleColor.DarkGreen);
+            sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
+            sb.AppendLine(option.Usage);
+
+            if (namedOption is not null)
+            {
+                sb.Pastel("       Aliases:", ConsoleColor.DarkYellow);
+                sb.AppendLine($" {string.Join(", ", namedOption.Aliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length))} ");
+            }
+
+            if (option.Description is not null)
+            {
+                var descriptionWords = option.Description.Split(' ');
+                var descriptionLines = CreateLinesByWidth(descriptionWords);
+                foreach (var description in descriptionLines)
+                    sb.AppendLine($"       {description}");
+            }
+
+            if (Settings.NewLineAfterOption is true)
+                sb.AppendLine();
+        }
+
+        var usageLines = CreateLinesByWidth(_baseOptions.Select(o => o.Usage), true);
+        sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
+        sb.AppendLine(usageLines[0]);
+
+        for (var index = 1; index < usageLines.Count; ++index)
+            sb.AppendLine($"       {usageLines[index]}");
+
+        return sb;
+    }
+
+    protected StringBuilder BuildErrorText(bool enableColoring)
+    {
+        var sb = new StringBuilder();
+        if (_errors.Count < 1)
+            return sb;
+
+        TextColoring.SetEnabled(enableColoring);
+
+        sb.Pastel("     Error(s)!", ConsoleColor.Red);
+        sb.AppendLine();
+
+        for (int i = 0; i < _errors.Count; i++)
+        {
+            sb.Pastel($"{(i + 1):00} - ", ConsoleColor.DarkYellow);
+            sb.AppendLine(_errors[i]);
+        }
+
+        return sb;
+    }
+
+    private void ValidateHelpToken()
+    {
+        var helpOption = _baseOptions.OfType<SwitchOption>().
+            First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
+
+        if (IsOnlyOption(helpOption))
+        {
+            _errors.Clear();
+        }
+        else if (helpOption.OptionTokens.Count > 0)
+        {
+            _errors.Add($"{helpOption.Name} ({helpOption.ShortAlias}) option cannot be combined with other options.");
+        }
+    }
+
+    private List<string> CreateLinesByWidth(IEnumerable<string> textWords, bool addBrackets = false)
+    {
+        var displayWidth = Settings.HelpDisplayWidth!.Value;
+        var textLines = new List<string> { string.Empty };
+
+        foreach (var word in textWords)
+        {
+            if (textLines[^1].Length > displayWidth)
+                textLines.Add(string.Empty);
+
+            var space = textLines[^1].Length > 0 ? " " : string.Empty;
+            var newWord = addBrackets ? $"[{word}]" : word;
+
+            textLines[^1] += $"{space}{newWord}";
+        }
+
+        return textLines;
     }
 
     private void ValidateOptionAliases(BaseOption option, List<string> aliases)
@@ -306,107 +362,5 @@ internal abstract class BaseArgumentParser : IArgumentParser
         var name = (option as INamedOption)?.ShortAlias ?? option.Name;
         var comma = ex.Message.EndsWith(".") ? string.Empty : ",";
         return $"{ex.Message}{comma} Option: {name}";
-    }
-
-    private static string? BuildTitleLine()
-    {
-        var title = AssemblyHelper.GetAssemblyTitle() ?? string.Empty;
-
-        var version = AssemblyHelper.GetAssemblyVersion();
-        if (!string.IsNullOrWhiteSpace(version))
-            title += $" v{version}";
-
-        var company = AssemblyHelper.GetAssemblyCompany();
-        if (!string.IsNullOrWhiteSpace(company))
-            title += $", {company}";
-
-        return string.IsNullOrWhiteSpace(title) ? null : title;
-    }
-
-    private static string? BuildDescriptionLine()
-    {
-        var copyright = AssemblyHelper.GetAssemblyCopyright();
-        var description = AssemblyHelper.GetAssemblyDescription() ?? string.Empty;
-
-        if (!string.IsNullOrWhiteSpace(copyright))
-        {
-            var comma = string.IsNullOrWhiteSpace(description) ?
-                string.Empty : (description.EndsWith(".") ? " " : ", ");
-            description += $"{comma}{copyright}";
-        }
-
-        return string.IsNullOrWhiteSpace(description) ? null : description;
-    }
-
-    private void ClearOptionPropertiesByReflection()
-    {
-        var options = AppOptions.Options.Cast<BaseOption>().ToList();
-        _registeredPropertyNames ??= GetRegisteredPropertyNames(options);
-
-        _propertyInfos ??= AppOptions.GetType().GetProperties()
-            .Where(p => _registeredPropertyNames.Contains(p.Name))
-            .ToArray();
-
-        foreach (var option in options)
-        {
-            option.Clear();
-        }
-
-        foreach (var property in _propertyInfos)
-        {
-            var type = property.PropertyType;
-            var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
-            property.SetValue(AppOptions, defaultValue);
-        }
-    }
-
-    private void UpdateOptionPropertiesByReflection(IBaseOption option)
-    {
-        if (!option.IsActive)
-            return;
-
-        var baseOption = (option as BaseOption)!;
-        if (baseOption.CountProperty is not null)
-        {
-            var countProp = _propertyInfos!.First(p => p.Name == baseOption.CountProperty.Name);
-            if (countProp.PropertyType == typeof(bool))
-            {
-                countProp.SetValue(AppOptions, true);
-            }
-            else if (countProp.PropertyType == typeof(int))
-            {
-                countProp.SetValue(AppOptions, option is INamedOption ? option.OptionCount : option.ValueCount);
-            }
-        }
-
-        var keyProp = _propertyInfos!.First(p => p.Name == baseOption.KeyProperty.Name);
-        var type = keyProp.PropertyType;
-        if (option is SwitchOption)
-        {
-            if (type == typeof(bool))
-            {
-                keyProp.SetValue(AppOptions, true);
-            }
-            else if (type == typeof(int))
-            {
-                keyProp.SetValue(AppOptions, option is INamedOption ? option.OptionCount : option.ValueCount);
-            }
-        }
-        else if (option is BaseValueOption valOption)
-        {
-            valOption.UpdatePropertyValue(AppOptions, keyProp);
-        }
-    }
-
-    private static List<string> GetRegisteredPropertyNames(IReadOnlyList<BaseOption> options)
-    {
-        var propertyNames = options
-            .Where(o => !string.IsNullOrWhiteSpace(o.CountProperty?.Name))
-            .Select(a => a.CountProperty!.Name)
-            .ToList();
-
-        propertyNames.AddRange(options.Select(o => o.KeyProperty.Name));
-
-        return propertyNames;
     }
 }

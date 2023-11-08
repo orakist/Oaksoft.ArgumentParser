@@ -1,6 +1,6 @@
 ﻿namespace Oaksoft.ArgumentParser.Parser;
 
-internal class ParserSettings : IParserSettings
+internal class ParserSettingsBuilder : IParserSettingsBuilder
 {
     public bool? AutoPrintHeader { get; set; }
 

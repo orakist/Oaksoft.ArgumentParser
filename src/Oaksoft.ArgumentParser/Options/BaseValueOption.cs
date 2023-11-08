@@ -9,32 +9,17 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal abstract class BaseValueOption<TValue> 
-    : BaseValueOption, IValueOption<TValue>, IValueContext<TValue>
+internal abstract class BaseScalarValueOption<TValue>
+    : BaseAllowedValuesOption<TValue>, IScalarValueOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    public TValue? DefaultValue { get; private set; }
+    public Ref<TValue>? DefaultValue { get; private set; }
 
-    public List<TValue?> Constraints => _constraints.ToList();
+    public Ref<TValue>? ResultValue { get; private set; }
 
-    public List<TValue> AllowedValues => _allowedValues.ToList();
-
-    public List<TValue> ResultValues => _resultValues.ToList();
-
-    private Func<string, bool>? _validateValueCallback;
-    private Func<string, TValue>? _convertValueCallback;
-    private Func<IValueContext<TValue>, IArgumentParser, bool>? _validateOptionCallback;
-
-    private readonly List<TValue?> _constraints;
-    private readonly HashSet<TValue> _allowedValues;
-    protected readonly List<TValue> _resultValues;
-
-    protected BaseValueOption(int requiredValueCount, int maximumValueCount)
+    protected BaseScalarValueOption(int requiredValueCount, int maximumValueCount)
         : base(requiredValueCount, maximumValueCount)
     {
-        _constraints = new List<TValue?>();
-        _resultValues = new List<TValue>();
-        _allowedValues = new HashSet<TValue>();
     }
 
     public void SetDefaultValue(TValue defaultValue)
@@ -42,18 +27,116 @@ internal abstract class BaseValueOption<TValue>
         if (defaultValue is string strValue)
         {
             var value = string.IsNullOrWhiteSpace(strValue) ? null : strValue.Trim();
-            DefaultValue = (TValue?)(object?)value;
+            DefaultValue = value is null ? null : new Ref<TValue>((TValue)(object)value);
         }
         else
         {
-            DefaultValue = defaultValue;
+            DefaultValue = new Ref<TValue>(defaultValue);
         }
     }
 
-    public void SetConstraints(params TValue?[] constraints)
+    public override void Validate(IArgumentParser parser)
     {
-        _constraints.AddRange(
-            constraints.Select(s => s is string value ? (TValue)(object)value.Trim() : s));
+        base.Validate(parser);
+
+        if (_inputValues.Count <= 0) 
+            return;
+
+        var resultValues = GetValidatedValues(parser.CaseSensitive);
+
+        // if last switch option contains value assign it,
+        // otherwise we will use default value
+        if (!string.IsNullOrWhiteSpace(_valueTokens[^1]))
+        {
+            ResultValue = new Ref<TValue>(resultValues[^1]);
+        }
+    }
+
+    public override void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty)
+    {
+        if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue))) 
+            return;
+
+        var result = ResultValue != null 
+            ? ResultValue.Value 
+            : DefaultValue != null ? DefaultValue.Value : default;
+
+        keyProperty.SetValue(appOptions, result);
+    }
+
+    public override void Clear()
+    {
+        base.Clear();
+        ResultValue = null;
+    }
+}
+
+internal abstract class BaseSequentialValueOption<TValue>
+    : BaseAllowedValuesOption<TValue>, ISequentialValueOption<TValue>
+    where TValue : IComparable, IEquatable<TValue>
+{
+    public bool EnableValueTokenSplitting { get; init; }
+
+    public List<TValue> ResultValues => _resultValues.ToList();
+
+    protected readonly List<TValue> _resultValues;
+
+    protected BaseSequentialValueOption(int requiredValueCount, int maximumValueCount)
+        : base(requiredValueCount, maximumValueCount)
+    {
+        _resultValues = new List<TValue>();
+    }
+
+    public override void Validate(IArgumentParser parser)
+    {
+        base.Validate(parser);
+
+        if (_inputValues.Count <= 0)
+            return;
+
+        var resultValues = GetValidatedValues(parser.CaseSensitive);
+
+        _resultValues.AddRange(resultValues);
+    }
+
+    public override void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty)
+    {
+        if (keyProperty.PropertyType.IsAssignableFrom(typeof(List<TValue>)))
+        {
+            keyProperty.SetValue(appOptions, _resultValues);
+        }
+        else if (keyProperty.PropertyType.IsAssignableFrom(typeof(TValue[])))
+        {
+            keyProperty.SetValue(appOptions, _resultValues.ToArray());
+        }
+    }
+
+    public override void Clear()
+    {
+        base.Clear();
+        _resultValues.Clear();
+    }
+}
+
+internal abstract class BaseAllowedValuesOption<TValue>
+    : BaseValueOption<TValue>, IHaveAllowedValues<TValue>
+    where TValue : IComparable, IEquatable<TValue>
+{
+    public List<TValue> AllowedValues => _allowedValues.ToList();
+
+    protected readonly HashSet<TValue> _allowedValues;
+    protected readonly List<Predicate<TValue>> _predicates;
+
+    protected BaseAllowedValuesOption(int requiredValueCount, int maximumValueCount)
+        : base(requiredValueCount, maximumValueCount)
+    {
+        _allowedValues = new HashSet<TValue>();
+        _predicates = new List<Predicate<TValue>>();
+    }
+
+    public void AddPredicate(Predicate<TValue> predicate)
+    {
+        _predicates.Add(predicate);
     }
 
     public void SetAllowedValues(params TValue[] allowedValues)
@@ -66,36 +149,60 @@ internal abstract class BaseValueOption<TValue>
             _allowedValues.Add(value);
     }
 
+    protected override List<TValue> GetValidatedValues(bool caseSensitive = false)
+    {
+        var resultValues = base.GetValidatedValues(caseSensitive);
+
+        resultValues.ValidateByAllowedValues(_allowedValues, caseSensitive);
+
+        foreach (var predicate in _predicates)
+        {
+            for (var index = 0; index < resultValues.Count; index++)
+            {
+                if (predicate(resultValues[index]))
+                    continue;
+
+                throw new Exception($"Value '{_inputValues[index]}' is not validated by the predicate callback.");
+            }
+        }
+
+        return resultValues;
+    }
+}
+
+internal abstract class BaseValueOption<TValue> : BaseValueOption
+    where TValue : IComparable, IEquatable<TValue>
+{
+    private TryParse<TValue>? _tryParseValueCallback;
+    private Func<List<string>, List<TValue>>? _tryParseValuesCallback;
+
+    protected BaseValueOption(int requiredValueCount, int maximumValueCount)
+        : base(requiredValueCount, maximumValueCount)
+    {
+    }
+
     public void SetParsingCallbacks(IParsingCallbacks<TValue> optionCallbacks)
     {
         var type = optionCallbacks.GetType();
+
         // only use overriden methods
-        var methodName = nameof(IParsingCallbacks<TValue>.ValidateValue);
+        var methodName = nameof(IParsingCallbacks<TValue>.TryParseValue);
         if (type.GetMethod(methodName)?.DeclaringType == type)
-            _validateValueCallback ??= optionCallbacks.ValidateValue;
+            _tryParseValueCallback ??= optionCallbacks.TryParseValue;
 
-        methodName = nameof(IParsingCallbacks<TValue>.ConvertValue);
+        methodName = nameof(IParsingCallbacks<TValue>.TryParseValues);
         if (type.GetMethod(methodName)?.DeclaringType == type)
-            _convertValueCallback ??= optionCallbacks.ConvertValue;
-
-        methodName = nameof(IParsingCallbacks<TValue>.ValidateOption);
-        if (type.GetMethod(methodName)?.DeclaringType == type)
-            _validateOptionCallback ??= optionCallbacks.ValidateOption;
+            _tryParseValuesCallback ??= optionCallbacks.TryParseValues;
     }
 
-    public void SetValueValidator(Func<string, bool> validator)
+    public void SetTryParseValueCallback(TryParse<TValue> callback)
     {
-        _validateValueCallback = validator;
+        _tryParseValueCallback = callback;
     }
 
-    public void SetValueConvertor(Func<string, TValue> convertor)
+    public void SetTryParseValuesCallback(Func<List<string>, List<TValue>> callback)
     {
-        _convertValueCallback = convertor;
-    }
-
-    public void SetOptionValidator(Func<IValueContext<TValue>, IArgumentParser, bool> validator)
-    {
-        _validateOptionCallback = validator;
+        _tryParseValuesCallback = callback;
     }
 
     public override void Initialize(IArgumentParser parser)
@@ -105,98 +212,54 @@ internal abstract class BaseValueOption<TValue>
         if (DefaultParsingCallbacks<TValue>.Instance.IsValidParser)
             SetParsingCallbacks(DefaultParsingCallbacks<TValue>.Instance);
 
-        CallbackValidatorGuard();
+        if (_tryParseValueCallback is null && _tryParseValuesCallback is null)
+        {
+            throw new Exception(
+                $"Missing TryParse callback for custom type! Configure a TryParse callback for type '{typeof(TValue).Name}'.");
+        }
     }
 
-    public override void Validate(IArgumentParser parser)
+    protected virtual List<TValue> GetValidatedValues(bool caseSensitive = false)
     {
-        base.Validate(parser);
-
-        if (_validateOptionCallback is not null)
+        var resultValues = new List<TValue>();
+        if (_tryParseValuesCallback is not null)
         {
-            if (!_validateOptionCallback.Invoke(this, parser))
+            resultValues.AddRange(_tryParseValuesCallback(_inputValues));
+
+            if (resultValues == null || resultValues.Count < _inputValues.Count)
                 throw new Exception("Option values cannot be validated.");
         }
-        else
+        else if (_tryParseValueCallback is not null)
         {
-            CallbackValidatorGuard();
-
             foreach (var inputValue in _inputValues)
             {
-                if (_validateValueCallback!.Invoke(inputValue))
-                    continue;
+                if (!_tryParseValueCallback(inputValue, out var result))
+                    throw new Exception($"Invalid input value found!. Value: {inputValue}");
 
-                throw new Exception($"Invalid input value found!. Value: {inputValue}");
+                resultValues.Add(result);
             }
-
-            var values = _inputValues.Select(v => _convertValueCallback!.Invoke(v)).ToList();
-            parser.ValidateByAllowedValues(values, _allowedValues);
-
-            _resultValues.AddRange(values);
         }
+
+        return resultValues;
     }
 
-    public override void ApplyDefaultValue(IApplicationOptions appOptions, PropertyInfo keyProperty)
+    protected virtual bool IsValidValue(string value)
     {
-        if (DefaultValue is null)
-            return;
-
-        if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
-            return;
-
-        keyProperty.SetValue(appOptions, DefaultValue);
-    }
-
-    public override void UpdatePropertyValue(IApplicationOptions appOptions, PropertyInfo keyProperty)
-    {
-        if (keyProperty.PropertyType.IsAssignableFrom(typeof(List<TValue>)))
-        {
-            keyProperty.SetValue(appOptions, _resultValues);
-        }
-        else if (keyProperty.PropertyType.IsAssignableFrom(typeof(TValue[])))
-        {
-            keyProperty.SetValue(appOptions, _resultValues.ToArray());
-        }
-        else if (keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
-        {
-            keyProperty.SetValue(appOptions, _resultValues.First());
-        }
-    }
-
-    public override void Clear()
-    {
-        base.Clear();
-        _resultValues.Clear();
-    }
-
-    private void CallbackValidatorGuard()
-    {
-        if (_validateValueCallback is null)
-        {
-            throw new Exception(
-                $"Missing value validator callback! Configure a value validator for type '{typeof(TValue).Name}'.");
-        }
-
-        if (_convertValueCallback is null)
-        {
-            throw new Exception(
-                $"Missing value convertor callback! Configure a value convertor for type '{typeof(TValue).Name}'.");
-        }
+        return _tryParseValueCallback is not null &&
+               _tryParseValueCallback(value, out _);
     }
 }
 
 internal abstract class BaseValueOption : BaseOption, IValueOption
 {
-    public bool EnableValueTokenSplitting { get; init; }
-
     public List<string> ValueTokens => _valueTokens.ToList();
 
     public List<string> InputValues => _inputValues.ToList();
 
     public override int ValueCount => _inputValues.Count;
 
-    private protected List<string> _valueTokens;
-    private protected List<string> _inputValues;
+    protected List<string> _valueTokens;
+    protected List<string> _inputValues;
 
     protected BaseValueOption(int requiredValueCount, int maximumValueCount)
     {
@@ -216,9 +279,7 @@ internal abstract class BaseValueOption : BaseOption, IValueOption
         ValueArity = (requiredValueCount, maximumValueCount);
     }
 
-    public abstract void ApplyDefaultValue(IApplicationOptions appOptions, PropertyInfo keyProperty);
-
-    public abstract void UpdatePropertyValue(IApplicationOptions appOptions, PropertyInfo keyProperty);
+    public abstract void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty);
 
     public override void Clear()
     {

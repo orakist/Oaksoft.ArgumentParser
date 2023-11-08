@@ -2,19 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Oaksoft.ArgumentParser.Definitions;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Base;
 
 internal static class OptionValueHelper
 {
-    public static StringComparison ComparisonFlag(this IArgumentParser parser)
-    {
-        return parser.CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-    }
-
     public static void ValidateByAllowedValues<TValue>(
-        this IArgumentParser parser, List<TValue> inputValues, ICollection<TValue> allowedValues)
+        this List<TValue> inputValues, ICollection<TValue> allowedValues, bool caseSensitive)
         where TValue : IComparable, IEquatable<TValue>
     {
         if (allowedValues.Count <= 0)
@@ -22,7 +16,7 @@ internal static class OptionValueHelper
 
         if (typeof(TValue) == typeof(string))
         {
-            var flag = parser.ComparisonFlag();
+            var flag = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
             foreach (var inputValue in inputValues.Cast<string>())
             {
                 if (allowedValues.Cast<string>().Any(a => a.Equals(inputValue, flag)))
@@ -42,6 +36,24 @@ internal static class OptionValueHelper
                 var values = string.Join('|', allowedValues);
                 throw new Exception($"Option value '{inputValue}' not recognized. Must be one of: {values}");
             }
+        }
+    }
+
+    public static IEnumerable<string> GetInputValues(
+        this string valueToken, ValueDelimiterRules valueDelimiter, bool enableValueTokenSplitting)
+    {
+        var symbols = valueDelimiter.GetSymbols().ToList();
+
+        if (enableValueTokenSplitting)
+        {
+            foreach (var value in valueToken.EnumerateByDelimiter(symbols))
+            {
+                yield return value;
+            }
+        }
+        else
+        {
+            yield return valueToken;
         }
     }
 

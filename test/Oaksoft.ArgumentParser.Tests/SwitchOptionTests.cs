@@ -19,6 +19,7 @@ namespace Oaksoft.ArgumentParser.Tests
             var result = sut.Parse(args);
 
             // Verify outcome
+            sut.IsValid.ShouldBeTrue();
             result.Value.ShouldBeTrue();
             result.NullValue.ShouldBeEquivalentTo(true);
         }

@@ -60,11 +60,7 @@ internal static class OptionRegistrar
     {
         var optionLimits = optionArity.GetLimits();
         var valueLimits = valueArity.GetLimits();
-        var option = new SequentialNamedOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max)
-        {
-            EnableValueTokenSplitting = true,
-            AllowSequentialValues = true
-        };
+        var option = new SequentialNamedOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max);
 
         builder.RegisterOptionProperty<TSource>(option, keyProperty);
 
@@ -96,11 +92,7 @@ internal static class OptionRegistrar
     {
         var optionLimits = optionArity.GetLimits();
         var valueLimits = valueArity.GetLimits();
-        var option = new SequentialNamedOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max)
-        {
-            EnableValueTokenSplitting = true,
-            AllowSequentialValues = true
-        };
+        var option = new SequentialNamedOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max);
 
         builder.RegisterOptionProperty<TSource>(option, keyProperty, countProperty);
 
@@ -128,10 +120,7 @@ internal static class OptionRegistrar
         where TValue : IComparable, IEquatable<TValue>
     {
         var valueLimits = valueArity.GetLimits();
-        var option = new SequentialValueOption<TValue>(valueLimits.Min, valueLimits.Max)
-        {
-            EnableValueTokenSplitting = true
-        };
+        var option = new SequentialValueOption<TValue>(valueLimits.Min, valueLimits.Max);
 
         builder.RegisterOptionProperty<TSource>(option, keyProperty);
 
@@ -159,10 +148,7 @@ internal static class OptionRegistrar
         where TValue : IComparable, IEquatable<TValue>
     {
         var valueLimits = valueArity.GetLimits();
-        var option = new SequentialValueOption<TValue>(valueLimits.Min, valueLimits.Max)
-        {
-            EnableValueTokenSplitting = true
-        };
+        var option = new SequentialValueOption<TValue>(valueLimits.Min, valueLimits.Max);
 
         builder.RegisterOptionProperty<TSource>(option, keyProperty, countProperty);
 

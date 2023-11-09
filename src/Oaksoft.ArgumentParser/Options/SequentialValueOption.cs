@@ -16,9 +16,9 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
         OptionArity = (0, 0);
     }
 
-    public override void Initialize(IArgumentParser parser)
+    public override void Initialize()
     {
-        base.Initialize(parser);
+        base.Initialize();
 
         if (string.IsNullOrWhiteSpace(Usage))
         {
@@ -26,7 +26,7 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
         }
     }
 
-    public override void Parse(TokenValue[] tokens, IArgumentParser parser)
+    public override void Parse(TokenValue[] tokens)
     {
         foreach (var token in tokens)
         {
@@ -34,10 +34,10 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
                 continue;
 
             var argument = token.Argument;
-            if (argument.IsAliasCandidate(parser.OptionPrefix))
+            if (argument.IsAliasCandidate(_parser!.OptionPrefix))
                 continue;
 
-            var value = argument.GetInputValues(parser.ValueDelimiter, EnableValueTokenSplitting).First();
+            var value = argument.GetInputValues(_parser.ValueDelimiter, EnableValueTokenSplitting).First();
             if (!IsValidValue(value)) 
                 continue;
 
@@ -45,13 +45,13 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
             _valueTokens.Add(argument);
         }
 
-        var inputValues = _valueTokens.GetInputValues(parser.ValueDelimiter, EnableValueTokenSplitting);
+        var inputValues = _valueTokens.GetInputValues(_parser!.ValueDelimiter, EnableValueTokenSplitting);
         _inputValues.AddRange(inputValues);
     }
 
-    public override void Validate(IArgumentParser parser)
+    public override void Validate()
     {
-        base.Validate(parser);
+        base.Validate();
 
         IsValid = true;
     }

@@ -15,9 +15,9 @@ internal sealed class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
         OptionArity = (0, 0);
     }
 
-    public override void Initialize(IArgumentParser parser)
+    public override void Initialize()
     {
-        base.Initialize(parser);
+        base.Initialize();
 
         if (string.IsNullOrWhiteSpace(Usage))
         {
@@ -25,7 +25,7 @@ internal sealed class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
         }
     }
 
-    public override void Parse(TokenValue[] tokens, IArgumentParser parser)
+    public override void Parse(TokenValue[] tokens)
     {
         foreach (var token in tokens)
         {
@@ -33,7 +33,7 @@ internal sealed class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
                 continue;
 
             var argument = token.Argument;
-            if (argument.IsAliasCandidate(parser.OptionPrefix))
+            if (argument.IsAliasCandidate(_parser!.OptionPrefix))
                 continue;
 
             if (!IsValidValue(argument))
@@ -47,9 +47,9 @@ internal sealed class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
         _inputValues.AddRange(_valueTokens);
     }
 
-    public override void Validate(IArgumentParser parser)
+    public override void Validate()
     {
-        base.Validate(parser);
+        base.Validate();
 
         IsValid = true;
     }

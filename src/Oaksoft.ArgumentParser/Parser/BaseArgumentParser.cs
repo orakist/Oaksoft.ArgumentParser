@@ -82,7 +82,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
                 AutoInitializeOptionAliases(option, aliases);
 
-                option.Initialize(this);
+                option.SetParser(this);
+
+                option.Initialize();
             }
             catch (Exception ex)
             {
@@ -128,7 +130,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             try
             {
-                option.Parse(tokens, this);
+                option.Parse(tokens);
             }
             catch (Exception ex)
             {
@@ -143,7 +145,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             try
             {
-                option.Validate(this);
+                option.Validate();
             }
             catch (Exception ex)
             {
@@ -397,7 +399,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             autoAliases = autoAliases.Select(a => a.ToLowerInvariant());
 
         var suggestedAliases = autoAliases.ToArray();
-        option.SetAliases(suggestedAliases);
+        option.AddAliases(suggestedAliases);
         aliases.AddRange(suggestedAliases);
     }
 

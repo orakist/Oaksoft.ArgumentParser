@@ -11,7 +11,7 @@ internal sealed class SequentialNamedOption<TValue>
     : BaseSequentialValueOption<TValue>, ISequentialNamedOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    public bool AllowSequentialValues { get; init; }
+    public bool AllowSequentialValues { get; private set; }
 
     public string ShortAlias => _prefixAliases.MinBy(k => k.Length)!;
 
@@ -30,6 +30,7 @@ internal sealed class SequentialNamedOption<TValue>
         : base(requiredValueCount, maximumValueCount)
     {
         OptionArity = (requiredOptionCount, maximumOptionCount);
+        AllowSequentialValues = true;
 
         _aliases = new List<string>();
         _optionTokens = new List<string>();
@@ -38,16 +39,22 @@ internal sealed class SequentialNamedOption<TValue>
 
     public void SetOptionArity(ArityType optionArity)
     {
+        ParserInitializedGuard();
+
         OptionArity = optionArity.GetLimits();
     }
 
     public void SetOptionArity(int requiredOptionCount, int maximumOptionCount)
     {
+        ParserInitializedGuard();
+
         OptionArity = (requiredOptionCount, maximumOptionCount);
     }
 
-    public override void SetAliases(params string[] aliases)
+    public override void AddAliases(params string[] aliases)
     {
+        ParserInitializedGuard();
+
         var values = aliases
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Select(s => s.Trim());
@@ -55,9 +62,16 @@ internal sealed class SequentialNamedOption<TValue>
         _aliases.AddRange(values);
     }
 
-    public override void Initialize(IArgumentParser parser)
+    public void SetAllowSequentialValues(bool enabled)
     {
-        base.Initialize(parser);
+        ParserInitializedGuard();
+
+        AllowSequentialValues = enabled;
+    }
+
+    public override void Initialize()
+    {
+        base.Initialize();
 
         if (_aliases.Count < 1)
             throw new ArgumentException("Option alias not found! Use WithAliases() to set aliases of the option.");
@@ -68,19 +82,19 @@ internal sealed class SequentialNamedOption<TValue>
             if (string.IsNullOrWhiteSpace(alias) || !char.IsAsciiLetter(alias[0]))
                 throw new ArgumentException($"Invalid alias '{_aliases[index]}' found!");
 
-            _aliases[index] = parser.CaseSensitive ? alias : alias.ToLowerInvariant();
+            _aliases[index] = _parser!.CaseSensitive ? alias : alias.ToLowerInvariant();
         }
 
-        var aliases = parser.OptionPrefix.GetPrefixedAliases(_aliases);
+        var aliases = _parser!.OptionPrefix.GetPrefixedAliases(_aliases);
         _prefixAliases.AddRange(aliases.OrderByDescending(a => a.Length).ToList());
 
         if (string.IsNullOrWhiteSpace(Usage))
             Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
     }
 
-    public override void Parse(TokenValue[] tokens, IArgumentParser parser)
+    public override void Parse(TokenValue[] tokens)
     {
-        var compareFlag = parser.CaseSensitive 
+        var compareFlag = _parser!.CaseSensitive 
             ? StringComparison.Ordinal 
             : StringComparison.OrdinalIgnoreCase;
 
@@ -108,7 +122,7 @@ internal sealed class SequentialNamedOption<TValue>
                     {
                         var nextToken = tokens[i + 1];
 
-                        if (nextToken.Argument.IsAliasCandidate(parser.OptionPrefix))
+                        if (nextToken.Argument.IsAliasCandidate(_parser.OptionPrefix))
                             break;
 
                         nextToken.IsParsed = true;
@@ -124,7 +138,7 @@ internal sealed class SequentialNamedOption<TValue>
                 // parse --option=val or -o=val or -oval
                 // parse --option:val or -o:val
                 // parse "--option val" or "-o val"
-                var optionValue = argument.GetOptionValue(alias, parser.TokenDelimiter);
+                var optionValue = argument.GetOptionValue(alias, _parser.TokenDelimiter);
                 if (string.IsNullOrWhiteSpace(optionValue))
                     continue;
 
@@ -134,13 +148,13 @@ internal sealed class SequentialNamedOption<TValue>
         }
 
         // parse multiple values 'str1;str2;str3'
-        var inputValues = _valueTokens.GetInputValues(parser.ValueDelimiter, EnableValueTokenSplitting);
+        var inputValues = _valueTokens.GetInputValues(_parser.ValueDelimiter, EnableValueTokenSplitting);
         _inputValues.AddRange(inputValues);
     }
 
-    public override void Validate(IArgumentParser parser)
+    public override void Validate()
     {
-        base.Validate(parser);
+        base.Validate();
 
         IsValid = true;
     }

@@ -116,24 +116,24 @@ public static class ConfigureExtensions
     }
     #endregion
 
-    #region Alias Configuration
-    public static ISwitchOption WithAliases(this ISwitchOption option, params string[] aliases)
+    #region Option Alias Configuration
+    public static ISwitchOption AddAliases(this ISwitchOption option, params string[] aliases)
     {
-        ((SwitchOption)option).SetAliases(aliases);
+        ((SwitchOption)option).AddAliases(aliases);
         return option;
     }
 
-    public static IScalarNamedOption<TValue> WithAliases<TValue>(this IScalarNamedOption<TValue> option, params string[] aliases)
+    public static IScalarNamedOption<TValue> AddAliases<TValue>(this IScalarNamedOption<TValue> option, params string[] aliases)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarNamedOption<TValue>)option).SetAliases(aliases);
+        ((ScalarNamedOption<TValue>)option).AddAliases(aliases);
         return option;
     }
 
-    public static ISequentialNamedOption<TValue> WithAliases<TValue>(this ISequentialNamedOption<TValue> option, params string[] aliases)
+    public static ISequentialNamedOption<TValue> AddAliases<TValue>(this ISequentialNamedOption<TValue> option, params string[] aliases)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((SequentialNamedOption<TValue>)option).SetAliases(aliases);
+        ((SequentialNamedOption<TValue>)option).AddAliases(aliases);
         return option;
     }
     #endregion
@@ -271,7 +271,29 @@ public static class ConfigureExtensions
         ((ScalarValueOption<TValue>)option).SetDefaultValue(defaultValue);
         return option;
     }
+    #endregion
 
+    #region Sequential Value Configuration
+    public static ISequentialNamedOption<TValue> WithAllowSequentialValues<TValue>(this ISequentialNamedOption<TValue> option, bool enabled)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        ((SequentialNamedOption<TValue>)option).SetAllowSequentialValues(enabled);
+        return option;
+    }
+
+    public static ISequentialNamedOption<TValue> WithEnableValueTokenSplitting<TValue>(this ISequentialNamedOption<TValue> option, bool enabled)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        ((SequentialNamedOption<TValue>)option).SetEnableValueTokenSplitting(enabled);
+        return option;
+    }
+
+    public static ISequentialValueOption<TValue> WithEnableValueTokenSplitting<TValue>(this ISequentialValueOption<TValue> option, bool enabled)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        ((SequentialValueOption<TValue>)option).SetEnableValueTokenSplitting(enabled);
+        return option;
+    }
     #endregion
 
     #region Allowed Values Configuration
@@ -288,7 +310,6 @@ public static class ConfigureExtensions
         ((SequentialNamedOption<TValue>)option).SetAllowedValues(allowedValues);
         return option;
     }
-
 
     public static IScalarValueOption<TValue> WithAllowedValues<TValue>(this IScalarValueOption<TValue> option, params TValue[] allowedValues)
         where TValue : IComparable, IEquatable<TValue>

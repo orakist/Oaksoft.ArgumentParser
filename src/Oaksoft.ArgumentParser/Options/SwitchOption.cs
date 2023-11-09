@@ -38,16 +38,22 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
 
     public void SetOptionArity(ArityType optionArity)
     {
+        ParserInitializedGuard();
+
         OptionArity = optionArity.GetLimits();
     }
 
     public void SetOptionArity(int requiredOptionCount, int maximumOptionCount)
     {
+        ParserInitializedGuard();
+
         OptionArity = (requiredOptionCount, maximumOptionCount);
     }
 
-    public override void SetAliases(params string[] aliases)
+    public override void AddAliases(params string[] aliases)
     {
+        ParserInitializedGuard();
+
         var values = aliases
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Select(s => s.Trim());
@@ -57,12 +63,14 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
 
     public void SetDefaultValue(bool defaultValue)
     {
+        ParserInitializedGuard();
+
         DefaultValue = new Ref<bool>(defaultValue);
     }
 
-    public override void Initialize(IArgumentParser parser)
+    public override void Initialize()
     {
-        base.Initialize(parser);
+        base.Initialize();
 
         if (_aliases.Count < 1)
             throw new ArgumentException("Option alias not found! Use WithAliases() to set aliases of the option.");
@@ -73,19 +81,19 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
             if (string.IsNullOrWhiteSpace(alias) || !char.IsAsciiLetter(alias[0]))
                 throw new ArgumentException($"Invalid alias '{_aliases[index]}' found!");
 
-            _aliases[index] = parser.CaseSensitive ? alias : alias.ToLowerInvariant();
+            _aliases[index] = _parser!.CaseSensitive ? alias : alias.ToLowerInvariant();
         }
 
-        var aliases = parser.OptionPrefix.GetPrefixedAliases(_aliases);
+        var aliases = _parser!.OptionPrefix.GetPrefixedAliases(_aliases);
         _prefixAliases.AddRange(aliases.OrderByDescending(a => a.Length).ToList());
 
         if (string.IsNullOrWhiteSpace(Usage))
             Usage = ShortAlias;
     }
 
-    public override void Parse(TokenValue[] tokens, IArgumentParser parser)
+    public override void Parse(TokenValue[] tokens)
     {
-        var compareFlag = parser.CaseSensitive
+        var compareFlag = _parser!.CaseSensitive
             ? StringComparison.Ordinal
             : StringComparison.OrdinalIgnoreCase;
 
@@ -124,7 +132,7 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
                     // parse --option=true or -o=true or -otrue
                     // parse --option:true or -o:true
                     // parse "--option true" or "-o true"
-                    var optionValue = argument.GetOptionValue(alias, parser.TokenDelimiter);
+                    var optionValue = argument.GetOptionValue(alias, _parser.TokenDelimiter);
                     if (string.IsNullOrWhiteSpace(optionValue))
                         continue;
 
@@ -138,9 +146,9 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
         _inputValues.AddRange(_valueTokens.Where(v => !string.IsNullOrWhiteSpace(v)));
     }
 
-    public override void Validate(IArgumentParser parser)
+    public override void Validate()
     {
-        base.Validate(parser);
+        base.Validate();
 
         if (_inputValues.Count > 0)
         {

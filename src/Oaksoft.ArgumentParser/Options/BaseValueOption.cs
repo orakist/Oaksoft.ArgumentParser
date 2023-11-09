@@ -24,6 +24,8 @@ internal abstract class BaseScalarValueOption<TValue>
 
     public void SetDefaultValue(TValue defaultValue)
     {
+        ParserInitializedGuard();
+
         if (defaultValue is string strValue)
         {
             var value = string.IsNullOrWhiteSpace(strValue) ? null : strValue.Trim();
@@ -35,14 +37,14 @@ internal abstract class BaseScalarValueOption<TValue>
         }
     }
 
-    public override void Validate(IArgumentParser parser)
+    public override void Validate()
     {
-        base.Validate(parser);
+        base.Validate();
 
         if (_inputValues.Count <= 0) 
             return;
 
-        var resultValues = GetValidatedValues(parser.CaseSensitive);
+        var resultValues = GetValidatedValues();
 
         // if last switch option contains value assign it,
         // otherwise we will use default value
@@ -75,7 +77,7 @@ internal abstract class BaseSequentialValueOption<TValue>
     : BaseAllowedValuesOption<TValue>, ISequentialValueOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    public bool EnableValueTokenSplitting { get; init; }
+    public bool EnableValueTokenSplitting { get; private set; }
 
     public List<TValue> ResultValues => _resultValues.ToList();
 
@@ -85,16 +87,24 @@ internal abstract class BaseSequentialValueOption<TValue>
         : base(requiredValueCount, maximumValueCount)
     {
         _resultValues = new List<TValue>();
+        EnableValueTokenSplitting = true;
     }
 
-    public override void Validate(IArgumentParser parser)
+    public void SetEnableValueTokenSplitting(bool enabled)
     {
-        base.Validate(parser);
+        ParserInitializedGuard();
+
+        EnableValueTokenSplitting = enabled;
+    }
+
+    public override void Validate()
+    {
+        base.Validate();
 
         if (_inputValues.Count <= 0)
             return;
 
-        var resultValues = GetValidatedValues(parser.CaseSensitive);
+        var resultValues = GetValidatedValues();
 
         _resultValues.AddRange(resultValues);
     }
@@ -136,24 +146,29 @@ internal abstract class BaseAllowedValuesOption<TValue>
 
     public void AddPredicate(Predicate<TValue> predicate)
     {
+        ParserInitializedGuard();
+
         _predicates.Add(predicate);
     }
 
     public void SetAllowedValues(params TValue[] allowedValues)
     {
+        ParserInitializedGuard();
+
         var values = allowedValues
             .Where(s => s is not string value || !string.IsNullOrWhiteSpace(value))
             .Select(s => s is string value ? (TValue)(object)value.Trim() : s);
 
+        _allowedValues.Clear();
         foreach (var value in values)
             _allowedValues.Add(value);
     }
 
-    protected override List<TValue> GetValidatedValues(bool caseSensitive = false)
+    protected override List<TValue> GetValidatedValues()
     {
-        var resultValues = base.GetValidatedValues(caseSensitive);
+        var resultValues = base.GetValidatedValues();
 
-        resultValues.ValidateByAllowedValues(_allowedValues, caseSensitive);
+        resultValues.ValidateByAllowedValues(_allowedValues, _parser!.CaseSensitive);
 
         foreach (var predicate in _predicates)
         {
@@ -183,34 +198,31 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
 
     public void SetParsingCallbacks(IParsingCallbacks<TValue> optionCallbacks)
     {
-        var type = optionCallbacks.GetType();
+        ParserInitializedGuard();
 
-        // only use overriden methods
-        var methodName = nameof(IParsingCallbacks<TValue>.TryParseValue);
-        if (type.GetMethod(methodName)?.DeclaringType == type)
-            _tryParseValueCallback ??= optionCallbacks.TryParseValue;
-
-        methodName = nameof(IParsingCallbacks<TValue>.TryParseValues);
-        if (type.GetMethod(methodName)?.DeclaringType == type)
-            _tryParseValuesCallback ??= optionCallbacks.TryParseValues;
+        SetTryParseValueCallbacks(optionCallbacks);
     }
 
     public void SetTryParseValueCallback(TryParse<TValue> callback)
     {
+        ParserInitializedGuard();
+
         _tryParseValueCallback = callback;
     }
 
     public void SetTryParseValuesCallback(Func<List<string>, List<TValue>> callback)
     {
+        ParserInitializedGuard();
+
         _tryParseValuesCallback = callback;
     }
 
-    public override void Initialize(IArgumentParser parser)
+    public override void Initialize()
     {
-        base.Initialize(parser);
+        base.Initialize();
 
         if (DefaultParsingCallbacks<TValue>.Instance.IsValidParser)
-            SetParsingCallbacks(DefaultParsingCallbacks<TValue>.Instance);
+            SetTryParseValueCallbacks(DefaultParsingCallbacks<TValue>.Instance);
 
         if (_tryParseValueCallback is null && _tryParseValuesCallback is null)
         {
@@ -219,7 +231,7 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
         }
     }
 
-    protected virtual List<TValue> GetValidatedValues(bool caseSensitive = false)
+    protected virtual List<TValue> GetValidatedValues()
     {
         var resultValues = new List<TValue>();
         if (_tryParseValuesCallback is not null)
@@ -248,6 +260,20 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
         return _tryParseValueCallback is not null &&
                _tryParseValueCallback(value, out _);
     }
+
+    private void SetTryParseValueCallbacks(IParsingCallbacks<TValue> optionCallbacks)
+    {
+        var type = optionCallbacks.GetType();
+
+        // only use overriden methods
+        var methodName = nameof(IParsingCallbacks<TValue>.TryParseValue);
+        if (type.GetMethod(methodName)?.DeclaringType == type)
+            _tryParseValueCallback ??= optionCallbacks.TryParseValue;
+
+        methodName = nameof(IParsingCallbacks<TValue>.TryParseValues);
+        if (type.GetMethod(methodName)?.DeclaringType == type)
+            _tryParseValuesCallback ??= optionCallbacks.TryParseValues;
+    }
 }
 
 internal abstract class BaseValueOption : BaseOption, IValueOption
@@ -271,11 +297,15 @@ internal abstract class BaseValueOption : BaseOption, IValueOption
 
     public void SetValueArity(ArityType valueArity)
     {
+        ParserInitializedGuard();
+
         ValueArity = valueArity.GetLimits();
     }
 
     public void SetValueArity(int requiredValueCount, int maximumValueCount)
     {
+        ParserInitializedGuard();
+
         ValueArity = (requiredValueCount, maximumValueCount);
     }
 

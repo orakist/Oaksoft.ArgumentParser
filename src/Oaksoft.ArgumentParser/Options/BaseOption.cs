@@ -28,6 +28,8 @@ internal abstract class BaseOption : IBaseOption
 
     public PropertyInfo? CountProperty { get; private set; }
 
+    protected IArgumentParser? _parser;
+
     public void SetKeyProperty(PropertyInfo property)
     {
         KeyProperty = property;
@@ -38,8 +40,15 @@ internal abstract class BaseOption : IBaseOption
         CountProperty = property;
     }
 
+    public void SetParser(IArgumentParser parser)
+    {
+        _parser = parser;
+    }
+
     public void SetName(string name)
     {
+        ParserInitializedGuard();
+
         if (string.IsNullOrWhiteSpace(name))
             return;
 
@@ -48,6 +57,8 @@ internal abstract class BaseOption : IBaseOption
 
     public void SetUsage(string usage)
     {
+        ParserInitializedGuard();
+
         if (string.IsNullOrWhiteSpace(usage))
             return;
 
@@ -56,17 +67,19 @@ internal abstract class BaseOption : IBaseOption
 
     public void SetDescription(string description)
     {
+        ParserInitializedGuard();
+
         if (string.IsNullOrWhiteSpace(description))
             return;
 
         Description = description.Trim();
     }
     
-    public virtual void SetAliases(params string[] aliases)
+    public virtual void AddAliases(params string[] aliases)
     {
     }
 
-    public virtual void Initialize(IArgumentParser parser)
+    public virtual void Initialize()
     {
         if (ValueArity.Min < 0 || ValueArity.Max < ValueArity.Min)
         {
@@ -95,9 +108,9 @@ internal abstract class BaseOption : IBaseOption
         }
     }
 
-    public abstract void Parse(TokenValue[] tokens, IArgumentParser parser);
+    public abstract void Parse(TokenValue[] tokens);
 
-    public virtual void Validate(IArgumentParser parser)
+    public virtual void Validate()
     {
         if (OptionCount < OptionArity.Min)
         {
@@ -136,4 +149,11 @@ internal abstract class BaseOption : IBaseOption
     {
         return value < 2 ? " was" : "s were";
     }
+
+    protected void ParserInitializedGuard()
+    {
+        if (_parser != null)
+            throw new Exception("An option cannot be modified after building the argument parser.");
+    }
+
 }

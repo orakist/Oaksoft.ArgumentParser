@@ -1,4 +1,4 @@
-﻿namespace Oaksoft.ArgumentParser.Parser;
+﻿namespace Oaksoft.ArgumentParser.Builder;
 
 public interface IParserSettingsBuilder
 {

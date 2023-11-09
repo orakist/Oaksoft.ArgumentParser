@@ -1,4 +1,5 @@
-﻿using Oaksoft.ArgumentParser.Definitions;
+﻿using Oaksoft.ArgumentParser.Builder;
+using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser;

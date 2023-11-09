@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Parser;
@@ -11,7 +12,8 @@ namespace Oaksoft.ArgumentParser.Base;
 internal static class OptionRegistrar
 {
     public static ISwitchOption RegisterSwitchOption<TSource>(
-        this IArgumentParserBuilder builder, PropertyInfo keyProperty, bool mandatoryOption)
+        this IArgumentParserBuilder builder, 
+        PropertyInfo keyProperty, bool mandatoryOption)
         where TSource : IApplicationOptions
     {
         var optionLimits = (mandatoryOption ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
@@ -23,7 +25,8 @@ internal static class OptionRegistrar
     }
 
     public static ISwitchOption RegisterSwitchOption<TSource>(
-        this IArgumentParserBuilder builder, PropertyInfo keyProperty, ArityType optionArity)
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, ArityType optionArity)
         where TSource : IApplicationOptions
     {
         var optionLimits = optionArity.GetLimits();
@@ -35,8 +38,8 @@ internal static class OptionRegistrar
     }
 
     public static IScalarNamedOption<TValue> RegisterNamedOption<TSource, TValue>(
-        this IArgumentParserBuilder builder, PropertyInfo keyProperty, 
-        bool mustHaveOneValue, bool mandatoryOption)
+        this IArgumentParserBuilder builder, 
+        PropertyInfo keyProperty, bool mustHaveOneValue, bool mandatoryOption)
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
@@ -50,8 +53,8 @@ internal static class OptionRegistrar
     }
 
     public static ISequentialNamedOption<TValue> RegisterNamedOption<TSource, TValue>(
-        this IArgumentParserBuilder builder, PropertyInfo keyProperty, bool enableValueTokenSplitting, 
-        bool allowSequentialValues, ArityType valueArity, ArityType optionArity)
+        this IArgumentParserBuilder builder, 
+        PropertyInfo keyProperty, ArityType valueArity, ArityType optionArity)
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
@@ -59,8 +62,8 @@ internal static class OptionRegistrar
         var valueLimits = valueArity.GetLimits();
         var option = new SequentialNamedOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max)
         {
-            EnableValueTokenSplitting = enableValueTokenSplitting,
-            AllowSequentialValues = allowSequentialValues
+            EnableValueTokenSplitting = true,
+            AllowSequentialValues = true
         };
 
         builder.RegisterOptionProperty<TSource>(option, keyProperty);
@@ -69,7 +72,8 @@ internal static class OptionRegistrar
     }
 
     public static IScalarNamedOption<TValue> RegisterNamedOption<TSource, TValue>(
-        this IArgumentParserBuilder builder, PropertyInfo keyProperty, PropertyInfo flagProperty,
+        this IArgumentParserBuilder builder, 
+        PropertyInfo keyProperty, PropertyInfo flagProperty,
         bool mustHaveOneValue, bool mandatoryOption)
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
@@ -84,8 +88,8 @@ internal static class OptionRegistrar
     }
 
     public static ISequentialNamedOption<TValue> RegisterNamedOption<TSource, TValue>(
-        this IArgumentParserBuilder builder, PropertyInfo keyProperty, PropertyInfo countProperty,
-        bool enableValueTokenSplitting, bool allowSequentialValues,
+        this IArgumentParserBuilder builder, 
+        PropertyInfo keyProperty, PropertyInfo countProperty,
         ArityType valueArity, ArityType optionArity)
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
@@ -94,8 +98,8 @@ internal static class OptionRegistrar
         var valueLimits = valueArity.GetLimits();
         var option = new SequentialNamedOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max)
         {
-            EnableValueTokenSplitting = enableValueTokenSplitting,
-            AllowSequentialValues = allowSequentialValues
+            EnableValueTokenSplitting = true,
+            AllowSequentialValues = true
         };
 
         builder.RegisterOptionProperty<TSource>(option, keyProperty, countProperty);
@@ -104,7 +108,8 @@ internal static class OptionRegistrar
     }
 
     public static IScalarValueOption<TValue> RegisterValueOption<TSource, TValue>(
-        this IArgumentParserBuilder builder, PropertyInfo keyProperty, bool mustHaveOneValue)
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, bool mustHaveOneValue)
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
@@ -117,15 +122,15 @@ internal static class OptionRegistrar
     }
 
     public static ISequentialValueOption<TValue> RegisterValueOption<TSource, TValue>(
-        this IArgumentParserBuilder builder, PropertyInfo keyProperty, 
-        bool enableValueTokenSplitting, ArityType valueArity)
+        this IArgumentParserBuilder builder, 
+        PropertyInfo keyProperty, ArityType valueArity)
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
         var valueLimits = valueArity.GetLimits();
         var option = new SequentialValueOption<TValue>(valueLimits.Min, valueLimits.Max)
         {
-            EnableValueTokenSplitting = enableValueTokenSplitting
+            EnableValueTokenSplitting = true
         };
 
         builder.RegisterOptionProperty<TSource>(option, keyProperty);
@@ -134,8 +139,8 @@ internal static class OptionRegistrar
     }
 
     public static IScalarValueOption<TValue> RegisterValueOption<TSource, TValue>(
-        this IArgumentParserBuilder builder, PropertyInfo keyProperty, 
-        PropertyInfo flagProperty, bool mustHaveOneValue)
+        this IArgumentParserBuilder builder, 
+        PropertyInfo keyProperty, PropertyInfo flagProperty, bool mustHaveOneValue)
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
@@ -148,15 +153,15 @@ internal static class OptionRegistrar
     }
 
     public static ISequentialValueOption<TValue> RegisterValueOption<TSource, TValue>(
-        this IArgumentParserBuilder builder, PropertyInfo keyProperty, PropertyInfo countProperty,
-        bool enableValueTokenSplitting, ArityType valueArity)
+        this IArgumentParserBuilder builder, 
+        PropertyInfo keyProperty, PropertyInfo countProperty, ArityType valueArity)
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
         var valueLimits = valueArity.GetLimits();
         var option = new SequentialValueOption<TValue>(valueLimits.Min, valueLimits.Max)
         {
-            EnableValueTokenSplitting = enableValueTokenSplitting
+            EnableValueTokenSplitting = true
         };
 
         builder.RegisterOptionProperty<TSource>(option, keyProperty, countProperty);

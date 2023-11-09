@@ -5,8 +5,9 @@ using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
+using Oaksoft.ArgumentParser.Parser;
 
-namespace Oaksoft.ArgumentParser.Parser;
+namespace Oaksoft.ArgumentParser.Builder;
 
 internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<TOptions>
     where TOptions : IApplicationOptions
@@ -24,7 +25,6 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     private readonly List<BaseOption> _baseOptions;
 
     private Action<IParserSettingsBuilder>? _configureSettings;
-    private Action<IArgumentParserBuilder<TOptions>>? _configureOptions;
 
     public ArgumentParserBuilder(
         TOptions options, bool caseSensitive, OptionPrefixRules optionPrefix, 
@@ -76,12 +76,6 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         return this;
     }
 
-    public IArgumentParserBuilder<TOptions> ConfigureOptions(Action<IArgumentParserBuilder<TOptions>> action)
-    {
-        _configureOptions = action;
-        return this;
-    }
-
     public void RegisterOption(BaseOption option)
     {
         _baseOptions.Add(option);
@@ -102,7 +96,6 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     public IArgumentParser<TOptions> Build()
     {
         _configureSettings?.Invoke(_settingsBuilder);
-        _configureOptions?.Invoke(this);
 
         BuildDefaultSettings();
 
@@ -151,8 +144,9 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         if (options.Any(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help)))
             return;
 
-        this.AddSwitchOption(o => o.Help)
-            .WithDescription("Prints this help information.");
+        this.AddSwitchOption(
+            p => p.Help, 
+            o => o.WithDescription("Prints this help information."));
     }
 
     private static string? BuildTitleLine()

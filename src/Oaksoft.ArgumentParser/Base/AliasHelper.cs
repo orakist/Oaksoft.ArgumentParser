@@ -166,7 +166,7 @@ internal static class AliasHelper
         }
     }
 
-    private static IEnumerable<string> GetHumanizedWords(string name)
+    public static IEnumerable<string> GetHumanizedWords(string name)
     {
         var candidates = name.Replace('_', ' ')
             .TrimStart(_suggestionTrimChars)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
@@ -56,23 +57,6 @@ internal sealed class ArgumentParser<TOptions>
         AutoPrintErrorText();
 
         return _appOptions;
-    }
-
-    public override string GetHeaderText()
-    {
-        return BuildHeaderText(true, true).ToString();
-    }
-
-    public override string GetHelpText(bool? enableColoring = default)
-    {
-        var coloring = enableColoring ?? Settings.EnableColoring ?? true;
-        return BuildHelpText(coloring).ToString();
-    }
-
-    public override string GetErrorText(bool? enableColoring = default)
-    {
-        var coloring = enableColoring ?? Settings.EnableColoring ?? true;
-        return BuildErrorText(coloring).ToString();
     }
 
     private void InitializePropertyInfos()

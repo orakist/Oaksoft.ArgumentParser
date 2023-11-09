@@ -1,6 +1,6 @@
 ﻿using System;
+using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Extensions;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Console;
 
@@ -9,7 +9,7 @@ internal static class Program
     private static void Main(string[] args)
     {
         var parser = CommandLine.CreateParser<ApplicationOptions>()
-            .ConfigureOptions(AddCustomOptions)
+            .ConfigureOptions()
             .Build();
 
         try
@@ -35,65 +35,67 @@ internal static class Program
         }
     }
 
-    private static void AddCustomOptions(IArgumentParserBuilder<ApplicationOptions> builder)
+    private static IArgumentParserBuilder<ApplicationOptions> ConfigureOptions(this IArgumentParserBuilder<ApplicationOptions> builder)
     {
-        builder.AddSwitchOption(o => o.AddSwitch)
-            .WithDescription("Enables the addition operator.");
+        return builder
+            .AddSwitchOption(p => p.AddSwitch,
+                o => o.WithDescription("Enables the addition operator."))
 
-        builder.AddSwitchOption(o => o.SubtractSwitch)
-            .WithDescription("Enables the subtraction operator.");
+            .AddSwitchOption(p => p.SubtractSwitch,
+                o => o.WithDescription("Enables the subtraction operator."))
 
-        builder.AddCountOption(o => o.MultiplySwitch)
-            .WithCustomOptionArity(0, 5)
-            .WithDescription("Enables the multiplication operator.");
+            .AddCountOption(o => o.MultiplySwitch,
+                o => o.WithCustomOptionArity(0, 5)
+                    .WithDescription("Enables the multiplication operator."))
 
-        builder.AddCountOption(o => o.DivideSwitch)
-            .WithDescription("Enables the division operator.");
+            .AddCountOption(o => o.DivideSwitch,
+                o => o.WithDescription("Enables the division operator."))
 
-        builder.AddNamedOption(o => o.AddCount, mustHaveOneValue: false)
-            .WithDefaultValue(1)
-            .AddPredicate(v => v is > 0 and < 21)
-            .WithDescription("Sets addition count. If no option value is given, a random value is generated. Value must be between 1 and 20.");
+            .AddNamedOption(o => o.AddCount,
+                o => o.WithDefaultValue(1)
+                    .AddPredicate(v => v is > 0 and < 21)
+                    .WithDescription(
+                        "Sets addition count. If no option value is given, a random value is generated. Value must be between 1 and 20."))
 
-        builder.AddNamedOption(o => o.SubtractCount)
-            .WithDefaultValue("2")
-            .WithDescription("Sets subtraction count.");
+            .AddNamedOption(o => o.SubtractCount,
+                o => o.WithDefaultValue("2")
+                    .WithDescription("Sets subtraction count."))
 
-        builder.AddNamedOption(o => o.StartTime)
-            .WithDefaultValue(DateTime.Now)
-            .WithDescription("Sets the start time.");
+            .AddNamedOption(o => o.StartTime,
+                o => o.WithDefaultValue(DateTime.Now)
+                    .WithDescription("Sets the start time."))
 
-        builder.AddNamedOption(o => o.MultiplyCount)
-            .WithDefaultValue(0F)
-            .WithDescription("Sets multiplication count.");
+            .AddNamedOption(o => o.MultiplyCount,
+                o => o.WithDefaultValue(0F)
+                    .WithDescription("Sets multiplication count."))
 
-        builder.AddNamedOption(o => o.DivideCount)
-            .WithDefaultValue(0L)
-            .WithDescription("Sets division count.");
+            .AddNamedOption(o => o.DivideCount,
+                o => o.WithDefaultValue(0L)
+                    .WithDescription("Sets division count."))
 
-        builder.AddNamedOption(o => o.AddNumbers)
-            .WithCustomOptionArity(0, 2)
-            .WithCustomValueArity(0, 20)
-            .WithDescription("Defines numbers for addition.");
+            .AddNamedOption(o => o.AddNumbers,
+                o => o.WithCustomOptionArity(0, 2)
+                    .WithCustomValueArity(0, 20)
+                    .WithDescription("Defines numbers for addition."))
 
-        builder.AddNamedOption(o => o.SubtractNumbers)
-            .WithDescription("Defines numbers for subtraction.");
+            .AddNamedOption(o => o.SubtractNumbers,
+                o => o.WithDescription("Defines numbers for subtraction."))
 
-        builder.AddNamedOption(o => o.MultiplyNumbers)
-            .WithDescription("Defines numbers for multiplication.");
+            .AddNamedOption(o => o.MultiplyNumbers,
+                o => o.WithDescription("Defines numbers for multiplication."))
 
-        builder.AddNamedOption(o => o.DivideNumbers)
-            .WithDescription("Defines numbers for division.");
+            .AddNamedOption(o => o.DivideNumbers,
+                o => o.WithDescription("Defines numbers for division."))
 
-        builder.AddNamedOption(o => o.FormulaSign, o => o.FormulaEnabled)
-            .WithDefaultValue("=")
-            .WithDescription("Sets formula sign.");
+            .AddNamedOption(o => o.FormulaSign, o => o.FormulaEnabled,
+                o => o.WithDefaultValue("=")
+                    .WithDescription("Sets formula sign."))
 
-        builder.AddNamedOption(o => o.FormulaResults, o => o.FormulaCount)
-            .WithDescription("Defines formula expressions.");
+            .AddNamedOption(o => o.FormulaResults, o => o.FormulaCount,
+                o => o.WithDescription("Defines formula expressions."))
 
-        builder.AddValueOption(o => o.Variables)
-            .WithUsage("variable-names")
-            .WithDescription("Defines variables to use them in formulas.");
+            .AddValueOption(o => o.Variables,
+                o => o.WithUsage("variable-names")
+                    .WithDescription("Defines variables to use them in formulas."));
     }
 }

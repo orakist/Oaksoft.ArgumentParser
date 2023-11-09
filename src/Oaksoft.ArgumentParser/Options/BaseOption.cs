@@ -40,20 +40,26 @@ internal abstract class BaseOption : IBaseOption
 
     public void SetName(string name)
     {
-        if (!string.IsNullOrWhiteSpace(name))
-            Name = name.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+            return;
+
+        Name = string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
     }
 
     public void SetUsage(string usage)
     {
-        if (!string.IsNullOrWhiteSpace(usage))
-            Usage = usage.Trim();
+        if (string.IsNullOrWhiteSpace(usage))
+            return;
+
+        Usage = string.Join(' ', usage.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
     }
 
-    public void SetDescription(string? description)
+    public void SetDescription(string description)
     {
-        Description = string.IsNullOrWhiteSpace(description) 
-            ? null : description.Trim();
+        if (string.IsNullOrWhiteSpace(description))
+            return;
+
+        Description = description.Trim();
     }
     
     public virtual void SetAliases(params string[] aliases)
@@ -78,7 +84,9 @@ internal abstract class BaseOption : IBaseOption
 
         if (string.IsNullOrWhiteSpace(Name))
         {
-            Name = KeyProperty.Name;
+            throw new ArgumentException(
+                nameof(Name),
+                $"Empty option arity. Every option must have a valid name. Property: {KeyProperty.Name}");
         }
 
         if (string.IsNullOrWhiteSpace(Description))

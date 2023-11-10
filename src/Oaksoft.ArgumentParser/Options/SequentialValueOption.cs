@@ -1,5 +1,4 @@
-﻿using Oaksoft.ArgumentParser.Base;
-using Oaksoft.ArgumentParser.Parser;
+﻿using Oaksoft.ArgumentParser.Parser;
 using System;
 using System.Linq;
 
@@ -33,10 +32,7 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
             if (!token.IsOnlyValue)
                 continue;
 
-            var value = token.Value!
-                .GetInputValues(_parser!.ValueDelimiter, EnableValueTokenSplitting)
-                .First();
-
+            var value = SplitByValueDelimiter(token.Value!).First();
             if (!IsValidValue(value)) 
                 continue;
 
@@ -44,7 +40,8 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
             _valueTokens.Add(token.Value!);
         }
 
-        var inputValues = _valueTokens.GetInputValues(_parser!.ValueDelimiter, EnableValueTokenSplitting);
+        // parse multiple values 'str1;str2;str3'
+        var inputValues = _valueTokens.SelectMany(SplitByValueDelimiter);
         _inputValues.AddRange(inputValues);
     }
 

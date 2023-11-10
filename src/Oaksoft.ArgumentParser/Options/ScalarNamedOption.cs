@@ -48,6 +48,11 @@ internal sealed class ScalarNamedOption<TValue>
         OptionArity = (requiredOptionCount, maximumOptionCount);
     }
 
+    public override List<string> GetAliases()
+    {
+        return _aliases;
+    }
+
     public override void AddAliases(params string[] aliases)
     {
         ParserInitializedGuard();

@@ -126,6 +126,25 @@ internal abstract class BaseSequentialValueOption<TValue>
         base.Clear();
         _resultValues.Clear();
     }
+
+    protected IEnumerable<string> SplitByValueDelimiter(string value)
+    {
+        if(string.IsNullOrWhiteSpace(value))
+            yield break;
+
+        if (!EnableValueTokenSplitting)
+            yield return value.Trim();
+
+        var values = new List<string> { value };
+
+        values = _parser!.ValueDelimiter.GetSymbols()
+            .Aggregate(values, (current, symbol) => current.SelectMany(v => v.Split(symbol)).ToList());
+
+        foreach (var v in values.Where(v => !string.IsNullOrWhiteSpace(v)))
+        {
+            yield return v.Trim();
+        }
+    }
 }
 
 internal abstract class BaseAllowedValuesOption<TValue>
@@ -168,7 +187,7 @@ internal abstract class BaseAllowedValuesOption<TValue>
     {
         var resultValues = base.GetValidatedValues();
 
-        resultValues.ValidateByAllowedValues(_allowedValues, _parser!.CaseSensitive);
+        ValidateByAllowedValues(resultValues);
 
         foreach (var predicate in _predicates)
         {
@@ -182,6 +201,37 @@ internal abstract class BaseAllowedValuesOption<TValue>
         }
 
         return resultValues;
+    }
+
+    private void ValidateByAllowedValues(List<TValue> inputValues)
+    {
+        if (_allowedValues.Count <= 0)
+            return;
+
+        if (typeof(TValue) == typeof(string))
+        {
+            var flag = _parser!.CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+            foreach (var inputValue in inputValues.Cast<string>())
+            {
+                if (_allowedValues.Cast<string>().Any(a => a.Equals(inputValue, flag)))
+                    continue;
+
+                var values = string.Join('|', _allowedValues);
+                throw new Exception($"Option value '{inputValue}' not recognized. Must be one of: {values}");
+            }
+        }
+        else
+        {
+            foreach (var inputValue in inputValues)
+            {
+                if (_allowedValues.Any(a => a.Equals(inputValue)))
+                    continue;
+
+                var values = string.Join('|', _allowedValues);
+                throw new Exception($"Option value '{inputValue}' not recognized. Must be one of: {values}");
+            }
+        }
     }
 }
 

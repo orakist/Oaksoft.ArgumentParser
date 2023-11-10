@@ -27,6 +27,10 @@ public interface IArgumentParser
     string GetErrorText(bool? enableColoring = default);
 
     List<IBaseOption> GetOptions();
+
+    IBaseOption? GetOptionByName(string name);
+
+    IBaseOption? GetOptionByAlias(string alias);
 }
 
 public interface IArgumentParser<out TOptions> : IArgumentParser

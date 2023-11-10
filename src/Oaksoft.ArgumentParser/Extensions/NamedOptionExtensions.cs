@@ -9,7 +9,7 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Extensions;
 
-public static partial class OptionsExtensions
+public static partial class OptionExtensions
 {
     public static IArgumentParserBuilder<TSource> AddNamedOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,

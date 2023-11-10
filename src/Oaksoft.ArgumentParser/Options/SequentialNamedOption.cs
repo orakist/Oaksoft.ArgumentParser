@@ -51,6 +51,11 @@ internal sealed class SequentialNamedOption<TValue>
         OptionArity = (requiredOptionCount, maximumOptionCount);
     }
 
+    public override List<string> GetAliases()
+    {
+        return _aliases;
+    }
+
     public override void AddAliases(params string[] aliases)
     {
         ParserInitializedGuard();
@@ -141,7 +146,7 @@ internal sealed class SequentialNamedOption<TValue>
         }
 
         // parse multiple values 'str1;str2;str3'
-        var inputValues = _valueTokens.GetInputValues(_parser.ValueDelimiter, EnableValueTokenSplitting);
+        var inputValues = _valueTokens.SelectMany(SplitByValueDelimiter);
         _inputValues.AddRange(inputValues);
     }
 

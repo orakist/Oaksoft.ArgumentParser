@@ -50,6 +50,11 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
         OptionArity = (requiredOptionCount, maximumOptionCount);
     }
 
+    public override List<string> GetAliases()
+    {
+        return _aliases;
+    }
+
     public override void AddAliases(params string[] aliases)
     {
         ParserInitializedGuard();

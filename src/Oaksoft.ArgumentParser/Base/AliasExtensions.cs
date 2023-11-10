@@ -6,7 +6,7 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Base;
 
-internal static class AliasHelper
+internal static class AliasExtensions
 {
     private static readonly char[] _suggestionTrimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
     private static readonly char[] _validAliasChars = { '?', '%', '$', '€', '£', '#', '@', '-' };
@@ -148,16 +148,6 @@ internal static class AliasHelper
         }
     }
 
-    public static IEnumerable<char> GetSymbols(this AliasDelimiterRules rules)
-    {
-        if (rules.HasFlag(AliasDelimiterRules.AllowEqualSymbol))
-            yield return '=';
-        if (rules.HasFlag(AliasDelimiterRules.AllowColonSymbol))
-            yield return ':';
-        if (rules.HasFlag(AliasDelimiterRules.AllowWhitespace))
-            yield return ' ';
-    }
-
     public static void ExtractAliasAndValue(
         this TokenItem tokenItem, List<string> aliases, bool caseSensitive,
         OptionPrefixRules prefixRules, AliasDelimiterRules aliasRules)
@@ -207,32 +197,32 @@ internal static class AliasHelper
 
         foreach (var alias in aliases)
         {
-            if (!token.StartsWith(alias, compareFlag))
+            if (!token.AsSpan(2).StartsWith(alias, compareFlag))
                 continue;
 
             if (prefixRules.HasFlag(OptionPrefixRules.AllowDoubleDash))
             {
                 // allow --o or --opt
-                if (token.Length == alias.Length)
+                if (token.Length == alias.Length + 2)
                     return token;
 
                 // allow --o:value or --o=value, --opt:value or --opt=value
-                if (token.Length > alias.Length + 1 && aliasRules.GetSymbols().Any(s => token[alias.Length] == s))
-                    return token[..alias.Length];
+                if (token.Length > alias.Length + 3 && aliasRules.GetSymbols().Any(s => token[alias.Length + 2] == s))
+                    return token[..(alias.Length + 2)];
             }
 
             if (prefixRules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
             {
-                if (alias.Length < 4)
+                if (alias.Length < 2)
                     throw new Exception($"Double dash '--' is not allowed with short aliases! Invalid token: {token}");
 
                 // allow only --opt
-                if (token.Length == alias.Length)
+                if (token.Length == alias.Length + 2)
                     return token;
 
                 // allow --opt:value or --opt=value
-                if (token.Length > alias.Length + 1 && aliasRules.GetSymbols().Any(s => token[alias.Length] == s))
-                    return token[..alias.Length];
+                if (token.Length > alias.Length + 3 && aliasRules.GetSymbols().Any(s => token[alias.Length + 2] == s))
+                    return token[..(alias.Length + 2)];
             }
 
             throw new Exception($"Invalid double dash alias '{alias}' usage! Token: {token}");
@@ -259,27 +249,27 @@ internal static class AliasHelper
 
         foreach (var alias in aliases)
         {
-            if (!token.StartsWith(alias, compareFlag))
+            if (!token.AsSpan(1).StartsWith(alias, compareFlag))
                 continue;
 
             if (prefixRules.HasFlag(OptionPrefixRules.AllowSingleDash))
             {
                 // allow -o or -opt
-                if (token.Length == alias.Length)
+                if (token.Length == alias.Length + 1)
                     return token;
 
                 // allow -o=value, -o:value, -opt:value or -opt=value
-                if (token.Length > alias.Length + 1 && aliasRules.GetSymbols().Any(s => token[alias.Length] == s))
-                    return token[..alias.Length];
+                if (token.Length > alias.Length + 2 && aliasRules.GetSymbols().Any(s => token[alias.Length + 1] == s))
+                    return token[..(alias.Length + 1)];
 
                 // allow only -ovalue
-                if (alias.Length == 2 && aliasRules.HasFlag(AliasDelimiterRules.AllowOmittingDelimiter))
+                if (alias.Length == 1 && aliasRules.HasFlag(AliasDelimiterRules.AllowOmittingDelimiter))
                     return token[..2];
             }
 
             if (prefixRules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
             {
-                if (alias.Length > 2)
+                if (alias.Length > 1)
                     throw new Exception($"Single dash '-' is not allowed with long aliases! Invalid token: {token}");
 
                 // allow only -o
@@ -288,7 +278,7 @@ internal static class AliasHelper
 
                 // allow -o:value or -o=value
                 if (token.Length > 3 && aliasRules.GetSymbols().Any(s => token[2] == s))
-                    return token[..2]; 
+                    return token[..2];
 
                 // allow only -ovalue
                 if (aliasRules.HasFlag(AliasDelimiterRules.AllowOmittingDelimiter))
@@ -316,16 +306,16 @@ internal static class AliasHelper
 
         foreach (var alias in aliases)
         {
-            if (!token.StartsWith(alias, compareFlag))
+            if (!token.AsSpan(1).StartsWith(alias, compareFlag))
                 continue;
 
             // allow /o or /opt
-            if (token.Length == alias.Length)
+            if (token.Length == alias.Length + 1)
                 return token;
 
             // allow /o=value, /o:value, /opt:value or /opt=value
-            if (token.Length > alias.Length + 1 && aliasRules.GetSymbols().Any(s => token[alias.Length] == s))
-                return token[..alias.Length];
+            if (token.Length > alias.Length + 2 && aliasRules.GetSymbols().Any(s => token[alias.Length + 1] == s))
+                return token[..(alias.Length + 1)];
 
             throw new Exception($"Invalid forward slash alias '{alias}' usage! Token: {token}");
         }

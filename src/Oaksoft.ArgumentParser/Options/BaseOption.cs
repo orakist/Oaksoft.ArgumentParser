@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Oaksoft.ArgumentParser.Parser;
 
@@ -74,9 +76,15 @@ internal abstract class BaseOption : IBaseOption
 
         Description = description.Trim();
     }
-    
+
+    public virtual List<string> GetAliases()
+    {
+        throw new NotSupportedException("GetAliases() not supported by value options.");
+    }
+
     public virtual void AddAliases(params string[] aliases)
     {
+        throw new NotSupportedException("AddAliases() not supported by value options.");
     }
 
     public virtual void Initialize()

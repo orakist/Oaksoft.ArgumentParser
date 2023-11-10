@@ -8,7 +8,7 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Extensions;
 
-public static partial class OptionsExtensions
+public static partial class OptionExtensions
 {
     public static IArgumentParserBuilder<TSource> AddSwitchOption<TSource>(
         this IArgumentParserBuilder<TSource> builder, 

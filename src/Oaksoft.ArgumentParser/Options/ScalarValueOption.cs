@@ -1,5 +1,4 @@
-﻿using Oaksoft.ArgumentParser.Base;
-using Oaksoft.ArgumentParser.Parser;
+﻿using Oaksoft.ArgumentParser.Parser;
 using System;
 
 namespace Oaksoft.ArgumentParser.Options;

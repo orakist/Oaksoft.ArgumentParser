@@ -52,6 +52,20 @@ internal abstract class BaseArgumentParser : IArgumentParser
         return _baseOptions.Cast<IBaseOption>().ToList();
     }
 
+    public IBaseOption? GetOptionByName(string name)
+    {
+        return _baseOptions.FirstOrDefault(
+            o => o.Name.Equals(name, StringComparison.OrdinalIgnoreCase) ||
+                 o.KeyProperty.Name.Equals(name, StringComparison.OrdinalIgnoreCase) ||
+                 o.CountProperty != null && o.CountProperty.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public IBaseOption? GetOptionByAlias(string alias)
+    {
+        return _baseOptions.OfType<INamedOption>().FirstOrDefault(
+            o => o.Aliases.Any(a => a.Equals(alias, StringComparison.OrdinalIgnoreCase)));
+    }
+
     public string GetHeaderText()
     {
         return BuildHeaderText(true, true).ToString();
@@ -95,8 +109,13 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
+        var allAliases = _baseOptions
+            .Where(o => o is INamedOption)
+            .SelectMany(o => o.GetAliases())
+            .OrderByDescending(s => s.Length);
+
         _allAliases.Clear();
-        _allAliases.AddRange(_baseOptions.OfType<INamedOption>().SelectMany(o => o.Aliases));
+        _allAliases.AddRange(allAliases);
 
         var duplicateAliases = _allAliases.GroupBy(c => c).Where(c => c.Count() > 1)
             .Select(c => c.Key).ToList();

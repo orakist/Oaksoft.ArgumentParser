@@ -6,7 +6,7 @@ using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Extensions;
 
-public static class ConfigureExtensions
+public static partial class OptionExtensions
 {
     #region Option Name Configuration
     public static ISwitchOption WithName(this ISwitchOption option, string name)
@@ -251,8 +251,7 @@ public static class ConfigureExtensions
     #endregion
 
     #region Default Value Configuration
-    public static ISwitchOption WithDefaultValue<TValue>(this ISwitchOption option, bool defaultValue)
-        where TValue : IComparable, IEquatable<TValue>
+    public static ISwitchOption WithDefaultValue(this ISwitchOption option, bool defaultValue)
     {
         ((SwitchOption)option).SetDefaultValue(defaultValue);
         return option;

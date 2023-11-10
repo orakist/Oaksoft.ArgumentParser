@@ -145,7 +145,7 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static ISwitchOption WithCustomValueArity(this ISwitchOption option, int requiredOptionCount, int maximumOptionCount)
+    public static ISwitchOption WithValueArity(this ISwitchOption option, int requiredOptionCount, int maximumOptionCount)
     {
         ((SwitchOption)option).SetValueArity(requiredOptionCount, maximumOptionCount);
         return option;
@@ -158,7 +158,7 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static IScalarNamedOption<TValue> WithCustomValueArity<TValue>(this IScalarNamedOption<TValue> option, int requiredValueCount, int maximumValueCount)
+    public static IScalarNamedOption<TValue> WithValueArity<TValue>(this IScalarNamedOption<TValue> option, int requiredValueCount, int maximumValueCount)
         where TValue : IComparable, IEquatable<TValue>
     {
         ((ScalarNamedOption<TValue>)option).SetValueArity(requiredValueCount, maximumValueCount);
@@ -172,7 +172,7 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static ISequentialNamedOption<TValue> WithCustomValueArity<TValue>(this ISequentialNamedOption<TValue> option, int requiredValueCount, int maximumValueCount)
+    public static ISequentialNamedOption<TValue> WithValueArity<TValue>(this ISequentialNamedOption<TValue> option, int requiredValueCount, int maximumValueCount)
         where TValue : IComparable, IEquatable<TValue>
     {
         ((SequentialNamedOption<TValue>)option).SetValueArity(requiredValueCount, maximumValueCount);
@@ -186,7 +186,7 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static IScalarValueOption<TValue> WithCustomValueArity<TValue>(this IScalarValueOption<TValue> option, int requiredValueCount, int maximumValueCount)
+    public static IScalarValueOption<TValue> WithValueArity<TValue>(this IScalarValueOption<TValue> option, int requiredValueCount, int maximumValueCount)
         where TValue : IComparable, IEquatable<TValue>
     {
         ((ScalarValueOption<TValue>)option).SetValueArity(requiredValueCount, maximumValueCount);
@@ -200,7 +200,7 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static ISequentialValueOption<TValue> WithCustomValueArity<TValue>(this ISequentialValueOption<TValue> option, int requiredValueCount, int maximumValueCount)
+    public static ISequentialValueOption<TValue> WithValueArity<TValue>(this ISequentialValueOption<TValue> option, int requiredValueCount, int maximumValueCount)
         where TValue : IComparable, IEquatable<TValue>
     {
         ((SequentialValueOption<TValue>)option).SetValueArity(requiredValueCount, maximumValueCount);
@@ -215,7 +215,7 @@ public static class ConfigureExtensions
         return option;
     }
     
-    public static ISwitchOption WithCustomOptionArity(this ISwitchOption option, int requiredOptionCount, int maximumOptionCount)
+    public static ISwitchOption WithOptionArity(this ISwitchOption option, int requiredOptionCount, int maximumOptionCount)
     {
         ((SwitchOption)option).SetOptionArity(requiredOptionCount, maximumOptionCount);
         return option;
@@ -228,7 +228,7 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static IScalarNamedOption<TValue> WithCustomOptionArity<TValue>(this IScalarNamedOption<TValue> option, int requiredOptionCount, int maximumOptionCount)
+    public static IScalarNamedOption<TValue> WithOptionArity<TValue>(this IScalarNamedOption<TValue> option, int requiredOptionCount, int maximumOptionCount)
         where TValue : IComparable, IEquatable<TValue>
     {
         ((ScalarNamedOption<TValue>)option).SetOptionArity(requiredOptionCount, maximumOptionCount);
@@ -242,7 +242,7 @@ public static class ConfigureExtensions
         return option;
     }
 
-    public static ISequentialNamedOption<TValue> WithCustomOptionArity<TValue>(this ISequentialNamedOption<TValue> option, int requiredOptionCount, int maximumOptionCount)
+    public static ISequentialNamedOption<TValue> WithOptionArity<TValue>(this ISequentialNamedOption<TValue> option, int requiredOptionCount, int maximumOptionCount)
         where TValue : IComparable, IEquatable<TValue>
     {
         ((SequentialNamedOption<TValue>)option).SetOptionArity(requiredOptionCount, maximumOptionCount);

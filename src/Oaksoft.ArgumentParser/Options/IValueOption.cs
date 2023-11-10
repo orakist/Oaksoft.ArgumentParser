@@ -11,18 +11,25 @@ public interface ISwitchValueOption
     : IHaveDefaultValue<bool>, IHaveResultValue<bool>, IValueOption
 {
 }
+public interface IScalarValueOption : IValueOption
+{
+}
+
+public interface ISequentialValueOption : IValueOption
+{
+    bool EnableValueTokenSplitting { get; }
+}
 
 public interface IScalarValueOption<TValue>
-    : IHaveDefaultValue<TValue>, IHaveResultValue<TValue>, IHaveAllowedValues<TValue>, IValueOption
+    : IScalarValueOption, IHaveDefaultValue<TValue>, IHaveResultValue<TValue>, IHaveAllowedValues<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
 }
 
 public interface ISequentialValueOption<TValue>
-    : IHaveResultValues<TValue>, IHaveAllowedValues<TValue>, IValueOption
+    : ISequentialValueOption, IHaveResultValues<TValue>, IHaveAllowedValues<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    bool EnableValueTokenSplitting { get; }
 }
 
 public interface IHaveValueOption

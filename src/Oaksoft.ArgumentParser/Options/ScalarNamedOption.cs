@@ -7,7 +7,7 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal sealed class ScalarNamedOption<TValue> 
+internal sealed class ScalarNamedOption<TValue>
     : BaseScalarValueOption<TValue>, IScalarNamedOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
@@ -68,21 +68,19 @@ internal sealed class ScalarNamedOption<TValue>
 
         for (var index = 0; index < _aliases.Count; ++index)
         {
-            var alias = _aliases[index].TrimAlias();
-            if (string.IsNullOrWhiteSpace(alias) || !char.IsAsciiLetter(alias[0]))
-                throw new ArgumentException($"Invalid alias '{_aliases[index]}' found!");
+            var alias = _aliases[index].ValidateAlias();
 
             _aliases[index] = _parser!.CaseSensitive ? alias : alias.ToLowerInvariant();
         }
 
-        var aliases = _parser!.OptionPrefix.GetPrefixedAliases(_aliases);
+        var aliases = _aliases.GetPrefixedAliases(_parser!.OptionPrefix);
         _prefixAliases.AddRange(aliases.OrderByDescending(a => a.Length).ToList());
 
         if (string.IsNullOrWhiteSpace(Usage))
             Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
     }
 
-    public override void Parse(TokenValue[] tokens)
+    public override void Parse(TokenItem[] tokens)
     {
         var compareFlag = _parser!.CaseSensitive
             ? StringComparison.Ordinal
@@ -91,13 +89,12 @@ internal sealed class ScalarNamedOption<TValue>
         for (var i = 0; i < tokens.Length; ++i)
         {
             var token = tokens[i];
-            if (token.Invalid || token.IsParsed)
+            if (token.Invalid || token.IsParsed || token.Alias is null)
                 continue;
 
-            var argument = token.Argument;
             foreach (var alias in _prefixAliases)
             {
-                if (!token.Argument.StartsWith(alias, compareFlag))
+                if (!token.Alias.Equals(alias, compareFlag))
                     continue;
 
                 token.IsParsed = true;
@@ -106,31 +103,22 @@ internal sealed class ScalarNamedOption<TValue>
 
                 // parse --option (optional value)
                 // parse --option val (single value)
-                // parse --option val1 val2 val3 (sequential values)
-                if (argument.Length == alias.Length)
+                if (token.Value is null)
                 {
-                    if (i + 1 < tokens.Length && !tokens[i + 1].IsParsed)
+                    if (i + 1 < tokens.Length && tokens[i + 1].IsOnlyValue)
                     {
-                        var nextToken = tokens[i + 1];
-
-                        if (!nextToken.Argument.IsAliasCandidate(_parser.OptionPrefix))
-                        {
-                            nextToken.IsParsed = true;
-                            _valueTokens[^1] = nextToken.Argument;
-                        }
+                        tokens[i + 1].IsParsed = true;
+                        _valueTokens[^1] = tokens[i + 1].Value!;
                     }
-
-                    break;
+                }
+                else
+                {                
+                    // parse --option=val or -o=val or -oval
+                    // parse --option:val or -o:val
+                    // parse "--option val" or "-o val"
+                    _valueTokens[^1] = token.Value;
                 }
 
-                // parse --option=val or -o=val or -oval
-                // parse --option:val or -o:val
-                // parse "--option val" or "-o val"
-                var optionValue = argument.GetOptionValue(alias, _parser.TokenDelimiter);
-                if (string.IsNullOrWhiteSpace(optionValue))
-                    continue;
-
-                _valueTokens[^1] = optionValue;
                 break;
             }
         }

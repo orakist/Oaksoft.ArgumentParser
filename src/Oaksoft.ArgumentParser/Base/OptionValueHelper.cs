@@ -81,7 +81,7 @@ internal static class OptionValueHelper
     /// <summary>
     /// Split the argument by using token delimiter flags and return the value
     /// </summary>
-    public static string GetOptionValue(this string argument, string alias, TokenDelimiterRules rules)
+    public static string GetOptionValue(this string argument, string alias, AliasDelimiterRules rules)
     {
         foreach (var symbol in rules.GetSymbols())
         {
@@ -92,22 +92,12 @@ internal static class OptionValueHelper
         }
 
         if ((alias.Length == 2 || alias.StartsWith("--") && alias.Length == 3) &&
-            rules.HasFlag(TokenDelimiterRules.AllowOmittingDelimiter))
+            rules.HasFlag(AliasDelimiterRules.AllowOmittingDelimiter))
         {
             return argument[alias.Length..];
         }
 
         return string.Empty;
-    }
-
-    private static IEnumerable<char> GetSymbols(this TokenDelimiterRules rules)
-    {
-        if (rules.HasFlag(TokenDelimiterRules.AllowEqualSymbol))
-            yield return '=';
-        if (rules.HasFlag(TokenDelimiterRules.AllowColonSymbol))
-            yield return ':';
-        if (rules.HasFlag(TokenDelimiterRules.AllowWhitespace))
-            yield return ' ';
     }
 
     public static IEnumerable<char> GetSymbols(this ValueDelimiterRules rules)

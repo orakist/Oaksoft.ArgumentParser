@@ -10,7 +10,7 @@ public interface IArgumentParserBuilder
 
     OptionPrefixRules OptionPrefix { get; }
 
-    TokenDelimiterRules TokenDelimiter { get; }
+    AliasDelimiterRules AliasDelimiter { get; }
 
     ValueDelimiterRules ValueDelimiter { get; }
 }

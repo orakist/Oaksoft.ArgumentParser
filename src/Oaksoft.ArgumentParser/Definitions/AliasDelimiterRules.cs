@@ -3,7 +3,7 @@
 namespace Oaksoft.ArgumentParser.Definitions;
 
 [Flags]
-public enum TokenDelimiterRules
+public enum AliasDelimiterRules
 {
     /// <summary>
     /// Parser allows equal symbol ('=') as the delimiter between an option name and its value.

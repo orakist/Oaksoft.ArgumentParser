@@ -45,7 +45,7 @@ internal static class Program
                 o => o.WithDescription("Enables the subtraction operator."))
 
             .AddCountOption(o => o.MultiplySwitch,
-                o => o.WithCustomOptionArity(0, 5)
+                o => o.WithOptionArity(0, 5)
                     .WithDescription("Enables the multiplication operator."))
 
             .AddCountOption(o => o.DivideSwitch,
@@ -74,8 +74,8 @@ internal static class Program
                     .WithDescription("Sets division count."))
 
             .AddNamedOption(o => o.AddNumbers,
-                o => o.WithCustomOptionArity(0, 2)
-                    .WithCustomValueArity(0, 20)
+                o => o.WithOptionArity(0, 2)
+                    .WithValueArity(0, 20)
                     .WithDescription("Defines numbers for addition."))
 
             .AddNamedOption(o => o.SubtractNumbers,

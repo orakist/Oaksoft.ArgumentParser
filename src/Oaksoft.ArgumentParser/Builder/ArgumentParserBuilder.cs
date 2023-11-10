@@ -16,7 +16,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
     public OptionPrefixRules OptionPrefix { get; }
 
-    public TokenDelimiterRules TokenDelimiter { get; }
+    public AliasDelimiterRules AliasDelimiter { get; }
 
     public ValueDelimiterRules ValueDelimiter { get; }
 
@@ -28,11 +28,11 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
     public ArgumentParserBuilder(
         TOptions options, bool caseSensitive, OptionPrefixRules optionPrefix, 
-        TokenDelimiterRules tokenDelimiter, ValueDelimiterRules valueDelimiter)
+        AliasDelimiterRules aliasDelimiter, ValueDelimiterRules valueDelimiter)
     {
         CaseSensitive = caseSensitive;
         OptionPrefix = optionPrefix;
-        TokenDelimiter = tokenDelimiter;
+        AliasDelimiter = aliasDelimiter;
         ValueDelimiter = valueDelimiter;
 
         _appOptions = options;

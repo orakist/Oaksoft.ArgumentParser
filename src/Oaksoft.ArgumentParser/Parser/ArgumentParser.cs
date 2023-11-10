@@ -14,7 +14,7 @@ internal sealed class ArgumentParser<TOptions>
     private readonly TOptions _appOptions;
 
     public ArgumentParser(TOptions options, ArgumentParserBuilder<TOptions> builder)
-        : base(builder.CaseSensitive, builder.OptionPrefix, builder.TokenDelimiter, builder.ValueDelimiter)
+        : base(builder.CaseSensitive, builder.OptionPrefix, builder.AliasDelimiter, builder.ValueDelimiter)
     {
         Settings = builder.GetSettings();
 
@@ -40,13 +40,9 @@ internal sealed class ArgumentParser<TOptions>
     {
         ClearOptions();
 
-        var tokens = arguments
-            .Select(a => new TokenValue { Argument = a })
-            .ToArray();
+        var tokens = PrepareTokens(arguments);
 
-        ValidateArguments(tokens);
-
-        ParseArguments(tokens);
+        ParseOptions(tokens);
 
         ValidateOptions(tokens);
 
@@ -76,11 +72,6 @@ internal sealed class ArgumentParser<TOptions>
 
     protected override void ClearOptionPropertiesByReflection()
     {
-        foreach (var option in _baseOptions)
-        {
-            option.Clear();
-        }
-
         foreach (var property in _propertyInfos)
         {
             var type = property.PropertyType;

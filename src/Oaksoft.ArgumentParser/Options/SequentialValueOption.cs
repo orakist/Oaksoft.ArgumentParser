@@ -26,23 +26,22 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
         }
     }
 
-    public override void Parse(TokenValue[] tokens)
+    public override void Parse(TokenItem[] tokens)
     {
         foreach (var token in tokens)
         {
-            if (token.Invalid || token.IsParsed)
+            if (!token.IsOnlyValue)
                 continue;
 
-            var argument = token.Argument;
-            if (argument.IsAliasCandidate(_parser!.OptionPrefix))
-                continue;
+            var value = token.Value!
+                .GetInputValues(_parser!.ValueDelimiter, EnableValueTokenSplitting)
+                .First();
 
-            var value = argument.GetInputValues(_parser.ValueDelimiter, EnableValueTokenSplitting).First();
             if (!IsValidValue(value)) 
                 continue;
 
             token.IsParsed = true;
-            _valueTokens.Add(argument);
+            _valueTokens.Add(token.Value!);
         }
 
         var inputValues = _valueTokens.GetInputValues(_parser!.ValueDelimiter, EnableValueTokenSplitting);

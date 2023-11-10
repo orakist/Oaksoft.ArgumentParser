@@ -108,7 +108,7 @@ internal abstract class BaseOption : IBaseOption
         }
     }
 
-    public abstract void Parse(TokenValue[] tokens);
+    public abstract void Parse(TokenItem[] tokens);
 
     public virtual void Validate()
     {

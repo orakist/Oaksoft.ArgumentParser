@@ -12,7 +12,11 @@ public interface INamedOption : IBaseOption
     List<string> OptionTokens { get; }
 }
 
-public interface ISwitchOption : IScalarNamedOption, ISwitchValueOption
+public interface ISwitchNamedOption : INamedOption, IValueOption
+{
+}
+
+public interface ISwitchOption : ISwitchNamedOption, ISwitchValueOption
 {
 }
 
@@ -27,10 +31,10 @@ public interface IScalarNamedOption<TValue> : IScalarNamedOption, IScalarValueOp
 
 public interface ISequentialNamedOption : INamedOption, IValueOption
 {
+    bool AllowSequentialValues { get; }
 }
 
 public interface ISequentialNamedOption<TValue> : ISequentialNamedOption, ISequentialValueOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    bool AllowSequentialValues { get; }
 }

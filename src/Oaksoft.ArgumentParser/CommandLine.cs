@@ -8,7 +8,7 @@ public static class CommandLine
 {
     public static IArgumentParserBuilder<TOptions> CreateParser<TOptions>(
         OptionPrefixRules optionPrefix = OptionPrefixRules.Default, 
-        TokenDelimiterRules tokenDelimiter = TokenDelimiterRules.Default, 
+        AliasDelimiterRules aliasDelimiter = AliasDelimiterRules.Default, 
         ValueDelimiterRules valueDelimiter = ValueDelimiterRules.Default, 
         bool caseSensitive = false)
         where TOptions : IApplicationOptions, new()
@@ -17,6 +17,6 @@ public static class CommandLine
 
         return new ArgumentParserBuilder<TOptions>(
             applicationOptions, caseSensitive, optionPrefix, 
-            tokenDelimiter, valueDelimiter);
+            aliasDelimiter, valueDelimiter);
     }
 }

@@ -25,22 +25,18 @@ internal sealed class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
         }
     }
 
-    public override void Parse(TokenValue[] tokens)
+    public override void Parse(TokenItem[] tokens)
     {
         foreach (var token in tokens)
         {
-            if (token.Invalid || token.IsParsed)
+            if (!token.IsOnlyValue)
                 continue;
 
-            var argument = token.Argument;
-            if (argument.IsAliasCandidate(_parser!.OptionPrefix))
-                continue;
-
-            if (!IsValidValue(argument))
+            if (!IsValidValue(token.Value!))
                 continue;
 
             token.IsParsed = true;
-            _valueTokens.Add(argument);
+            _valueTokens.Add(token.Value!);
             break;
         }
 

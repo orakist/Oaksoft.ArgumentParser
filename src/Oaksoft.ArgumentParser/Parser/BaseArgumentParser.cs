@@ -15,7 +15,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public OptionPrefixRules OptionPrefix { get; }
 
-    public TokenDelimiterRules TokenDelimiter { get; }
+    public AliasDelimiterRules AliasDelimiter { get; }
 
     public ValueDelimiterRules ValueDelimiter { get; }
 
@@ -25,22 +25,26 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public List<string> Errors => _errors.ToList();
 
-    protected readonly List<string> _errors;
     protected readonly List<BaseOption> _baseOptions;
     protected readonly List<PropertyInfo> _propertyInfos;
 
+    private readonly List<string> _errors;
+    private readonly List<string> _allAliases;
+
     protected BaseArgumentParser(
         bool caseSensitive, OptionPrefixRules optionPrefix,
-        TokenDelimiterRules tokenDelimiter, ValueDelimiterRules valueDelimiter)
+        AliasDelimiterRules aliasDelimiter, ValueDelimiterRules valueDelimiter)
     {
         CaseSensitive = caseSensitive;
         OptionPrefix = optionPrefix;
-        TokenDelimiter = tokenDelimiter;
+        AliasDelimiter = aliasDelimiter;
         ValueDelimiter = valueDelimiter;
 
-        _errors = new List<string>();
         _baseOptions = new List<BaseOption>();
         _propertyInfos = new List<PropertyInfo>();
+
+        _errors = new List<string>();
+        _allAliases = new List<string>();
     }
 
     public List<IBaseOption> GetOptions()
@@ -72,7 +76,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
     protected void InitializeOptions()
     {
         var names = new List<string>();
-        var aliases = new List<string>();
 
         foreach (var option in _baseOptions)
         {
@@ -80,7 +83,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 AutoInitializeOptionName(option, names);
 
-                AutoInitializeOptionAliases(option, aliases);
+                AutoInitializeOptionAliases(option);
 
                 option.SetParser(this);
 
@@ -92,12 +95,15 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        aliases = aliases.GroupBy(c => c).Where(c => c.Count() > 1)
+        _allAliases.Clear();
+        _allAliases.AddRange(_baseOptions.OfType<INamedOption>().SelectMany(o => o.Aliases));
+
+        var duplicateAliases = _allAliases.GroupBy(c => c).Where(c => c.Count() > 1)
             .Select(c => c.Key).ToList();
 
-        if (aliases.Count > 0)
+        if (duplicateAliases.Count > 0)
         {
-            var aliasText = string.Join(", ", aliases);
+            var aliasText = string.Join(", ", duplicateAliases);
             throw new Exception($"Option aliases must be unique. Duplicate Aliases: {aliasText}");
         }
 
@@ -115,10 +121,38 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         _errors.Clear();
 
+        foreach (var option in _baseOptions)
+        {
+            option.Clear();
+        }
+
         ClearOptionPropertiesByReflection();
     }
 
-    protected void ParseArguments(TokenValue[] tokens)
+    protected TokenItem[] PrepareTokens(string[] arguments)
+    {
+        var tokens = arguments
+            .Select(a => new TokenItem { Token = a })
+            .ToArray();
+
+        foreach (var token in tokens)
+        {
+            try
+            {
+                token.ExtractAliasAndValue(
+                    _allAliases, CaseSensitive, OptionPrefix, AliasDelimiter);
+            }
+            catch (Exception ex)
+            {
+                _errors.Add(ex.Message);
+                token.Invalid = true;
+            }
+        }
+
+        return tokens;
+    }
+
+    protected void ParseOptions(TokenItem[] tokens)
     {
         var orderedOptions = new List<BaseOption>();
         orderedOptions.AddRange(_baseOptions.Where(o => o is ISwitchOption));
@@ -139,7 +173,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
     }
 
-    protected void ValidateOptions(TokenValue[] tokens)
+    protected void ValidateOptions(TokenItem[] tokens)
     {
         foreach (var option in _baseOptions)
         {
@@ -155,8 +189,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         ValidateHelpToken();
 
-        foreach (var option in tokens.Where(s => !s.IsParsed && !s.Invalid))
-            _errors.Add($"Unknown option found. Option: {option.Argument}");
+        foreach (var token in tokens.Where(s => !s.IsParsed && !s.Invalid))
+            _errors.Add($"Unknown token found. Token: {token.Token}");
     }
 
     protected void BindOptionsToAttributes()
@@ -173,22 +207,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
             catch (Exception ex)
             {
                 _errors.Add(BuildErrorMessage(option, ex));
-            }
-        }
-    }
-
-    protected void ValidateArguments(TokenValue[] tokens)
-    {
-        foreach (var token in tokens)
-        {
-            try
-            {
-                token.Argument.ValidateArgument(OptionPrefix);
-            }
-            catch (Exception ex)
-            {
-                _errors.Add(ex.Message);
-                token.Invalid = true;
             }
         }
     }
@@ -367,7 +385,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
 
         // suggest a name for option by using the registered property name
-        var words = AliasHelper.GetHumanizedWords(option.KeyProperty.Name).ToList();
+        var words = option.KeyProperty.Name.GetHumanizedWords().ToList();
         if (words.Count < 1)
             return;
 
@@ -376,7 +394,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         names.Add(name);
     }
 
-    private void AutoInitializeOptionAliases(BaseOption option, List<string> aliases)
+    private void AutoInitializeOptionAliases(BaseOption option)
     {
         if (option is not INamedOption namedOption)
             return;
@@ -387,20 +405,20 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 ? namedOption.Aliases
                 : namedOption.Aliases.Select(a => a.ToLowerInvariant());
 
-            aliases.AddRange(optionAliases);
+            _allAliases.AddRange(optionAliases);
             return;
         }
 
         // suggest aliases for option by using the registered property name
-        var autoAliases = AliasHelper.GetAliasesHeuristically(
-            option.KeyProperty.Name, aliases, Settings.MaxAliasLength!.Value, CaseSensitive);
+        var aliases = option.KeyProperty.Name.SuggestAliasesHeuristically(
+            _allAliases, Settings.MaxAliasLength!.Value, CaseSensitive);
 
         if (!CaseSensitive)
-            autoAliases = autoAliases.Select(a => a.ToLowerInvariant());
+            aliases = aliases.Select(a => a.ToLowerInvariant());
 
-        var suggestedAliases = autoAliases.ToArray();
+        var suggestedAliases = aliases.ToArray();
         option.AddAliases(suggestedAliases);
-        aliases.AddRange(suggestedAliases);
+        _allAliases.AddRange(suggestedAliases);
     }
 
     private static string BuildErrorMessage(BaseOption option, Exception ex)

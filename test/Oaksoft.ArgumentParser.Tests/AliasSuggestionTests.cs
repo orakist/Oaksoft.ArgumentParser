@@ -537,7 +537,7 @@ namespace Oaksoft.ArgumentParser.Tests
         {
             // Arrange
             var sut = CommandLine.CreateParser<SampleOptionNames>()
-                .AddNamedOption(s => s.__1_Help_1)
+                .AddNamedOption(s => s.__1_Help, o => o.WithName("Test"))
                 .AddNamedOption(s => s.__2_Value)
                 .AddNamedOption(s => s.__3_Va1_l2_3ue);
 
@@ -547,14 +547,12 @@ namespace Oaksoft.ArgumentParser.Tests
             // Assert
             result.GetOptions().Count.ShouldBe(4);
 
-            var option = result.GetOptionByName(nameof(SampleOptionNames.__1_Help_1));
+            var option = result.GetOptionByName(nameof(SampleOptionNames.__1_Help));
             var namedOption = option as INamedOption;
             namedOption.ShouldNotBeNull();
-            namedOption.Aliases.Count.ShouldBe(4);
+            namedOption.Aliases.Count.ShouldBe(2);
             namedOption.Aliases.ShouldContain("-e");
-            namedOption.Aliases.ShouldContain("--help-1");
             namedOption.Aliases.ShouldContain("/e");
-            namedOption.Aliases.ShouldContain("/help-1");
 
             option = result.GetOptionByName(nameof(SampleOptionNames.__2_Value));
             namedOption = option as INamedOption;

@@ -136,5 +136,17 @@ namespace Oaksoft.ArgumentParser.Tests
             Should.Throw<Exception>(() => namedOption.WithName("NewName"))
                 .Message.ShouldStartWith("An option cannot be modified after");
         }
+
+        [Fact]
+        public void ShouldThrowException_WhenTryToAddReservedProperty()
+        {
+            // Arrange
+            var sut = CommandLine.CreateParser<LongAppOptions>()
+                .AddSwitchOption(s => s.Help);
+
+            // Act & Assert
+            Should.Throw<Exception>(() => sut.Build())
+                .Message.ShouldStartWith("Reserved properties ('Help') cannot be used.");
+        }
     }
 }

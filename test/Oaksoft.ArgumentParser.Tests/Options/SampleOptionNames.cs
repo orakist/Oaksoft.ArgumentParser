@@ -16,6 +16,8 @@ public class SampleOptionNames : IApplicationOptions
 
     public int __1_Help_1 { get; set; }
 
+    public int __1_Help { get; set; }
+
     public int __2_Value { get; set; }
 
     public int __3_Va1_l2_3ue { get; set; }

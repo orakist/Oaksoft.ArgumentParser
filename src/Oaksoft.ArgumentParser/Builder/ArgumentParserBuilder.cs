@@ -145,14 +145,14 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
     private void BuildDefaultOptions()
     {
-        var options = _baseOptions.Cast<BaseOption>();
-        if (options.Any(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help)))
-            return;
+        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help)))
+            throw new ArgumentException("Reserved properties ('Help') cannot be used.");
 
-        this.AddSwitchOption(
-            p => p.Help, 
-            o => o.AddAliases("-h", "-?", "--help")
-                .WithDescription("Prints this help information."));
+        this.AddSwitchOption(p => p.Help);
+
+        var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
+        option.AddAliases(true, "-h", "-?", "--help");
+        option.SetDescription("Prints this help information.");
     }
 
     private static string? BuildTitleLine()

@@ -430,7 +430,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             suggestedAliases = suggestedAliases.Select(a => a.ToLowerInvariant());
 
         var validAliases = suggestedAliases.ToArray();
-        option.AddAliases(validAliases);
+        option.AddAliases(false, validAliases);
         aliases.AddRange(validAliases);
     }
 

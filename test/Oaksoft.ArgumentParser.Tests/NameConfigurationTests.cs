@@ -102,7 +102,8 @@ namespace Oaksoft.ArgumentParser.Tests
                 .AddNamedOption(s => s.__2_Value);
 
             // Act & Assert
-            Should.Throw<Exception>(() => sut.Build());
+            Should.Throw<Exception>(() => sut.Build())
+                .Message.ShouldStartWith("Option names must be unique.");
         }
 
         [Fact]
@@ -114,7 +115,8 @@ namespace Oaksoft.ArgumentParser.Tests
                 .AddNamedOption(s => s.ValueCount, o => o.WithName("Test"));
 
             // Act & Assert
-            Should.Throw<Exception>(() => sut.Build());
+            Should.Throw<Exception>(() => sut.Build())
+                .Message.ShouldStartWith("Option names must be unique.");
         }
 
         [Fact]
@@ -131,7 +133,8 @@ namespace Oaksoft.ArgumentParser.Tests
             namedOption.ShouldNotBeNull();
 
             // Assert
-            Should.Throw<Exception>(() => namedOption.WithName("NewName"));
+            Should.Throw<Exception>(() => namedOption.WithName("NewName"))
+                .Message.ShouldStartWith("An option cannot be modified after");
         }
     }
 }

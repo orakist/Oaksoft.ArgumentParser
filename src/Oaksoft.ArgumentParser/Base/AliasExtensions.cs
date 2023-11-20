@@ -12,7 +12,7 @@ internal static class AliasExtensions
     private static readonly char[] _validAliasChars = { '?', '%', '$', '€', '£', '#', '@', '-' };
     private static readonly string[] _reservedAliases = { "h", "?", "help" };
 
-    public static string ValidateAlias(this string alias)
+    public static string ValidateAlias(this string alias, bool skipValidation)
     {
         var result = string.Join('-', GetNormalizedWords(alias));
 
@@ -23,7 +23,7 @@ internal static class AliasExtensions
                 $"Invalid alias '{alias}' found! Use ascii letters, ascii digits and ('{validChars}') symbols. And an alias should not start with digit.");
         }
 
-        if (_reservedAliases.Any(r => r.Equals(result, StringComparison.OrdinalIgnoreCase)))
+        if (!skipValidation && _reservedAliases.Any(r => r.Equals(result, StringComparison.OrdinalIgnoreCase)))
         {
             throw new ArgumentException(
                 $"Invalid alias '{alias}' found! Reserved aliases ('{string.Join("', '", _reservedAliases)}') cannot be used.");

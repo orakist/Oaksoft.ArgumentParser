@@ -81,7 +81,7 @@ internal abstract class BaseOption : IBaseOption
         throw new NotSupportedException("GetAliases() not supported by value options.");
     }
 
-    public virtual void AddAliases(params string[] aliases)
+    public virtual void AddAliases(bool skipValidation, params string[] aliases)
     {
         throw new NotSupportedException("AddAliases() not supported by value options.");
     }

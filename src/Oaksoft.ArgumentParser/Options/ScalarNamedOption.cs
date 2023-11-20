@@ -53,16 +53,15 @@ internal sealed class ScalarNamedOption<TValue>
         return _aliases;
     }
 
-    public override void AddAliases(params string[] aliases)
+    public override void AddAliases(bool skipValidation, params string[] aliases)
     {
         ParserInitializedGuard();
 
         var values = aliases
             .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Select(s => s.Trim().ValidateAlias())
-            .Distinct();
+            .Select(s => s.Trim().ValidateAlias(skipValidation));
 
-        _aliases.AddRange(values);
+        _aliases.AddRange(values.Distinct());
     }
 
     public override void Initialize()

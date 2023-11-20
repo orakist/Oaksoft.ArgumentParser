@@ -23,4 +23,6 @@ public interface IParserSettings
     string? Description { get; }
 
     int? MaxAliasLength { get; }
+
+    int? MaxAliasWordCount { get; }
 }

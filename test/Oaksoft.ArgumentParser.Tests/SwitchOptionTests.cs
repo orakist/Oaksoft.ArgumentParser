@@ -1,4 +1,5 @@
 using Oaksoft.ArgumentParser.Extensions;
+using Oaksoft.ArgumentParser.Tests.Options;
 using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests
@@ -14,18 +15,18 @@ namespace Oaksoft.ArgumentParser.Tests
         [InlineData(true, false, "--value:true", "--null-value=FALSE")]
         [InlineData(false, true, "/v=false", "/null-value:TRUE")]
         [InlineData(false, true, "/null-value", "TRUE", "/v", "FALSE")]
-        public void Parse_bool_switch_option_when_arguments_valid(bool val1, bool val2, params string[] args)
+        public void Parse_BoolSwitchOption_WhenArgumentsValid(bool val1, bool val2, params string[] args)
         {
-            // Fixture setup
-            var sut = CommandLine.CreateParser<BoolScalarOptions>()
+            // Arrange
+            var sut = CommandLine.CreateParser<BoolAppOptions>()
                 .AddSwitchOption(s => s.Value)
                 .AddSwitchOption(s => s.NullValue)
                 .Build();
 
-            // Exercise system
+            // Act
             var result = sut.Parse(args);
 
-            // Verify outcome
+            // Assert
             sut.IsValid.ShouldBeTrue();
             result.Value.ShouldBeEquivalentTo(val1);
             result.NullValue.ShouldBeEquivalentTo(val2);
@@ -38,18 +39,18 @@ namespace Oaksoft.ArgumentParser.Tests
         [InlineData("--v=true", "--n=true")]
         [InlineData("-value:true", "-null-value=true")]
         [InlineData("/vtrue", "/null-valuex")]
-        public void Parse_bool_switch_option_when_arguments_invalid(params string[] args)
+        public void Parse_BoolSwitchOption_WhenArgumentsInvalid(params string[] args)
         {
-            // Fixture setup
-            var sut = CommandLine.CreateParser<BoolScalarOptions>()
+            // Arrange
+            var sut = CommandLine.CreateParser<BoolAppOptions>()
                 .AddSwitchOption(s => s.Value)
                 .AddSwitchOption(s => s.NullValue)
                 .Build();
 
-            // Exercise system
+            // Act
             var result = sut.Parse(args);
 
-            // Verify outcome
+            // Assert
             sut.IsValid.ShouldBeFalse();
             sut.Errors.Count.ShouldBe(2);
             result.NullValue.ShouldBe(null);
@@ -63,18 +64,18 @@ namespace Oaksoft.ArgumentParser.Tests
         [InlineData("-n=true")]
         [InlineData("--null-value=true")]
         [InlineData("/v:true")]
-        public void Parse_bool_switch_option_when_options_mandatory(params string[] args)
+        public void Parse_BoolSwitchOption_WhenOptionsMandatory(params string[] args)
         {
-            // Fixture setup
-            var sut = CommandLine.CreateParser<BoolScalarOptions>()
+            // Arrange
+            var sut = CommandLine.CreateParser<BoolAppOptions>()
                 .AddSwitchOption(s => s.Value, mandatoryOption: true)
                 .AddSwitchOption(s => s.NullValue, mandatoryOption: true)
                 .Build();
 
-            // Exercise system
+            // Act
             var result = sut.Parse(args);
 
-            // Verify outcome
+            // Assert
             sut.IsValid.ShouldBeFalse();
             sut.Errors.Count.ShouldBe(1);
             sut.Errors[0].StartsWith("At least '1' option was expected").ShouldBeTrue();
@@ -89,18 +90,18 @@ namespace Oaksoft.ArgumentParser.Tests
         [InlineData(1, "-v=true", "-n=true")]
         [InlineData(1, "--value:true", "--null-value=true")]
         [InlineData(1, "/v=true", "/null-value:true")]
-        public void Parse_bool_switch_option_when_multiple_option_allowed(int count, params string[] args)
+        public void Parse_BoolSwitchOption_WhenMultipleOptionAllowed(int count, params string[] args)
         {
-            // Fixture setup
-            var sut = CommandLine.CreateParser<BoolScalarOptions>()
+            // Arrange
+            var sut = CommandLine.CreateParser<BoolAppOptions>()
                 .AddSwitchOption(s => s.Value, o => o.WithOptionArity(1, 3))
                 .AddSwitchOption(s => s.NullValue, o => o.WithOptionArity(1, 3).WithValueArity(2, 3))
                 .Build();
 
-            // Exercise system
+            // Act
             var result = sut.Parse(args);
 
-            // Verify outcome
+            // Assert
             sut.IsValid.ShouldBeEquivalentTo(count < 1);
             sut.Errors.Count.ShouldBeEquivalentTo(count);
             result.NullValue.ShouldBeEquivalentTo(sut.IsValid ? false : null);
@@ -116,18 +117,18 @@ namespace Oaksoft.ArgumentParser.Tests
         [InlineData(true, false, "--value:true", "--null-value")]
         [InlineData(false, true, "/v=false", "/null-value:TRUE")]
         [InlineData(false, true, "/null-value", "TRUE", "/v", "FALSE")]
-        public void Parse_bool_switch_option_when_default_value_set(bool val1, bool? val2, params string[] args)
+        public void Parse_BoolSwitchOption_WhenDefaultValueSet(bool val1, bool? val2, params string[] args)
         {
-            // Fixture setup
-            var sut = CommandLine.CreateParser<BoolScalarOptions>()
+            // Arrange
+            var sut = CommandLine.CreateParser<BoolAppOptions>()
                 .AddSwitchOption(s => s.Value, o => o.WithDefaultValue(true))
                 .AddSwitchOption(s => s.NullValue, o => o.WithDefaultValue(false))
                 .Build();
 
-            // Exercise system
+            // Act
             var result = sut.Parse(args);
 
-            // Verify outcome
+            // Assert
             sut.IsValid.ShouldBeTrue();
             result.NullValue.ShouldBeEquivalentTo(val2);
             result.Value.ShouldBe(val1);

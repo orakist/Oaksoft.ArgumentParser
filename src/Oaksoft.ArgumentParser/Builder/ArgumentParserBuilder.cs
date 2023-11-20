@@ -24,8 +24,6 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     private readonly IParserSettingsBuilder _settingsBuilder;
     private readonly List<BaseOption> _baseOptions;
 
-    private Action<IParserSettingsBuilder>? _configureSettings;
-
     public ArgumentParserBuilder(
         TOptions options, bool caseSensitive, OptionPrefixRules optionPrefix, 
         AliasDelimiterRules aliasDelimiter, ValueDelimiterRules valueDelimiter)
@@ -56,7 +54,8 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
             Title = _settingsBuilder.Title,
             Description = _settingsBuilder.Description,
 
-            MaxAliasLength = _settingsBuilder.MaxAliasLength ?? 32
+            MaxAliasLength = _settingsBuilder.MaxAliasLength ?? 32,
+            MaxAliasWordCount = _settingsBuilder.MaxAliasWordCount ?? 4
         };
     }
 
@@ -72,7 +71,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
     public IArgumentParserBuilder<TOptions> ConfigureSettings(Action<IParserSettingsBuilder> action)
     {
-        _configureSettings = action;
+        action.Invoke(_settingsBuilder);
         return this;
     }
 
@@ -95,8 +94,6 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
     public IArgumentParser<TOptions> Build()
     {
-        _configureSettings?.Invoke(_settingsBuilder);
-
         BuildDefaultSettings();
 
         BuildDefaultOptions();
@@ -118,6 +115,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         _settingsBuilder.ShowDescription ??= true;
         _settingsBuilder.EnableColoring ??= true;
         _settingsBuilder.MaxAliasLength ??= 32;
+        _settingsBuilder.MaxAliasWordCount ??= 4;
 
         if (_settingsBuilder.HelpDisplayWidth is < 40 or > 320)
         {
@@ -129,6 +127,13 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         {
             throw new ArgumentOutOfRangeException(nameof(IParserSettings.MaxAliasLength),
                 "Invalid Max Alias Length value! Valid interval is [4, 64].");
+        }
+
+
+        if (_settingsBuilder.MaxAliasWordCount is < 1 or > 8)
+        {
+            throw new ArgumentOutOfRangeException(nameof(IParserSettings.MaxAliasWordCount),
+                "Invalid Max Alias Word Count value! Valid interval is [1, 8].");
         }
 
         if (string.IsNullOrWhiteSpace(_settingsBuilder.Title))
@@ -146,7 +151,8 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         this.AddSwitchOption(
             p => p.Help, 
-            o => o.WithDescription("Prints this help information."));
+            o => o.AddAliases("-h", "-?", "--help")
+                .WithDescription("Prints this help information."));
     }
 
     private static string? BuildTitleLine()

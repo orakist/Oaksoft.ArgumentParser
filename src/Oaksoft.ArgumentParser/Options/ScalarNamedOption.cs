@@ -59,7 +59,8 @@ internal sealed class ScalarNamedOption<TValue>
 
         var values = aliases
             .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Select(s => s.Trim());
+            .Select(s => s.Trim().ValidateAlias())
+            .Distinct();
 
         _aliases.AddRange(values);
     }
@@ -68,18 +69,9 @@ internal sealed class ScalarNamedOption<TValue>
     {
         base.Initialize();
 
-        if (_aliases.Count < 1)
-            throw new ArgumentException("Option alias not found! Use WithAliases() to set aliases of the option.");
-
-        for (var index = 0; index < _aliases.Count; ++index)
-        {
-            var alias = _aliases[index].ValidateAlias();
-
-            _aliases[index] = _parser!.CaseSensitive ? alias : alias.ToLowerInvariant();
-        }
-
-        var aliases = _aliases.GetPrefixedAliases(_parser!.OptionPrefix);
-        _prefixAliases.AddRange(aliases.OrderByDescending(a => a.Length).ToList());
+        var prefixedAliases = _aliases.GetPrefixedAliases(
+            _parser!.OptionPrefix, _parser!.CaseSensitive);
+        _prefixAliases.AddRange(prefixedAliases);
 
         if (string.IsNullOrWhiteSpace(Usage))
             Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";

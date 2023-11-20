@@ -89,7 +89,13 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected void InitializeOptions()
     {
-        var names = new List<string>();
+        var names = _baseOptions.Where(o => !string.IsNullOrEmpty(o.Name))
+            .Select(o => o.Name).ToList();
+
+        var aliases = _baseOptions.Where(o => o is INamedOption)
+            .SelectMany(o => o.GetAliases())
+            .Select(a => CaseSensitive ? a : a.ToLowerInvariant())
+            .ToList();
 
         foreach (var option in _baseOptions)
         {
@@ -97,7 +103,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 AutoInitializeOptionName(option, names);
 
-                AutoInitializeOptionAliases(option);
+                AutoInitializeOptionAliases(option, aliases);
 
                 option.SetParser(this);
 
@@ -109,13 +115,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        var allAliases = _baseOptions
-            .Where(o => o is INamedOption)
+        var validAliases = _baseOptions.Where(o => o is INamedOption)
             .SelectMany(o => o.GetAliases())
             .OrderByDescending(s => s.Length);
 
-        _allAliases.Clear();
-        _allAliases.AddRange(allAliases);
+        _allAliases.AddRange(validAliases);
 
         var duplicateAliases = _allAliases.GroupBy(c => c).Where(c => c.Count() > 1)
             .Select(c => c.Key).ToList();
@@ -129,9 +133,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
         names = names.GroupBy(c => c).Where(c => c.Count() > 1)
             .Select(c => c.Key).ToList();
 
-        if (names.Count <= 0) 
+        if (names.Count <= 0)
             return;
-        
+
         var namesText = string.Join(", ", names);
         throw new Exception($"Option names must be unique. Duplicate Names: {namesText}");
     }
@@ -395,13 +399,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
         return textLines;
     }
 
-    private static void AutoInitializeOptionName(BaseOption option, ICollection<string> names)
+    private static void AutoInitializeOptionName(BaseOption option, List<string> names)
     {
-        if (!string.IsNullOrWhiteSpace(option.Name))
-        {
-            names.Add(option.Name.ToLowerInvariant());
+        if (!string.IsNullOrEmpty(option.Name))
             return;
-        }
 
         // suggest a name for option by using the registered property name
         var words = option.KeyProperty.Name.GetHumanizedWords().ToList();
@@ -413,31 +414,24 @@ internal abstract class BaseArgumentParser : IArgumentParser
         names.Add(name);
     }
 
-    private void AutoInitializeOptionAliases(BaseOption option)
+    private void AutoInitializeOptionAliases(BaseOption option, List<string> aliases)
     {
-        if (option is not INamedOption namedOption)
+        if (option is not INamedOption)
             return;
 
-        if (namedOption.Aliases.Count > 0)
-        {
-            var optionAliases = CaseSensitive
-                ? namedOption.Aliases
-                : namedOption.Aliases.Select(a => a.ToLowerInvariant());
-
-            _allAliases.AddRange(optionAliases);
+        if (option.GetAliases().Count > 0)
             return;
-        }
 
         // suggest aliases for option by using the registered property name
-        var aliases = option.KeyProperty.Name.SuggestAliasesHeuristically(
-            _allAliases, Settings.MaxAliasLength!.Value, CaseSensitive);
+        var suggestedAliases = option.KeyProperty.Name.SuggestAliasesHeuristically(
+            aliases, CaseSensitive, Settings.MaxAliasLength!.Value, Settings.MaxAliasWordCount!.Value);
 
         if (!CaseSensitive)
-            aliases = aliases.Select(a => a.ToLowerInvariant());
+            suggestedAliases = suggestedAliases.Select(a => a.ToLowerInvariant());
 
-        var suggestedAliases = aliases.ToArray();
-        option.AddAliases(suggestedAliases);
-        _allAliases.AddRange(suggestedAliases);
+        var validAliases = suggestedAliases.ToArray();
+        option.AddAliases(validAliases);
+        aliases.AddRange(validAliases);
     }
 
     private static string BuildErrorMessage(BaseOption option, Exception ex)

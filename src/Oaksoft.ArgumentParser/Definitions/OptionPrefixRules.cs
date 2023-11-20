@@ -40,4 +40,10 @@ public enum OptionPrefixRules
     /// Valid examples: -o, -d, --start, --close, /d, /start
     /// </summary>
     Default = AllowSingleDashShortAlias | AllowDoubleDashLongAlias | AllowForwardSlash,
+
+    /// <summary>
+    /// Default option alias prefix rule
+    /// Valid examples: -o, --d, --start, -close, /d, /start
+    /// </summary>
+    All = Default | AllowDoubleDash | AllowSingleDash
 }

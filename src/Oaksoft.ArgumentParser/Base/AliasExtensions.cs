@@ -10,6 +10,7 @@ internal static class AliasExtensions
 {
     private static readonly char[] _suggestionTrimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
     private static readonly char[] _validAliasChars = { '?', '%', '$', '€', '£', '#', '@', '-' };
+    private static readonly string[] _reservedAliases = { "h", "?", "help" };
 
     public static string ValidateAlias(this string alias)
     {
@@ -22,6 +23,12 @@ internal static class AliasExtensions
                 $"Invalid alias '{alias}' found! Use ascii letters, ascii digits and ('{validChars}') symbols. And an alias should not start with digit.");
         }
 
+        if (_reservedAliases.Any(r => r.Equals(result, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new ArgumentException(
+                $"Invalid alias '{alias}' found! Reserved aliases ('{string.Join("', '", _reservedAliases)}') cannot be used.");
+        }
+
         return result;
     }
 
@@ -31,7 +38,7 @@ internal static class AliasExtensions
 
         foreach (var candidate in candidates)
         {
-            if (candidate.Length < 3)
+            if (candidate.Length < 2)
             {
                 yield return candidate;
                 continue;
@@ -64,7 +71,7 @@ internal static class AliasExtensions
     }
 
     public static IEnumerable<string> SuggestAliasesHeuristically(
-        this string name, ICollection<string> filter, int maxAliasLength, bool caseSensitive)
+        this string name, ICollection<string> filter, bool caseSensitive, int maxAliasLength, int maxAliasWordCount)
     {
         var words = name.GetHumanizedWords().ToList();
         if (words.Count < 1)
@@ -87,6 +94,9 @@ internal static class AliasExtensions
                 if (filter.Any(f => f.Equals(candidate, compareFlag)))
                     continue;
 
+                if (_reservedAliases.Any(f => f.Equals(candidate, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
                 candidateFound = true;
                 yield return candidate;
                 break;
@@ -96,56 +106,46 @@ internal static class AliasExtensions
                 break;
         }
 
-        // find a long alias by using first 2 words
-        if (words.Count > 1 && words.Take(2).Sum(s => s.Length) + 1 < maxAliasLength)
+        for (var i = maxAliasWordCount; i > 0; --i)
         {
-            var candidate = string.Join('-', words.Take(2));
-            if (!filter.Any(f => f.Equals(candidate, compareFlag)))
-            {
-                yield return candidate;
-                yield break;
-            }
-        }
+            // find a long alias by using first 3 words
+            if (words.Count < i || words.Take(i).Sum(s => s.Length) + i - 1 > maxAliasLength) 
+                continue;
 
-        // find a long alias by using first word
-        if (words[0].Length < maxAliasLength)
-        {
-            var candidate = words[0];
-            if (!filter.Any(f => f.Equals(candidate, compareFlag)))
-            {
-                yield return candidate;
-                yield break;
-            }
-        }
+            var candidate = string.Join('-', words.Take(i));
+            if (_reservedAliases.Any(r => r.Equals(candidate, StringComparison.OrdinalIgnoreCase))) 
+                continue;
 
-        // find a long alias by using first 3 words
-        if (words.Count > 2 && words.Take(3).Sum(s => s.Length) + 2 < maxAliasLength)
-        {
-            var candidate = string.Join('-', words.Take(3));
-            if (!filter.Any(f => f.Equals(candidate, compareFlag)))
-            {
-                yield return candidate;
-            }
+            if (filter.Any(f => f.Equals(candidate, compareFlag))) 
+                continue;
+
+            yield return candidate;
+            yield break;
         }
     }
 
-    public static IEnumerable<string> GetPrefixedAliases(this IEnumerable<string> aliases, OptionPrefixRules rules)
+    public static IEnumerable<string> GetPrefixedAliases(
+        this List<string> aliases, OptionPrefixRules rules, bool caseSensitive)
     {
-        foreach (var alias in aliases)
+        for (var index = 0; index < aliases.Count; ++index)
         {
-            if (rules.HasFlag(OptionPrefixRules.AllowSingleDash))
-                yield return "-" + alias;
-            else if (alias.Length < 2 && rules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
-                yield return "-" + alias;
-
-            if (rules.HasFlag(OptionPrefixRules.AllowDoubleDash))
-                yield return "--" + alias;
-            else if (alias.Length > 1 && rules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
-                yield return "--" + alias;
-
-            if (rules.HasFlag(OptionPrefixRules.AllowForwardSlash))
-                yield return "/" + alias;
+            aliases[index] = caseSensitive ? aliases[index] : aliases[index].ToLowerInvariant();
         }
+
+        var cleanAliases = aliases.ValidateAliases(rules).ToList();
+
+        aliases.Clear();
+        aliases.AddRange(cleanAliases);
+
+        if (aliases.Count < 1)
+            throw new ArgumentException("Option alias not found! Use WithAliases() to set aliases of the option.");
+
+        var prefixedAliases = aliases.GetPrefixedAliases(rules).OrderByDescending(a => a.Length).ToList();
+
+        if (prefixedAliases.Count < 1)
+            throw new ArgumentException("Option alias not found! Use valid OptionPrefixRule and alias combination.");
+
+        return prefixedAliases;
     }
 
     public static void ExtractAliasAndValue(
@@ -321,6 +321,58 @@ internal static class AliasExtensions
         }
 
         throw new Exception($"Unknown forward slash token '{token}' found!");
+    }
+
+    private static IEnumerable<string> GetPrefixedAliases(this IEnumerable<string> aliases, OptionPrefixRules rules)
+    {
+        foreach (var alias in aliases)
+        {
+            if (rules.HasFlag(OptionPrefixRules.AllowSingleDash))
+                yield return "-" + alias;
+            else if (alias.Length < 2 && rules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
+                yield return "-" + alias;
+
+            if (rules.HasFlag(OptionPrefixRules.AllowDoubleDash))
+                yield return "--" + alias;
+            else if (alias.Length > 1 && rules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
+                yield return "--" + alias;
+
+            if (rules.HasFlag(OptionPrefixRules.AllowForwardSlash))
+                yield return "/" + alias;
+        }
+    }
+
+    private static IEnumerable<string> ValidateAliases(this IEnumerable<string> aliases, OptionPrefixRules rules)
+    {
+        foreach (var alias in aliases)
+        {
+            if (rules.HasFlag(OptionPrefixRules.AllowSingleDash))
+            {
+                yield return alias;
+                continue;
+            }
+
+            if (alias.Length < 2 && rules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
+            {
+                yield return alias;
+                continue;
+            }
+
+            if (rules.HasFlag(OptionPrefixRules.AllowDoubleDash))
+            {
+                yield return alias;
+                continue;
+            }
+
+            if (alias.Length > 1 && rules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
+            {
+                yield return alias;
+                continue;
+            }
+
+            if (rules.HasFlag(OptionPrefixRules.AllowForwardSlash))
+                yield return alias;
+        }
     }
 
     /// <summary>

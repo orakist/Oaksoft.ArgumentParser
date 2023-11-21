@@ -84,6 +84,9 @@ internal sealed class SequentialNamedOption<TValue>
 
         if (string.IsNullOrWhiteSpace(Usage))
             Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
+
+        if (string.IsNullOrWhiteSpace(Description))
+            Description = $"Performs '{Name}' option.";
     }
 
     public override void Parse(TokenItem[] tokens)

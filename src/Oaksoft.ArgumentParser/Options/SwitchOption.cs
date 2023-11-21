@@ -83,6 +83,9 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
 
         if (string.IsNullOrWhiteSpace(Usage))
             Usage = ShortAlias;
+
+        if (string.IsNullOrWhiteSpace(Description))
+            Description = $"Performs '{Name}' option.";
     }
 
     public override void Parse(TokenItem[] tokens)

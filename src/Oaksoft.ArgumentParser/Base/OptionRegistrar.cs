@@ -156,7 +156,7 @@ internal static class OptionRegistrar
     }
 
     public static PropertyInfo ValidateExpression<TSource, TValue>(
-        this IArgumentParserBuilder builder, Expression<Func<TSource, TValue>>? expression)
+        this IArgumentParserBuilder builder, Expression<Func<TSource, TValue>>? expression, string type)
         where TSource : IApplicationOptions
     {
         if (expression?.Body == null)
@@ -165,14 +165,14 @@ internal static class OptionRegistrar
         if (expression.NodeType != ExpressionType.Lambda ||
             expression.Body is not MemberExpression member ||
             member.Member.MemberType != MemberTypes.Property)
-            throw new ArgumentException("Invalid lambda expression, please select a property!");
+            throw new ArgumentException($"Invalid lambda expression, please select a {type} type property!");
 
         var parserBuilder = (ArgumentParserBuilder<TSource>)builder;
         var properties = parserBuilder.GetAppOptions().GetType().GetProperties();
 
         var property = properties.FirstOrDefault(p => p.Name == member.Member.Name);
         if (property == null)
-            throw new ArgumentException("Unknown property, please select a property!");
+            throw new ArgumentException($"Unknown property, please select a {type} type property!");
 
         return property;
     }

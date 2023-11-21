@@ -20,9 +20,10 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
         base.Initialize();
 
         if (string.IsNullOrWhiteSpace(Usage))
-        {
-            Usage = Name.Replace(" ", "-").ToLowerInvariant();
-        }
+            Usage = $"value for '{Name.Replace(' ', '-').ToLowerInvariant()}' option";
+
+        if (string.IsNullOrWhiteSpace(Description))
+            Description = $"Captures value for '{Name}' option.";
     }
 
     public override void Parse(TokenItem[] tokens)

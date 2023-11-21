@@ -19,7 +19,7 @@ public static partial class OptionExtensions
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
 
         var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, mustHaveOneValue, mandatoryOption);
 
@@ -36,7 +36,7 @@ public static partial class OptionExtensions
         where TSource : IApplicationOptions
         where TValue : struct, IComparable, IEquatable<TValue>
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
 
         var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, mustHaveOneValue, mandatoryOption);
 
@@ -53,7 +53,7 @@ public static partial class OptionExtensions
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
 
         var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, valueArity, optionArity);
 
@@ -70,7 +70,7 @@ public static partial class OptionExtensions
         where TSource : IApplicationOptions
         where TValue : struct, IComparable, IEquatable<TValue>
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
 
         var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, valueArity, optionArity);
 
@@ -88,8 +88,8 @@ public static partial class OptionExtensions
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
-        var flagProperty = builder.ValidateExpression(flagPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
+        var flagProperty = builder.ValidateExpression(flagPropExpr, typeof(bool).ToString());
 
         var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, flagProperty, mustHaveOneValue, mandatoryOption);
 
@@ -107,8 +107,8 @@ public static partial class OptionExtensions
         where TSource : IApplicationOptions
         where TValue : struct, IComparable, IEquatable<TValue>
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
-        var flagProperty = builder.ValidateExpression(flagPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
+        var flagProperty = builder.ValidateExpression(flagPropExpr, typeof(bool).ToString());
 
         var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, flagProperty, mustHaveOneValue, mandatoryOption);
 
@@ -126,8 +126,8 @@ public static partial class OptionExtensions
         where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
-        var countProperty = builder.ValidateExpression(countPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
+        var countProperty = builder.ValidateExpression(countPropExpr, typeof(int).ToString());
 
         var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, countProperty, valueArity, optionArity);
 
@@ -145,8 +145,8 @@ public static partial class OptionExtensions
         where TSource : IApplicationOptions
         where TValue : struct, IComparable, IEquatable<TValue>
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
-        var countProperty = builder.ValidateExpression(countPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
+        var countProperty = builder.ValidateExpression(countPropExpr, typeof(int).ToString());
 
         var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, countProperty, valueArity, optionArity);
 

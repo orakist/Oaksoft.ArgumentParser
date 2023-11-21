@@ -25,29 +25,72 @@ namespace Oaksoft.ArgumentParser.Tests
             result.GetOptions().Count.ShouldBe(6);
 
             var option = result.GetOptionByName(nameof(IntAppOptions.Value));
-            var namedOption = option as INamedOption;
-            namedOption.ShouldNotBeNull();
-            namedOption.Name.ShouldBe("Value");
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("Value");
 
             option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
-            namedOption = option as INamedOption;
-            namedOption.ShouldNotBeNull();
-            namedOption.Name.ShouldBe("ValueCount");
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("ValueCount");
 
-            option = result.GetOptionByName("ValueList");
-            namedOption = option as INamedOption;
-            namedOption.ShouldNotBeNull();
-            namedOption.Name.ShouldBe("ValueList");
+            option = result.GetOptionByName(nameof(IntAppOptions.Values));
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("ValueList");
 
             option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
-            var valueOption = option as IValueOption;
-            valueOption.ShouldNotBeNull();
-            valueOption.Name.ShouldBe("ValueX");
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("ValueX");
 
             option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
-            valueOption = option as IValueOption;
-            valueOption.ShouldNotBeNull();
-            valueOption.Name.ShouldBe("ValueY");
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("ValueY");
+        }
+
+        [Fact]
+        public void ShouldBuildOptions_WhenDefaultNamesUsed()
+        {
+            // Arrange, should ignore empty names
+            var sut = CommandLine.CreateParser<IntAppOptions>()
+                .AddNamedOption(s => s.Value)
+                .AddCountOption(s => s.NullValue)
+                .AddNamedOption(s => s.Values)
+                .AddValueOption(s => s.NullValues, o => o.WithName(""))
+                .AddValueOption(s => s.ValueFlag, o => o.WithName("   "));
+
+            // Act
+            var result = sut.Build();
+
+            // Assert
+            result.GetOptions().Count.ShouldBe(6);
+
+            var option = result.GetOptionByName(nameof(IntAppOptions.Value));
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("Value");
+            option = result.GetOptionByName(option.Name);
+            option.ShouldNotBeNull();
+
+            option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("Null Value");
+            option = result.GetOptionByName(option.Name);
+            option.ShouldNotBeNull();
+
+            option = result.GetOptionByName(nameof(IntAppOptions.Values));
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("Values");
+            option = result.GetOptionByName(option.Name);
+            option.ShouldNotBeNull();
+
+            option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("Null Values");
+            option = result.GetOptionByName(option.Name);
+            option.ShouldNotBeNull();
+
+            option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("Value Flag");
+            option = result.GetOptionByName(option.Name);
+            option.ShouldNotBeNull();
         }
 
         [Fact]
@@ -66,31 +109,22 @@ namespace Oaksoft.ArgumentParser.Tests
             result.GetOptions().Count.ShouldBe(4);
 
             var option = result.GetOptionByName(nameof(SampleOptionNames.__1_Help_1));
-            var namedOption = option as INamedOption;
-            namedOption.ShouldNotBeNull();
-            namedOption.Name.ShouldBe("Help 1");
-            option = result.GetOptionByName("Help 1");
-            namedOption = option as INamedOption;
-            namedOption.ShouldNotBeNull();
-            namedOption.Name.ShouldBe("Help 1");
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("Help 1");
+            option = result.GetOptionByName(option.Name);
+            option.ShouldNotBeNull();
 
             option = result.GetOptionByName(nameof(SampleOptionNames.__2_Value));
-            namedOption = option as INamedOption;
-            namedOption.ShouldNotBeNull();
-            namedOption.Name.ShouldBe("Value");
-            option = result.GetOptionByName("Value");
-            namedOption = option as INamedOption;
-            namedOption.ShouldNotBeNull();
-            namedOption.Name.ShouldBe("Value");
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("Value");
+            option = result.GetOptionByName(option.Name);
+            option.ShouldNotBeNull();
 
             option = result.GetOptionByName(nameof(SampleOptionNames.ValueTest));
-            namedOption = option as INamedOption;
-            namedOption.ShouldNotBeNull();
-            namedOption.Name.ShouldBe("Value Test");
-            option = result.GetOptionByName("Value Test");
-            namedOption = option as INamedOption;
-            namedOption.ShouldNotBeNull();
-            namedOption.Name.ShouldBe("Value Test");
+            option.ShouldNotBeNull();
+            option.Name.ShouldBe("Value Test");
+            option = result.GetOptionByName(option.Name);
+            option.ShouldNotBeNull();
         }
 
         [Fact]

@@ -108,11 +108,6 @@ internal abstract class BaseOption : IBaseOption
                 nameof(Name),
                 $"Empty option arity. Every option must have a valid name. Property: {KeyProperty.Name}");
         }
-
-        if (string.IsNullOrWhiteSpace(Description))
-        {
-            Description = $"Performs '{Name}' option.";
-        }
     }
 
     public abstract void Parse(TokenItem[] tokens);

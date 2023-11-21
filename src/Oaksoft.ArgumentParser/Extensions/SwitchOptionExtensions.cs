@@ -17,7 +17,7 @@ public static partial class OptionExtensions
         bool mandatoryOption = false)
         where TSource : IApplicationOptions
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(bool).ToString());
 
         var option = builder.RegisterSwitchOption<TSource>(keyProperty, mandatoryOption);
         
@@ -33,7 +33,7 @@ public static partial class OptionExtensions
         bool mandatoryOption = false)
         where TSource : IApplicationOptions
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(bool).ToString());
 
         var option = builder.RegisterSwitchOption<TSource>(keyProperty, mandatoryOption);
 
@@ -49,7 +49,7 @@ public static partial class OptionExtensions
         ArityType optionArity = ArityType.ZeroOrMore)
         where TSource : IApplicationOptions
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(int).ToString());
 
         var option = builder.RegisterSwitchOption<TSource>(keyProperty, optionArity);
 
@@ -65,7 +65,7 @@ public static partial class OptionExtensions
         ArityType optionArity = ArityType.ZeroOrMore)
         where TSource : IApplicationOptions
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr);
+        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(int).ToString());
 
         var option = builder.RegisterSwitchOption<TSource>(keyProperty, optionArity);
 

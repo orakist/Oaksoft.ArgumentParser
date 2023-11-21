@@ -50,9 +50,20 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
         OptionArity = (requiredOptionCount, maximumOptionCount);
     }
 
-    public override List<string> GetAliases()
+    public override List<string> GetAliases(bool validate)
     {
+        if (validate)
+        {
+            _aliases.ValidateAliases(
+                _parser!.OptionPrefix, _parser.CaseSensitive, !_isReservedOption);
+        }
+
         return _aliases;
+    }
+
+    public override void AddSuggestedAlias(string alias)
+    {
+        _aliases.Add(alias);
     }
 
     public override void AddAliases(bool skipValidation, params string[] aliases)
@@ -77,8 +88,7 @@ internal sealed class SwitchOption : BaseValueOption<bool>, ISwitchOption
     {
         base.Initialize();
 
-        var prefixedAliases = _aliases.GetPrefixedAliases(
-            _parser!.OptionPrefix, _parser!.CaseSensitive);
+        var prefixedAliases = _aliases.GetPrefixedAliases(_parser!.OptionPrefix);
         _prefixAliases.AddRange(prefixedAliases);
 
         if (string.IsNullOrWhiteSpace(Usage))

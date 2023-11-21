@@ -89,13 +89,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected void InitializeOptions()
     {
-        var names = _baseOptions.Where(o => !string.IsNullOrEmpty(o.Name))
-            .Select(o => o.Name).ToList();
-
-        var aliases = _baseOptions.Where(o => o is INamedOption)
-            .SelectMany(o => o.GetAliases())
-            .Select(a => CaseSensitive ? a : a.ToLowerInvariant())
-            .ToList();
+        var names = new List<string>();
+        var aliases = new List<string>();
+        ValidateCustomNames(names, aliases);
 
         foreach (var option in _baseOptions)
         {
@@ -105,8 +101,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
                 AutoInitializeOptionAliases(option, aliases);
 
-                option.SetParser(this);
-
                 option.Initialize();
             }
             catch (Exception ex)
@@ -115,29 +109,54 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        var validAliases = _baseOptions.Where(o => o is INamedOption)
-            .SelectMany(o => o.GetAliases())
-            .OrderByDescending(s => s.Length);
+        _allAliases.AddRange(aliases.OrderByDescending(a => a.Length));
+    }
 
-        _allAliases.AddRange(validAliases);
-
-        var duplicateAliases = _allAliases.GroupBy(c => c).Where(c => c.Count() > 1)
-            .Select(c => c.Key).ToList();
-
-        if (duplicateAliases.Count > 0)
+    private void ValidateCustomNames(List<string> names, List<string> aliases)
+    {
+        foreach (var option in _baseOptions)
         {
-            var aliasText = string.Join(", ", duplicateAliases);
-            throw new Exception($"Option aliases must be unique. Duplicate Aliases: {aliasText}");
+            try
+            {
+                if (string.IsNullOrEmpty(option.Name))
+                    continue;
+
+                if (names.Contains(option.Name))
+                    throw new Exception($"Option name '{option.Name}' must be unique.");
+
+                names.Add(option.Name);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(BuildErrorMessage(option, ex));
+            }
         }
 
-        names = names.GroupBy(c => c).Where(c => c.Count() > 1)
-            .Select(c => c.Key).ToList();
+        foreach (var option in _baseOptions)
+        {
+            try
+            {
+                option.SetParser(this);
 
-        if (names.Count <= 0)
-            return;
+                if (option is not INamedOption)
+                    continue;
 
-        var namesText = string.Join(", ", names);
-        throw new Exception($"Option names must be unique. Duplicate Names: {namesText}");
+                if (option.GetAliases(true).Count < 1)
+                    continue;
+
+                foreach (var alias in option.GetAliases(false))
+                {
+                    if (aliases.Contains(alias))
+                        throw new Exception($"Option alias '{alias}' must be unique.");
+
+                    aliases.Add(alias);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(BuildErrorMessage(option, ex));
+            }
+        }
     }
 
     protected void ClearOptions()
@@ -410,7 +429,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
 
         var name = string.Join(' ', words);
-        option.SetName(name);
+        if (names.Contains(name))
+            throw new Exception($"Option '{name}' name must be unique.");
+
+        option.SetSuggestedName(name);
         names.Add(name);
     }
 
@@ -419,7 +441,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (option is not INamedOption)
             return;
 
-        if (option.GetAliases().Count > 0)
+        if (option.GetAliases(false).Count > 0)
             return;
 
         // suggest aliases for option by using the registered property name
@@ -429,9 +451,20 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (!CaseSensitive)
             suggestedAliases = suggestedAliases.Select(a => a.ToLowerInvariant());
 
-        var validAliases = suggestedAliases.ToArray();
-        option.AddAliases(false, validAliases);
-        aliases.AddRange(validAliases);
+        var validAliases = suggestedAliases.ToList();
+        validAliases.ValidateAliases(OptionPrefix, CaseSensitive, false);
+
+        if (validAliases.Count < 1)
+            throw new ArgumentException("Unable to suggest option alias! Use WithAliases() to set aliases of the option.");
+
+        foreach (var alias in validAliases)
+        {
+            if (aliases.Contains(alias))
+                throw new Exception($"Option alias '{alias}' value must be unique.");
+
+            aliases.Add(alias);
+            option.AddSuggestedAlias(alias);
+        }
     }
 
     private static string BuildErrorMessage(BaseOption option, Exception ex)

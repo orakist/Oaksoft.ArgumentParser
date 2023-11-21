@@ -30,6 +30,7 @@ internal abstract class BaseOption : IBaseOption
     public PropertyInfo? CountProperty { get; private set; }
 
     protected IArgumentParser? _parser;
+    protected bool _isReservedOption;
 
     public void SetKeyProperty(PropertyInfo property)
     {
@@ -40,6 +41,12 @@ internal abstract class BaseOption : IBaseOption
     {
         CountProperty = property;
     }
+
+    public void SetReservedOption(bool enabled)
+    {
+        _isReservedOption = enabled;
+    }
+
 
     public void SetParser(IArgumentParser parser)
     {
@@ -54,6 +61,11 @@ internal abstract class BaseOption : IBaseOption
             return;
 
         Name = string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+    }
+
+    public void SetSuggestedName(string name)
+    {
+        Name = name;
     }
 
     public void SetUsage(string usage)
@@ -76,16 +88,21 @@ internal abstract class BaseOption : IBaseOption
         Description = description.Trim();
     }
 
-    public virtual List<string> GetAliases()
+    public virtual List<string> GetAliases(bool validate)
     {
         throw new NotSupportedException("GetAliases() not supported by value options.");
+    }
+
+    public virtual void AddSuggestedAlias(string alias)
+    {
+        throw new NotSupportedException("AddAliases() not supported by value options.");
     }
 
     public virtual void AddAliases(bool skipValidation, params string[] aliases)
     {
         throw new NotSupportedException("AddAliases() not supported by value options.");
     }
-
+    
     public virtual void Initialize()
     {
         if (ValueArity.Min < 0 || ValueArity.Max < ValueArity.Min)

@@ -32,6 +32,34 @@ internal static class AliasExtensions
         return result;
     }
 
+    public static void ValidateAliases(this List<string> aliases, OptionPrefixRules rules, bool caseSensitive, bool throwException)
+    {
+        if(aliases.Count < 1)
+            return;
+
+        for (var index = 0; index < aliases.Count; ++index)
+        {
+            aliases[index] = caseSensitive ? aliases[index] : aliases[index].ToLowerInvariant();
+        }
+
+        var allowedAliases = aliases.Where(a => IsAliasAllowed(a, rules)).ToList();
+
+        if (throwException && allowedAliases.Count < 1)
+        {
+            throw new ArgumentException(
+                $"Option alias '{string.Join(", ", aliases)}' not allowed! Use valid {nameof(OptionPrefixRules)} and alias combination.");
+        }
+
+        if (throwException && allowedAliases.Count < aliases.Count)
+        {
+            throw new ArgumentException(
+                $"Some of option aliases '{string.Join(", ", aliases)}' not allowed! Use valid {nameof(OptionPrefixRules)} and alias combination.");
+        }
+
+        aliases.Clear();
+        aliases.AddRange(allowedAliases);
+    }
+
     public static IEnumerable<string> GetHumanizedWords(this string name)
     {
         var candidates = GetNormalizedWords(name);
@@ -124,23 +152,14 @@ internal static class AliasExtensions
         }
     }
 
-    public static IEnumerable<string> GetPrefixedAliases(
-        this List<string> aliases, OptionPrefixRules rules, bool caseSensitive)
+    public static IEnumerable<string> GetPrefixedAliases(this List<string> aliases, OptionPrefixRules rules)
     {
-        for (var index = 0; index < aliases.Count; ++index)
-        {
-            aliases[index] = caseSensitive ? aliases[index] : aliases[index].ToLowerInvariant();
-        }
-
-        var cleanAliases = aliases.ValidateAliases(rules).ToList();
-
-        aliases.Clear();
-        aliases.AddRange(cleanAliases);
-
         if (aliases.Count < 1)
             throw new ArgumentException("Option alias not found! Use WithAliases() to set aliases of the option.");
 
-        var prefixedAliases = aliases.GetPrefixedAliases(rules).OrderByDescending(a => a.Length).ToList();
+        var prefixedAliases = GetPrefixAddedAliases(aliases, rules)
+            .OrderByDescending(a => a.Length)
+            .ToList();
 
         if (prefixedAliases.Count < 1)
             throw new ArgumentException("Option alias not found! Use valid OptionPrefixRule and alias combination.");
@@ -323,7 +342,7 @@ internal static class AliasExtensions
         throw new Exception($"Unknown forward slash token '{token}' found!");
     }
 
-    private static IEnumerable<string> GetPrefixedAliases(this IEnumerable<string> aliases, OptionPrefixRules rules)
+    private static IEnumerable<string> GetPrefixAddedAliases(IEnumerable<string> aliases, OptionPrefixRules rules)
     {
         foreach (var alias in aliases)
         {
@@ -342,37 +361,24 @@ internal static class AliasExtensions
         }
     }
 
-    private static IEnumerable<string> ValidateAliases(this IEnumerable<string> aliases, OptionPrefixRules rules)
+    private static bool IsAliasAllowed(string alias, OptionPrefixRules rules)
     {
-        foreach (var alias in aliases)
-        {
-            if (rules.HasFlag(OptionPrefixRules.AllowSingleDash))
-            {
-                yield return alias;
-                continue;
-            }
+        if (rules.HasFlag(OptionPrefixRules.AllowSingleDash))
+            return true;
 
-            if (alias.Length < 2 && rules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
-            {
-                yield return alias;
-                continue;
-            }
+        if (alias.Length < 2 && rules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
+            return true;
 
-            if (rules.HasFlag(OptionPrefixRules.AllowDoubleDash))
-            {
-                yield return alias;
-                continue;
-            }
+        if (rules.HasFlag(OptionPrefixRules.AllowDoubleDash))
+            return true;
 
-            if (alias.Length > 1 && rules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
-            {
-                yield return alias;
-                continue;
-            }
+        if (alias.Length > 1 && rules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
+            return true;
 
-            if (rules.HasFlag(OptionPrefixRules.AllowForwardSlash))
-                yield return alias;
-        }
+        if (rules.HasFlag(OptionPrefixRules.AllowForwardSlash))
+            return true;
+
+        return false;
     }
 
     /// <summary>

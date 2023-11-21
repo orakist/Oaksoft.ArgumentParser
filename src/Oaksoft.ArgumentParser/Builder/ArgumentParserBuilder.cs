@@ -153,6 +153,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
         option.AddAliases(true, "-h", "-?", "--help");
         option.SetDescription("Prints this help information.");
+        option.SetReservedOption(true);
     }
 
     private static string? BuildTitleLine()

@@ -137,7 +137,7 @@ public class NameConfigurationTests
 
         // Act & Assert
         Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Option names must be unique.");
+            .Message.ShouldStartWith("Option 'Value' name must be unique.");
     }
 
     [Fact]
@@ -150,7 +150,7 @@ public class NameConfigurationTests
 
         // Act & Assert
         Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Option names must be unique.");
+            .Message.ShouldStartWith("Option name 'Test' must be unique.");
     }
 
     [Fact]

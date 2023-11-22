@@ -34,4 +34,9 @@ public enum AliasDelimiterRules
     /// Default token delimiter rule
     /// </summary>
     Default = AllowEqualSymbol | AllowColonSymbol | AllowOmittingDelimiter,
+
+    /// <summary>
+    /// All token delimiter rules enabled
+    /// </summary>
+    All = Default | AllowWhitespace
 }

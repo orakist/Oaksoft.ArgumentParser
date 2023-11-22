@@ -48,31 +48,26 @@ internal sealed class ScalarNamedOption<TValue>
         OptionArity = (requiredOptionCount, maximumOptionCount);
     }
 
-    public override List<string> GetAliases(bool validate)
+    public override List<string> GetAliases()
     {
-        if (validate)
-        {
-            _aliases.ValidateAliases(
-                _parser!.OptionPrefix, _parser.CaseSensitive, !_isReservedOption);
-        }
-
         return _aliases;
     }
 
-    public override void AddSuggestedAlias(string alias)
-    {
-        _aliases.Add(alias);
-    }
-
-    public override void AddAliases(bool skipValidation, params string[] aliases)
+    public override void AddAliases(params string[] aliases)
     {
         ParserInitializedGuard();
 
         var values = aliases
             .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Select(s => s.Trim().ValidateAlias(skipValidation));
+            .Select(s => s.Trim().ValidateAlias());
 
         _aliases.AddRange(values.Distinct());
+    }
+
+    public override void SetValidAliases(params string[] aliases)
+    {
+        _aliases.Clear();
+        _aliases.AddRange(aliases);
     }
 
     public override void Initialize()

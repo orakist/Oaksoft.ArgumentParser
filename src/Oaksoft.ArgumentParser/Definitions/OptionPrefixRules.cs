@@ -42,7 +42,7 @@ public enum OptionPrefixRules
     Default = AllowSingleDashShortAlias | AllowDoubleDashLongAlias | AllowForwardSlash,
 
     /// <summary>
-    /// Default option alias prefix rule
+    /// All option alias rules enabled
     /// Valid examples: -o, --d, --start, -close, /d, /start
     /// </summary>
     All = Default | AllowDoubleDash | AllowSingleDash

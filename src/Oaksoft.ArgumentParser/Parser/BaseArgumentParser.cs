@@ -101,6 +101,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
                 AutoInitializeOptionAliases(option, aliases);
 
+                option.SetParser(this);
+
                 option.Initialize();
             }
             catch (Exception ex)
@@ -136,21 +138,25 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             try
             {
-                option.SetParser(this);
-
                 if (option is not INamedOption)
                     continue;
 
-                if (option.GetAliases(true).Count < 1)
+                if (option.GetAliases().Count < 1)
                     continue;
 
-                foreach (var alias in option.GetAliases(false))
+                var validAliases = option.GetAliases()
+                    .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength!.Value, true)
+                    .ToArray();
+
+                foreach (var alias in validAliases)
                 {
                     if (aliases.Contains(alias))
                         throw new Exception($"Option alias '{alias}' must be unique.");
 
                     aliases.Add(alias);
                 }
+
+                option.SetValidAliases(validAliases);
             }
             catch (Exception ex)
             {
@@ -441,7 +447,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (option is not INamedOption)
             return;
 
-        if (option.GetAliases(false).Count > 0)
+        if (option.GetAliases().Count > 0)
             return;
 
         // suggest aliases for option by using the registered property name
@@ -451,20 +457,15 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (!CaseSensitive)
             suggestedAliases = suggestedAliases.Select(a => a.ToLowerInvariant());
 
-        var validAliases = suggestedAliases.ToList();
-        validAliases.ValidateAliases(OptionPrefix, CaseSensitive, false);
-
-        if (validAliases.Count < 1)
+        suggestedAliases = suggestedAliases.ValidateAliases(
+            OptionPrefix, CaseSensitive, Settings.MaxAliasLength!.Value, false);
+        
+        var validAliases = suggestedAliases.ToArray();
+        if (validAliases.Length < 1)
             throw new ArgumentException("Unable to suggest option alias! Use WithAliases() to set aliases of the option.");
 
-        foreach (var alias in validAliases)
-        {
-            if (aliases.Contains(alias))
-                throw new Exception($"Option alias '{alias}' value must be unique.");
-
-            aliases.Add(alias);
-            option.AddSuggestedAlias(alias);
-        }
+        aliases.AddRange(validAliases);
+        option.SetValidAliases(validAliases);
     }
 
     private static string BuildErrorMessage(BaseOption option, Exception ex)

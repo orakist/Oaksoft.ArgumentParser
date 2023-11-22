@@ -12,7 +12,7 @@ internal static class AliasExtensions
     private static readonly char[] _validAliasChars = { '?', '%', '$', '€', '£', '#', '@', '-' };
     private static readonly string[] _reservedAliases = { "h", "?", "help" };
 
-    public static string ValidateAlias(this string alias, bool skipValidation)
+    public static string ValidateAlias(this string alias)
     {
         var result = string.Join('-', GetNormalizedWords(alias));
 
@@ -23,7 +23,7 @@ internal static class AliasExtensions
                 $"Invalid alias '{alias}' found! Use ascii letters, ascii digits and ('{validChars}') symbols. And an alias should not start with digit.");
         }
 
-        if (!skipValidation && _reservedAliases.Any(r => r.Equals(result, StringComparison.OrdinalIgnoreCase)))
+        if (_reservedAliases.Any(r => r.Equals(result, StringComparison.OrdinalIgnoreCase)))
         {
             throw new ArgumentException(
                 $"Invalid alias '{alias}' found! Reserved aliases ('{string.Join("', '", _reservedAliases)}') cannot be used.");
@@ -32,32 +32,36 @@ internal static class AliasExtensions
         return result;
     }
 
-    public static void ValidateAliases(this List<string> aliases, OptionPrefixRules rules, bool caseSensitive, bool throwException)
+    public static IEnumerable<string> ValidateAliases(
+        this IEnumerable<string> aliases, OptionPrefixRules rules,
+        bool caseSensitive, int maxAliasLength, bool throwException)
     {
-        if(aliases.Count < 1)
-            return;
-
-        for (var index = 0; index < aliases.Count; ++index)
+        foreach (var alias in aliases.Select(a => caseSensitive ? a : a.ToLowerInvariant()))
         {
-            aliases[index] = caseSensitive ? aliases[index] : aliases[index].ToLowerInvariant();
+            if (alias.Length > maxAliasLength)
+            {
+                if (throwException)
+                {
+                    throw new ArgumentException(
+                        $"Option alias '{alias}' not allowed! Allowed max alias length is {maxAliasLength}.");
+                }
+
+                continue;
+            }
+
+            if (!IsAliasAllowed(alias, rules))
+            {
+                if (throwException)
+                {
+                    var message = $"{(alias.Length < 2 ? "Short" : "Long")} option alias '{alias}' not allowed!";
+                    throw new ArgumentException($"{message} Use appropriate {nameof(OptionPrefixRules)} and alias combination.");
+                }
+
+                continue;
+            }
+
+            yield return alias;
         }
-
-        var allowedAliases = aliases.Where(a => IsAliasAllowed(a, rules)).ToList();
-
-        if (throwException && allowedAliases.Count < 1)
-        {
-            throw new ArgumentException(
-                $"Option alias '{string.Join(", ", aliases)}' not allowed! Use valid {nameof(OptionPrefixRules)} and alias combination.");
-        }
-
-        if (throwException && allowedAliases.Count < aliases.Count)
-        {
-            throw new ArgumentException(
-                $"Some of option aliases '{string.Join(", ", aliases)}' not allowed! Use valid {nameof(OptionPrefixRules)} and alias combination.");
-        }
-
-        aliases.Clear();
-        aliases.AddRange(allowedAliases);
     }
 
     public static IEnumerable<string> GetHumanizedWords(this string name)
@@ -136,15 +140,15 @@ internal static class AliasExtensions
 
         for (var i = maxAliasWordCount; i > 0; --i)
         {
-            // find a long alias by using first 3 words
-            if (words.Count < i || words.Take(i).Sum(s => s.Length) + i - 1 > maxAliasLength) 
+            // find a long alias
+            if (words.Count < i || words.Take(i).Sum(s => s.Length) + i - 1 > maxAliasLength)
                 continue;
 
             var candidate = string.Join('-', words.Take(i));
-            if (_reservedAliases.Any(r => r.Equals(candidate, StringComparison.OrdinalIgnoreCase))) 
+            if (_reservedAliases.Any(r => r.Equals(candidate, StringComparison.OrdinalIgnoreCase)))
                 continue;
 
-            if (filter.Any(f => f.Equals(candidate, compareFlag))) 
+            if (filter.Any(f => f.Equals(candidate, compareFlag)))
                 continue;
 
             yield return candidate;

@@ -1,8 +1,8 @@
 using Oaksoft.ArgumentParser.Extensions;
-using Oaksoft.ArgumentParser.Tests.Options;
+using Oaksoft.ArgumentParser.Tests.AppModels;
 using Shouldly;
 
-namespace Oaksoft.ArgumentParser.Tests;
+namespace Oaksoft.ArgumentParser.Tests.OptionTests;
 
 public class SwitchOptionTests
 {

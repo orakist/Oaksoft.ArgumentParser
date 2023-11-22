@@ -1,9 +1,9 @@
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Tests.Options;
+using Oaksoft.ArgumentParser.Tests.AppModels;
 using Shouldly;
 
-namespace Oaksoft.ArgumentParser.Tests;
+namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
 public class NameConfigurationTests
 {

@@ -1,6 +1,6 @@
 ﻿using Oaksoft.ArgumentParser.Parser;
 
-namespace Oaksoft.ArgumentParser.Tests.Options;
+namespace Oaksoft.ArgumentParser.Tests.AppModels;
 
 public class SampleOptionNames : IApplicationOptions
 {

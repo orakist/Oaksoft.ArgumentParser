@@ -26,5 +26,10 @@ public enum ValueDelimiterRules
     /// <summary>
     /// Default value delimiter rule
     /// </summary>
-    Default = AllowSemicolonSymbol | AllowCommaSymbol | AllowPipeSymbol
+    Default = AllowSemicolonSymbol | AllowCommaSymbol | AllowPipeSymbol,
+
+    /// <summary>
+    /// All value delimiter rules enabled
+    /// </summary>
+    All = Default
 }

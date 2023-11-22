@@ -119,21 +119,21 @@ public static partial class OptionExtensions
     #region Option Alias Configuration
     public static ISwitchOption AddAliases(this ISwitchOption option, params string[] aliases)
     {
-        ((SwitchOption)option).AddAliases(false, aliases);
+        ((SwitchOption)option).AddAliases(aliases);
         return option;
     }
 
     public static IScalarNamedOption<TValue> AddAliases<TValue>(this IScalarNamedOption<TValue> option, params string[] aliases)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarNamedOption<TValue>)option).AddAliases(false, aliases);
+        ((ScalarNamedOption<TValue>)option).AddAliases(aliases);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> AddAliases<TValue>(this ISequentialNamedOption<TValue> option, params string[] aliases)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((SequentialNamedOption<TValue>)option).AddAliases(false, aliases);
+        ((SequentialNamedOption<TValue>)option).AddAliases(aliases);
         return option;
     }
     #endregion

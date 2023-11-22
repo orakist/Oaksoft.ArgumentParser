@@ -25,7 +25,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     private readonly List<BaseOption> _baseOptions;
 
     public ArgumentParserBuilder(
-        TOptions options, bool caseSensitive, OptionPrefixRules optionPrefix, 
+        TOptions options, bool caseSensitive, OptionPrefixRules optionPrefix,
         AliasDelimiterRules aliasDelimiter, ValueDelimiterRules valueDelimiter)
     {
         CaseSensitive = caseSensitive;
@@ -106,6 +106,24 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
     private void BuildDefaultSettings()
     {
+        if ((OptionPrefix & OptionPrefixRules.All) == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(OptionPrefix),
+                "Empty option alias prefix rule is not allowed.");
+        }
+
+        if ((AliasDelimiter & AliasDelimiterRules.All) == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(AliasDelimiter),
+                "Empty alias delimiter rule is not allowed.");
+        }
+        
+        if ((ValueDelimiter & ValueDelimiterRules.All) == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(ValueDelimiter),
+                "Empty value delimiter rule is not allowed.");
+        }
+        
         _settingsBuilder.AutoPrintHeader ??= true;
         _settingsBuilder.AutoPrintHelp ??= true;
         _settingsBuilder.AutoPrintErrors ??= true;
@@ -150,10 +168,12 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         this.AddSwitchOption(p => p.Help);
 
+        var aliases = new[] { "-h", "-?", "--help" };
+        var validAliases = aliases.ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false);
         var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
-        option.AddAliases(true, "-h", "-?", "--help");
+
+        option.SetValidAliases(validAliases.ToArray());
         option.SetDescription("Prints this help information.");
-        option.SetReservedOption(true);
     }
 
     private static string? BuildTitleLine()

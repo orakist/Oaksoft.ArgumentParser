@@ -1,4 +1,4 @@
-namespace Oaksoft.ArgumentParser.Tests;
+namespace Oaksoft.ArgumentParser.Tests.OptionTests;
 
 public class ScalarValueOptionTests
 {
@@ -6,6 +6,6 @@ public class ScalarValueOptionTests
     public void Parse_switch_option()
     {
 
-            
+
     }
 }

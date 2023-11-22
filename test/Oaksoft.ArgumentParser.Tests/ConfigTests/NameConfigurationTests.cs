@@ -19,30 +19,40 @@ public class NameConfigurationTests
             .AddValueOption(s => s.ValueFlag, o => o.WithName("ValueY"));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(6);
+        parser.GetOptions().Count.ShouldBe(6);
 
-        var option = result.GetOptionByName(nameof(IntAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("Value");
+        option = parser.GetOptionByName(option.Name);
+        option.ShouldNotBeNull();
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("ValueCount");
+        option = parser.GetOptionByName(option.Name);
+        option.ShouldNotBeNull();
 
-        option = result.GetOptionByName(nameof(IntAppOptions.Values));
+        option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("ValueList");
+        option = parser.GetOptionByName(option.Name);
+        option.ShouldNotBeNull();
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("ValueX");
+        option = parser.GetOptionByName(option.Name);
+        option.ShouldNotBeNull();
 
-        option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
+        option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("ValueY");
+        option = parser.GetOptionByName(option.Name);
+        option.ShouldNotBeNull();
     }
 
     [Fact]
@@ -53,46 +63,36 @@ public class NameConfigurationTests
             .AddNamedOption(s => s.Value)
             .AddNamedOption(s => s.NullValue, s => s.NullValueFlag)
             .AddNamedOption(s => s.Values)
-            .AddValueOption(s => s.NullValues, o => o.WithName(""))
-            .AddValueOption(s => s.ValueFlag, o => o.WithName("   "));
+            .AddValueOption(s => s.NullValues)
+            .AddValueOption(s => s.ValueFlag);
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(6);
+        parser.GetOptions().Count.ShouldBe(6);
 
-        var option = result.GetOptionByName(nameof(IntAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
-        option.Name.ShouldBe("Value");
-        option = result.GetOptionByName(option.Name);
-        option.ShouldNotBeNull();
+        option.Name.ShouldBe(nameof(IntAppOptions.Value));
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
-        option.Name.ShouldBe("Null Value");
-        option = result.GetOptionByName(option.Name);
-        option.ShouldNotBeNull();
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValueFlag));
+        option.Name.ShouldBe(nameof(IntAppOptions.NullValue));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValueFlag));
         option.ShouldNotBeNull();
 
-        option = result.GetOptionByName(nameof(IntAppOptions.Values));
+        option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
-        option.Name.ShouldBe("Values");
-        option = result.GetOptionByName(option.Name);
-        option.ShouldNotBeNull();
+        option.Name.ShouldBe(nameof(IntAppOptions.Values));
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
-        option.Name.ShouldBe("Null Values");
-        option = result.GetOptionByName(option.Name);
-        option.ShouldNotBeNull();
+        option.Name.ShouldBe(nameof(IntAppOptions.NullValues));
 
-        option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
+        option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
-        option.Name.ShouldBe("Value Flag");
-        option = result.GetOptionByName(option.Name);
-        option.ShouldNotBeNull();
+        option.Name.ShouldBe(nameof(IntAppOptions.ValueFlag));
     }
 
     [Fact]
@@ -100,46 +100,51 @@ public class NameConfigurationTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>()
-            .AddNamedOption(s => s.__1_Help_1)
+            .AddNamedOption(s => s.__1_2_3, o => o.AddAliases("x"))
             .AddNamedOption(s => s.__2_Value)
             .AddNamedOption(s => s.ValueTest);
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(4);
 
-        var option = result.GetOptionByName(nameof(SampleOptionNames.__1_Help_1));
+        var option = parser.GetOptionByName(nameof(SampleOptionNames.__1_2_3));
         option.ShouldNotBeNull();
-        option.Name.ShouldBe("Help 1");
-        option = result.GetOptionByName(option.Name);
-        option.ShouldNotBeNull();
+        option.Name.ShouldBe(nameof(SampleOptionNames.__1_2_3));
 
-        option = result.GetOptionByName(nameof(SampleOptionNames.__2_Value));
+        option = parser.GetOptionByName(nameof(SampleOptionNames.__2_Value));
         option.ShouldNotBeNull();
-        option.Name.ShouldBe("Value");
-        option = result.GetOptionByName(option.Name);
-        option.ShouldNotBeNull();
+        option.Name.ShouldBe(nameof(SampleOptionNames.__2_Value));
 
-        option = result.GetOptionByName(nameof(SampleOptionNames.ValueTest));
+        option = parser.GetOptionByName(nameof(SampleOptionNames.ValueTest));
         option.ShouldNotBeNull();
-        option.Name.ShouldBe("Value Test");
-        option = result.GetOptionByName(option.Name);
-        option.ShouldNotBeNull();
+        option.Name.ShouldBe(nameof(SampleOptionNames.ValueTest));
     }
 
     [Fact]
-    public void ShouldThrowException_WhenSameNameUsed()
+    public void ShouldThrowException_WhenSameNameWithPropertyUsed()
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>()
             .AddNamedOption(s => s.Value)
-            .AddNamedOption(s => s.__2_Value);
+            .AddNamedOption(s => s.__2_Value, o => o.WithName("Value"));
 
         // Act & Assert
         Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Option 'Value' name must be unique.");
+            .Message.ShouldStartWith("Name 'Value' is already in use!");
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenNameIsEmpty()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<SampleOptionNames>();
+
+        // Act & Assert
+        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, o => o.WithName(" ")))
+            .Message.ShouldStartWith("The name string cannot be empty!");
     }
 
     [Fact]
@@ -152,7 +157,7 @@ public class NameConfigurationTests
 
         // Act & Assert
         Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Option name 'Test' must be unique.");
+            .Message.ShouldStartWith("Name 'Test' is already in use!");
     }
 
     [Fact]
@@ -163,12 +168,12 @@ public class NameConfigurationTests
             .AddSwitchOption(s => s.ValueFlag);
 
         // Act
-        var result = sut.Build();
-        var option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
+        var parser = sut.Build();
+        var option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         var namedOption = option as ISwitchOption;
-        namedOption.ShouldNotBeNull();
 
         // Assert
+        namedOption.ShouldNotBeNull();
         Should.Throw<Exception>(() => namedOption.WithName("NewName"))
             .Message.ShouldStartWith("An option cannot be modified after");
     }
@@ -182,6 +187,6 @@ public class NameConfigurationTests
 
         // Act & Assert
         Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Reserved properties ('Help') cannot be used.");
+            .Message.ShouldStartWith("The reserved 'Help' property is not configurable.");
     }
 }

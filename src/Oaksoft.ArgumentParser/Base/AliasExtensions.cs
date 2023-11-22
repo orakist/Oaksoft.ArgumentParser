@@ -9,25 +9,43 @@ namespace Oaksoft.ArgumentParser.Base;
 internal static class AliasExtensions
 {
     private static readonly char[] _suggestionTrimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
-    private static readonly char[] _validAliasChars = { '?', '%', '$', '€', '£', '#', '@', '-' };
+    private static readonly char[] _allowedAliasSymbols = { '?', '%', '$', '€', '£', '#', '@', '-' };
     private static readonly string[] _reservedAliases = { "h", "?", "help" };
+
+    public static string ValidateName(this string name)
+    {
+        name = name.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("The name string cannot be empty!");
+        }
+
+        if (!name.All(c => char.IsAsciiDigit(c) || char.IsAsciiLetter(c) || c is '_' or ' '))
+        {
+            throw new ArgumentException(
+                $"Invalid name '{name}' found! Only use ascii letters, ascii digits and '_' symbol. " +
+                "Option name should have at least one letter, digit or '_' symbol.");
+        }
+
+        return string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+    }
 
     public static string ValidateAlias(this string alias)
     {
         alias = alias.Trim();
         if (string.IsNullOrWhiteSpace(alias))
         {
-            throw new ArgumentException("An alias string should not be empty!");
+            throw new ArgumentException("The alias string cannot be empty!");
         }
 
         var trimmed = TrimStartPrefixes(alias);
-        var result = string.Join('-', GetNormalizedWords(trimmed));
+        var result = string.Join('-', GetNormalizedWords(trimmed, _allowedAliasSymbols));
 
         if (string.IsNullOrWhiteSpace(trimmed) || result.Length < trimmed.Length)
         {
-            var validChars = string.Join("', '", _validAliasChars);
+            var validChars = string.Join("', '", _allowedAliasSymbols);
             throw new ArgumentException(
-                $"Invalid alias '{alias}' found! Use ascii letters, ascii digits and ('{validChars}') symbols. " +
+                $"Invalid alias '{alias}' found! Only use ascii letters, ascii digits and ('{validChars}') symbols. " +
                 "Alias should not start with digit and should have at least one letter or symbol.");
         }
 
@@ -69,44 +87,6 @@ internal static class AliasExtensions
             }
 
             yield return alias;
-        }
-    }
-
-    public static IEnumerable<string> GetHumanizedWords(this string name)
-    {
-        var candidates = GetNormalizedWords(name);
-
-        foreach (var candidate in candidates)
-        {
-            if (candidate.Length < 2)
-            {
-                yield return candidate;
-                continue;
-            }
-
-            var startIndex = 0;
-            var prevChar = candidate[0];
-            for (var i = 1; i < candidate.Length; ++i)
-            {
-                if ((char.IsDigit(prevChar) && !char.IsDigit(candidate[i])) ||
-                    (char.IsLower(prevChar) && char.IsUpper(candidate[i])))
-                {
-                    yield return candidate[startIndex..i];
-                    startIndex = i;
-                }
-                else if (char.IsUpper(prevChar) && char.IsLower(candidate[i]))
-                {
-                    if (startIndex < i - 1)
-                    {
-                        yield return candidate[startIndex..(i - 1)];
-                        startIndex = i - 1;
-                    }
-                }
-
-                prevChar = candidate[i];
-            }
-
-            yield return candidate[startIndex..];
         }
     }
 
@@ -275,7 +255,7 @@ internal static class AliasExtensions
         if (token.Length < 2)
             throw new Exception($"Invalid token '{token}' found!");
 
-        if (!char.IsAsciiLetter(token[1]) && !_validAliasChars.Contains(token[1]))
+        if (!char.IsAsciiLetter(token[1]) && !_allowedAliasSymbols.Contains(token[1]))
             return null;
 
         foreach (var alias in aliases)
@@ -415,10 +395,48 @@ internal static class AliasExtensions
         return null;
     }
 
-    private static IEnumerable<string> GetNormalizedWords(string input)
+    private static IEnumerable<string> GetHumanizedWords(this string name)
+    {
+        var candidates = GetNormalizedWords(name);
+
+        foreach (var candidate in candidates)
+        {
+            if (candidate.Length < 2)
+            {
+                yield return candidate;
+                continue;
+            }
+
+            var startIndex = 0;
+            var prevChar = candidate[0];
+            for (var i = 1; i < candidate.Length; ++i)
+            {
+                if ((char.IsDigit(prevChar) && !char.IsDigit(candidate[i])) ||
+                    (char.IsLower(prevChar) && char.IsUpper(candidate[i])))
+                {
+                    yield return candidate[startIndex..i];
+                    startIndex = i;
+                }
+                else if (char.IsUpper(prevChar) && char.IsLower(candidate[i]))
+                {
+                    if (startIndex < i - 1)
+                    {
+                        yield return candidate[startIndex..(i - 1)];
+                        startIndex = i - 1;
+                    }
+                }
+
+                prevChar = candidate[i];
+            }
+
+            yield return candidate[startIndex..];
+        }
+    }
+
+    private static IEnumerable<string> GetNormalizedWords(string input, params char[] allowedSymbols)
     {
         var validChars = input.Replace('_', ' ').Replace('-', ' ')
-            .Where(c => char.IsAsciiDigit(c) || char.IsAsciiLetter(c) || c == ' ' || _validAliasChars.Contains(c));
+            .Where(c => char.IsAsciiDigit(c) || char.IsAsciiLetter(c) || c == ' ' || allowedSymbols.Contains(c));
 
         return string.Join("", validChars)
             .TrimStart(_suggestionTrimChars)
@@ -427,9 +445,7 @@ internal static class AliasExtensions
 
     private static string TrimStartPrefixes(string input)
     {
-        if (input.StartsWith("--"))
-            input = input[2..];
-        else if (input.StartsWith('-') || input.StartsWith('/'))
+        if (input.StartsWith('/'))
             input = input[1..];
 
         input = input.Replace('_', ' ').Replace('-', ' ');

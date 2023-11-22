@@ -24,36 +24,47 @@ public class UsageConfigurationTests
             .AddValueOption(s => s.Value, o => o.WithUsage(usage3));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(6);
-        var text = result.GetHelpText(false);
+        parser.GetOptions().Count.ShouldBe(6);
+        var text = parser.GetHelpText(false);
 
-        var option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
+        var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage1);
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValueFlag));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValueFlag));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage2Trimmed);
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.Values));
+        option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage2Trimmed);
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage3Trimmed);
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.Value));
+        option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage3Trimmed);
         text.ShouldContain(option.Usage);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenUsageIsEmpty()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<SampleOptionNames>();
+
+        // Act & Assert
+        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, o => o.WithUsage(" ")))
+            .Message.ShouldStartWith("The usage string cannot be empty!");
     }
 
     [Fact]
@@ -64,39 +75,39 @@ public class UsageConfigurationTests
             .AddNamedOption(s => s.Value)
             .AddNamedOption(s => s.NullValue, mustHaveOneValue: false)
             .AddNamedOption(s => s.Values)
-            .AddValueOption(s => s.NullValues, o => o.WithUsage(""))
-            .AddValueOption(s => s.ValueFlag, o => o.WithUsage("   "));
+            .AddValueOption(s => s.NullValues)
+            .AddValueOption(s => s.ValueFlag);
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(6);
-        var text = result.GetHelpText(false);
+        parser.GetOptions().Count.ShouldBe(6);
+        var text = parser.GetHelpText(false);
 
-        var option = result.GetOptionByName(nameof(IntAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe("-v <value>");
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe("-n (value)");
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.Values));
+        option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe("-a (value)");
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
-        option.Usage.ShouldBe("value for 'null-values' option");
+        option.Usage.ShouldBe($"value for '{nameof(IntAppOptions.NullValues)}' option");
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
+        option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
-        option.Usage.ShouldBe("value for 'value-flag' option");
+        option.Usage.ShouldBe($"value for '{nameof(IntAppOptions.ValueFlag)}' option");
         text.ShouldContain(option.Usage);
     }
 
@@ -112,35 +123,35 @@ public class UsageConfigurationTests
             .AddValueOption(s => s.ValueFlag);
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(6);
-        var text = result.GetHelpText(false);
+        parser.GetOptions().Count.ShouldBe(6);
+        var text = parser.GetHelpText(false);
 
-        var option = result.GetOptionByName(nameof(IntAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe("/v <value>");
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe("/n (value)");
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.Values));
+        option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe("/a (value)");
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
-        option.Usage.ShouldBe("value for 'null-values' option");
+        option.Usage.ShouldBe($"value for '{nameof(IntAppOptions.NullValues)}' option");
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
+        option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
-        option.Usage.ShouldBe("value for 'value-flag' option");
+        option.Usage.ShouldBe($"value for '{nameof(IntAppOptions.ValueFlag)}' option");
         text.ShouldContain(option.Usage);
     }
 }

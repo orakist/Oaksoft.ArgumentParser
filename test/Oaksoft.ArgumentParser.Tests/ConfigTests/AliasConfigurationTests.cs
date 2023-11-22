@@ -18,12 +18,12 @@ public class AliasConfigurationTests
             .AddSwitchOption(s => s.NullValueFlag, o => o.AddAliases("f", "null-value-flag"));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(4);
 
-        var option = result.GetOptionByName(nameof(StringAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -32,7 +32,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/v");
         namedOption.Aliases.ShouldContain("/value");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValues));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -41,7 +41,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/n");
         namedOption.Aliases.ShouldContain("/null-value");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValueFlag));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValueFlag));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -61,26 +61,26 @@ public class AliasConfigurationTests
             .AddSwitchOption(s => s.NullValueFlag, o => o.AddAliases("test", "tesT"));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(4);
 
-        var option = result.GetOptionByName(nameof(StringAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(2);
         namedOption.Aliases.ShouldContain("-v");
         namedOption.Aliases.ShouldContain("/v");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValues));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(2);
         namedOption.Aliases.ShouldContain("--value");
         namedOption.Aliases.ShouldContain("/value");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValueFlag));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValueFlag));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(2);
@@ -98,19 +98,19 @@ public class AliasConfigurationTests
             .AddSwitchOption(s => s.NullValueFlag, o => o.AddAliases("test", "Test", "TEST", "TEST"));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(4);
 
-        var option = result.GetOptionByName(nameof(StringAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(2);
         namedOption.Aliases.ShouldContain("-v");
         namedOption.Aliases.ShouldContain("/v");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValues));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -119,7 +119,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("--Value");
         namedOption.Aliases.ShouldContain("/Value");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValueFlag));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValueFlag));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(6);
@@ -141,12 +141,12 @@ public class AliasConfigurationTests
             .AddSwitchOption(s => s.NullValueFlag, o => o.AddAliases("f", "--null -  value  --- flag--"));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(4);
 
-        var option = result.GetOptionByName(nameof(StringAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -155,7 +155,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/v");
         namedOption.Aliases.ShouldContain("/value");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValues));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -164,7 +164,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/n");
         namedOption.Aliases.ShouldContain("/null-value");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValueFlag));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValueFlag));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -196,7 +196,7 @@ public class AliasConfigurationTests
 
         // Act & Assert
         Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, a => a.AddAliases("  ")))
-            .Message.ShouldStartWith("An alias string should not be empty!");
+            .Message.ShouldStartWith("The alias string cannot be empty!");
     }
 
     [Fact]
@@ -249,12 +249,12 @@ public class AliasConfigurationTests
             .AddNamedOption(s => s.NullValue, o => o.AddAliases("n", "null-value-count"));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(4);
 
-        var option = result.GetOptionByName(nameof(StringAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -263,7 +263,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/v");
         namedOption.Aliases.ShouldContain("/value");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValue));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValue));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -272,7 +272,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/n");
         namedOption.Aliases.ShouldContain("/null-value-count");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValueCount));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValueCount));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -292,19 +292,19 @@ public class AliasConfigurationTests
             .AddNamedOption(s => s.Value); // should only suggest "l"
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(4);
 
-        var option = result.GetOptionByName(nameof(StringAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(2);
         namedOption.Aliases.ShouldContain("-l");
         namedOption.Aliases.ShouldContain("/l");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValue));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValue));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -313,7 +313,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/a");
         namedOption.Aliases.ShouldContain("/null-value-count");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.NullValueCount));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValueCount));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -333,24 +333,24 @@ public class AliasConfigurationTests
             .AddNamedOption(s => s.ValueTestProp, o => o.AddAliases("v"));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(4);
 
-        var option = result.GetOptionByName(nameof(SampleOptionNames.Value));
+        var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.ShouldContain("-l");
         namedOption.Aliases.ShouldHaveSingleItem();
 
-        option = result.GetOptionByName(nameof(SampleOptionNames.ValueTest));
+        option = parser.GetOptionByName(nameof(SampleOptionNames.ValueTest));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.ShouldContain("-a");
         namedOption.Aliases.ShouldHaveSingleItem();
 
-        option = result.GetOptionByName(nameof(SampleOptionNames.ValueTestProp));
+        option = parser.GetOptionByName(nameof(SampleOptionNames.ValueTestProp));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.ShouldContain("-v");
@@ -367,24 +367,24 @@ public class AliasConfigurationTests
             .AddNamedOption(s => s.ValueTestProp, o => o.AddAliases("test2"));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(4);
 
-        var option = result.GetOptionByName(nameof(SampleOptionNames.Value));
+        var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.ShouldContain("--value");
         namedOption.Aliases.ShouldHaveSingleItem();
 
-        option = result.GetOptionByName(nameof(SampleOptionNames.ValueTest));
+        option = parser.GetOptionByName(nameof(SampleOptionNames.ValueTest));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.ShouldContain("--test1");
         namedOption.Aliases.ShouldHaveSingleItem();
 
-        option = result.GetOptionByName(nameof(SampleOptionNames.ValueTestProp));
+        option = parser.GetOptionByName(nameof(SampleOptionNames.ValueTestProp));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.ShouldContain("--test2");
@@ -401,7 +401,7 @@ public class AliasConfigurationTests
 
         // Act & Assert
         Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Option alias 'v' must be unique.");
+            .Message.ShouldStartWith("Alias 'v' is already in use!");
     }
 
     [Fact]
@@ -438,12 +438,12 @@ public class AliasConfigurationTests
             .AddNamedOption(s => s.ValueFlag, o => o.AddAliases("test", "alias"));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(3);
+        parser.GetOptions().Count.ShouldBe(3);
 
-        var option = result.GetOptionByName(nameof(StringAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(6);
@@ -454,7 +454,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/a");
         namedOption.Aliases.ShouldContain("/b");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.ValueFlag));
+        option = parser.GetOptionByName(nameof(StringAppOptions.ValueFlag));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(6);
@@ -476,12 +476,12 @@ public class AliasConfigurationTests
             .AddNamedOption(s => s.Values);
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(4);
 
-        var option = result.GetOptionByName(nameof(StringAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(6);
@@ -492,7 +492,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/a");
         namedOption.Aliases.ShouldContain("/A");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.ValueFlag));
+        option = parser.GetOptionByName(nameof(StringAppOptions.ValueFlag));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -501,7 +501,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/test");
         namedOption.Aliases.ShouldContain("/TeSt");
 
-        option = result.GetOptionByName(nameof(StringAppOptions.Values));
+        option = parser.GetOptionByName(nameof(StringAppOptions.Values));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -510,5 +510,4 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/V");
         namedOption.Aliases.ShouldContain("/Values");
     }
-    
 }

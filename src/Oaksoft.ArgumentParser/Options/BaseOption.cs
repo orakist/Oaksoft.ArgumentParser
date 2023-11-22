@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
@@ -50,13 +51,10 @@ internal abstract class BaseOption : IBaseOption
     {
         ParserInitializedGuard();
 
-        if (string.IsNullOrWhiteSpace(name))
-            return;
-
-        Name = string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        Name = name.ValidateName();
     }
 
-    public void SetSuggestedName(string name)
+    public void SetValidName(string name)
     {
         Name = name;
     }
@@ -66,7 +64,9 @@ internal abstract class BaseOption : IBaseOption
         ParserInitializedGuard();
 
         if (string.IsNullOrWhiteSpace(usage))
-            return;
+        {
+            throw new ArgumentException("The usage string cannot be empty!");
+        }
 
         Usage = string.Join(' ', usage.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
     }
@@ -100,23 +100,22 @@ internal abstract class BaseOption : IBaseOption
     {
         if (ValueArity.Min < 0 || ValueArity.Max < ValueArity.Min)
         {
-            throw new ArgumentException(
+            throw new ArgumentOutOfRangeException(
                 nameof(ValueArity),
-                $"Invalid value arity. Do not use negative or inconsistent values. Arity: {ValueArity}");
+                $"Invalid value {ValueArity} arity! Do not use negative or inconsistent values.");
         }
 
         if (OptionArity.Min < 0 || OptionArity.Max < OptionArity.Min)
         {
-            throw new ArgumentException(
+            throw new ArgumentOutOfRangeException(
                 nameof(OptionArity),
-                $"Invalid option arity. Do not use negative or inconsistent values. Arity: {OptionArity}");
+                $"Invalid option {OptionArity} arity! Do not use negative or inconsistent values.");
         }
 
         if (string.IsNullOrWhiteSpace(Name))
         {
             throw new ArgumentException(
-                nameof(Name),
-                $"Empty option arity. Every option must have a valid name. Property: {KeyProperty.Name}");
+                $"Empty option nme! Every option must have a valid name. Property: {KeyProperty.Name}");
         }
     }
 

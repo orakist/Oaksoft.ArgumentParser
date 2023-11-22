@@ -20,6 +20,8 @@ public class SampleOptionNames : IApplicationOptions
 
     public int __2_Value { get; set; }
 
+    public int __1_2_3 { get; set; }
+
     public int __3_Va1_l2_3ue { get; set; }
 
     public int Val1 { get; set; }

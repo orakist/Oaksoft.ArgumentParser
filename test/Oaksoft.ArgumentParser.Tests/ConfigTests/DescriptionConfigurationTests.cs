@@ -19,33 +19,33 @@ public class DescriptionConfigurationTests
             .AddValueOption(s => s.ValueFlag, o => o.WithDescription(description));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(6);
-        var text = result.GetHelpText(false);
+        parser.GetOptions().Count.ShouldBe(6);
+        var text = parser.GetHelpText(false);
 
-        var option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
+        var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValueCount));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValueCount));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.Values));
+        option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
+        option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);
@@ -63,33 +63,33 @@ public class DescriptionConfigurationTests
             .AddValueOption(s => s.ValueFlag, o => o.WithDescription("   "));
 
         // Act
-        var result = sut.Build();
+        var parser = sut.Build();
 
         // Assert
-        result.GetOptions().Count.ShouldBe(6);
-        var text = result.GetHelpText(false);
+        parser.GetOptions().Count.ShouldBe(6);
+        var text = parser.GetHelpText(false);
 
-        var option = result.GetOptionByName(nameof(IntAppOptions.Value));
+        var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
         option.Description.ShouldBe($"Performs '{option.Name}' option.");
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Description.ShouldBe($"Performs '{option.Name}' option.");
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.Values));
+        option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Description.ShouldBe($"Performs '{option.Name}' option.");
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
         option.Description.ShouldBe($"Captures value for '{option.Name}' option.");
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
+        option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
         option.Description.ShouldBe($"Captures value for '{option.Name}' option.");
         text.ShouldContain(option.Description!);

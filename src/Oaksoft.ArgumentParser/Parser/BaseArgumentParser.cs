@@ -124,7 +124,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
                     continue;
 
                 if (names.Contains(option.Name))
-                    throw new Exception($"Option name '{option.Name}' must be unique.");
+                    throw new Exception($"Name '{option.Name}' is already in use! An option name must be unique!");
 
                 names.Add(option.Name);
             }
@@ -151,7 +151,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 foreach (var alias in validAliases)
                 {
                     if (aliases.Contains(alias))
-                        throw new Exception($"Option alias '{alias}' must be unique.");
+                        throw new Exception($"Alias '{alias}' is already in use! An option alias must be unique!");
 
                     aliases.Add(alias);
                 }
@@ -430,16 +430,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
 
         // suggest a name for option by using the registered property name
-        var words = option.KeyProperty.Name.GetHumanizedWords().ToList();
-        if (words.Count < 1)
-            return;
+        if (names.Contains(option.KeyProperty.Name))
+            throw new Exception($"Name '{option.KeyProperty.Name}' is already in use! An option name must be unique!");
 
-        var name = string.Join(' ', words);
-        if (names.Contains(name))
-            throw new Exception($"Option '{name}' name must be unique.");
-
-        option.SetSuggestedName(name);
-        names.Add(name);
+        option.SetValidName(option.KeyProperty.Name);
+        names.Add(option.KeyProperty.Name);
     }
 
     private void AutoInitializeOptionAliases(BaseOption option, List<string> aliases)

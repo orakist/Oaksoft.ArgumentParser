@@ -164,7 +164,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     private void BuildDefaultOptions()
     {
         if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help)))
-            throw new ArgumentException("Reserved properties ('Help') cannot be used.");
+            throw new ArgumentException("The reserved 'Help' property is not configurable.");
 
         this.AddSwitchOption(p => p.Help);
 
@@ -172,6 +172,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         var validAliases = aliases.ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false);
         var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
 
+        option.SetName("Help");
         option.SetValidAliases(validAliases.ToArray());
         option.SetDescription("Prints this help information.");
     }

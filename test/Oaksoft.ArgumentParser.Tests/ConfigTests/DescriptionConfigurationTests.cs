@@ -1,4 +1,5 @@
 using Oaksoft.ArgumentParser.Extensions;
+using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.AppModels;
 using Shouldly;
 
@@ -93,5 +94,23 @@ public class DescriptionConfigurationTests
         option.ShouldNotBeNull();
         option.Description.ShouldBe($"Captures value for '{option.Name}' option.");
         text.ShouldContain(option.Description!);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenTryToUpdateDescriptionAfterBuild()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value);
+
+        // Act
+        var parser = sut.Build();
+        var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
+        var namedOption = option as IScalarNamedOption<int>;
+
+        // Assert
+        namedOption.ShouldNotBeNull();
+        Should.Throw<Exception>(() => namedOption.WithDescription("test"))
+            .Message.ShouldStartWith("An option cannot be modified after");
     }
 }

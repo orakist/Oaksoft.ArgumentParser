@@ -4,6 +4,8 @@ namespace Oaksoft.ArgumentParser.Tests.AppModels;
 
 public class SampleOptionNames : IApplicationOptions
 {
+    public int V { get; set; }
+
     public int Value { get; set; }
 
     public bool ValueTest { get; set; }
@@ -11,6 +13,8 @@ public class SampleOptionNames : IApplicationOptions
     public List<int>? ValueTestProp { get; set; }
 
     public int ValueTestPropEx { get; set; }
+
+    public int ABCValue { get; set; }
 
     public int VeryLongApplicationOptionValuePropertyName { get; set; }
 

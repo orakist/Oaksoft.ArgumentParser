@@ -16,7 +16,7 @@ public interface ISwitchNamedOption : INamedOption, IValueOption
 {
 }
 
-public interface ISwitchOption : ISwitchNamedOption, ISwitchValueOption
+public interface ISwitchOption : ISwitchNamedOption, ISwitchValueOption, IHaveDefaultValue<bool>
 {
 }
 
@@ -24,7 +24,7 @@ public interface IScalarNamedOption : INamedOption, IValueOption
 {
 }
 
-public interface IScalarNamedOption<TValue> : IScalarNamedOption, IScalarValueOption<TValue>
+public interface IScalarNamedOption<TValue> : IScalarNamedOption, IScalarValueOption<TValue>, IHaveDefaultValue<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
 }

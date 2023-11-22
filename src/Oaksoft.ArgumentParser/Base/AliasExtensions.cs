@@ -20,11 +20,10 @@ internal static class AliasExtensions
             throw new ArgumentException("The name string cannot be empty!");
         }
 
-        if (!name.All(c => char.IsAsciiDigit(c) || char.IsAsciiLetter(c) || c is '_' or ' '))
+        if (!name.All(c => char.IsAsciiDigit(c) || char.IsAsciiLetter(c) || c is '_' or '-'))
         {
             throw new ArgumentException(
-                $"Invalid name '{name}' found! Only use ascii letters, ascii digits and '_' symbol. " +
-                "Option name should have at least one letter, digit or '_' symbol.");
+                $"Invalid name '{name}' found! Only use ascii letters, ascii digits and ('_', '-') symbols.");
         }
 
         return string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
@@ -105,7 +104,7 @@ internal static class AliasExtensions
         for (var i = 0; i < 8; ++i)
         {
             var candidateFound = false;
-            foreach (var word in words.Where(w => i < w.Length))
+            foreach (var word in words.Take(maxAliasWordCount).Where(w => i < w.Length))
             {
                 if (char.IsAsciiDigit(word[i]))
                     continue;
@@ -146,17 +145,21 @@ internal static class AliasExtensions
 
     public static IEnumerable<string> GetPrefixedAliases(this List<string> aliases, OptionPrefixRules rules)
     {
-        if (aliases.Count < 1)
-            throw new ArgumentException("Option alias not found! Use WithAliases() to set aliases of the option.");
+        foreach (var alias in aliases)
+        {
+            if (rules.HasFlag(OptionPrefixRules.AllowSingleDash))
+                yield return "-" + alias;
+            else if (alias.Length < 2 && rules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
+                yield return "-" + alias;
 
-        var prefixedAliases = GetPrefixAddedAliases(aliases, rules)
-            .OrderByDescending(a => a.Length)
-            .ToList();
+            if (rules.HasFlag(OptionPrefixRules.AllowDoubleDash))
+                yield return "--" + alias;
+            else if (alias.Length > 1 && rules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
+                yield return "--" + alias;
 
-        if (prefixedAliases.Count < 1)
-            throw new ArgumentException("Option alias not found! Use valid OptionPrefixRule and alias combination.");
-
-        return prefixedAliases;
+            if (rules.HasFlag(OptionPrefixRules.AllowForwardSlash))
+                yield return "/" + alias;
+        }
     }
 
     public static void ExtractAliasAndValue(
@@ -332,25 +335,6 @@ internal static class AliasExtensions
         }
 
         throw new Exception($"Unknown forward slash token '{token}' found!");
-    }
-
-    private static IEnumerable<string> GetPrefixAddedAliases(IEnumerable<string> aliases, OptionPrefixRules rules)
-    {
-        foreach (var alias in aliases)
-        {
-            if (rules.HasFlag(OptionPrefixRules.AllowSingleDash))
-                yield return "-" + alias;
-            else if (alias.Length < 2 && rules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
-                yield return "-" + alias;
-
-            if (rules.HasFlag(OptionPrefixRules.AllowDoubleDash))
-                yield return "--" + alias;
-            else if (alias.Length > 1 && rules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
-                yield return "--" + alias;
-
-            if (rules.HasFlag(OptionPrefixRules.AllowForwardSlash))
-                yield return "/" + alias;
-        }
     }
 
     private static bool IsAliasAllowed(string alias, OptionPrefixRules rules)

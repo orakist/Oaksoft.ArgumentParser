@@ -510,4 +510,22 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/V");
         namedOption.Aliases.ShouldContain("/Values");
     }
+
+    [Fact]
+    public void ShouldThrowException_WhenTryToUpdateAliasAfterBuild()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value);
+
+        // Act
+        var parser = sut.Build();
+        var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
+        var namedOption = option as IScalarNamedOption<int>;
+
+        // Assert
+        namedOption.ShouldNotBeNull();
+        Should.Throw<Exception>(() => namedOption.AddAliases("s"))
+            .Message.ShouldStartWith("An option cannot be modified after");
+    }
 }

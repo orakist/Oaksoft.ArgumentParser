@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Parser;
@@ -11,6 +12,8 @@ internal sealed class ScalarNamedOption<TValue>
     : BaseScalarValueOption<TValue>, IScalarNamedOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
+    public Ref<TValue>? DefaultValue { get; private set; }
+
     public string ShortAlias => _prefixAliases.MinBy(k => k.Length)!;
 
     public List<string> Aliases => _prefixAliases.ToList();
@@ -32,6 +35,13 @@ internal sealed class ScalarNamedOption<TValue>
         _aliases = new List<string>();
         _optionTokens = new List<string>();
         _prefixAliases = new List<string>();
+    }
+
+    public void SetDefaultValue(TValue defaultValue)
+    {
+        ParserInitializedGuard();
+
+        DefaultValue = new Ref<TValue>(defaultValue);
     }
 
     public void SetOptionArity(ArityType optionArity)
@@ -113,7 +123,7 @@ internal sealed class ScalarNamedOption<TValue>
                     }
                 }
                 else
-                {                
+                {
                     // parse --option=val or -o=val or -oval
                     // parse --option:val or -o:val
                     // parse "--option val" or "-o val"
@@ -126,6 +136,18 @@ internal sealed class ScalarNamedOption<TValue>
 
         // add parsed values to input list for validation
         _inputValues.AddRange(_valueTokens.Where(v => !string.IsNullOrWhiteSpace(v)));
+    }
+
+    public override void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty)
+    {
+        if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
+            return;
+
+        var result = ResultValue != null
+            ? ResultValue.Value
+            : DefaultValue != null ? DefaultValue.Value : default;
+
+        keyProperty.SetValue(appOptions, result);
     }
 
     public override void Validate()

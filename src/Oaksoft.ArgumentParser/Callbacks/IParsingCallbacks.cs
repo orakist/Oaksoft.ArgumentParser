@@ -6,9 +6,9 @@ namespace Oaksoft.ArgumentParser.Callbacks;
 public interface IParsingCallbacks<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    bool TryParseValue(string value, out TValue result);
-
     List<TValue> TryParseValues(List<string> values);
+
+    bool TryParseValue(string value, out TValue result);
 }
 
 /// <summary>Encapsulates a method to parse string values that has two parameters and returns boolean result.</summary>

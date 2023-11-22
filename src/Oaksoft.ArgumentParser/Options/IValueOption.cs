@@ -7,10 +7,10 @@ public interface IValueOption : IHaveValueOption, IBaseOption
 {
 }
 
-public interface ISwitchValueOption
-    : IHaveDefaultValue<bool>, IHaveResultValue<bool>, IValueOption
+public interface ISwitchValueOption : IHaveResultValue<bool>, IValueOption
 {
 }
+
 public interface IScalarValueOption : IValueOption
 {
 }
@@ -21,7 +21,7 @@ public interface ISequentialValueOption : IValueOption
 }
 
 public interface IScalarValueOption<TValue>
-    : IScalarValueOption, IHaveDefaultValue<TValue>, IHaveResultValue<TValue>, IHaveAllowedValues<TValue>
+    : IScalarValueOption, IHaveResultValue<TValue>, IHaveAllowedValues<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
 }
@@ -39,11 +39,6 @@ public interface IHaveValueOption
     List<string> InputValues { get; }
 }
 
-public interface IHaveDefaultValue<TValue>
-{
-    Ref<TValue>? DefaultValue { get; }
-}
-
 public interface IHaveAllowedValues<TValue>
 {
     List<TValue> AllowedValues { get; }
@@ -57,6 +52,11 @@ public interface IHaveResultValues<TValue>
 public interface IHaveResultValue<TValue>
 {
     Ref<TValue>? ResultValue { get; }
+}
+
+public interface IHaveDefaultValue<TValue>
+{
+    Ref<TValue>? DefaultValue { get; }
 }
 
 public class Ref<TValue>

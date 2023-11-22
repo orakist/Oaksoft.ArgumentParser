@@ -111,12 +111,6 @@ internal abstract class BaseOption : IBaseOption
                 nameof(OptionArity),
                 $"Invalid option {OptionArity} arity! Do not use negative or inconsistent values.");
         }
-
-        if (string.IsNullOrWhiteSpace(Name))
-        {
-            throw new ArgumentException(
-                $"Empty option nme! Every option must have a valid name. Property: {KeyProperty.Name}");
-        }
     }
 
     public abstract void Parse(TokenItem[] tokens);

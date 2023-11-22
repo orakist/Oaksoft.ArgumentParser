@@ -1,5 +1,6 @@
 ﻿using Oaksoft.ArgumentParser.Parser;
 using System;
+using System.Reflection;
 
 namespace Oaksoft.ArgumentParser.Options;
 
@@ -41,6 +42,16 @@ internal sealed class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
         }
 
         _inputValues.AddRange(_valueTokens);
+    }
+
+    public override void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty)
+    {
+        if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
+            return;
+
+        var result = ResultValue != null ? ResultValue.Value : default;
+
+        keyProperty.SetValue(appOptions, result);
     }
 
     public override void Validate()

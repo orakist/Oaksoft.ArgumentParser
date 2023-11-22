@@ -148,6 +148,18 @@ public class NameConfigurationTests
     }
 
     [Fact]
+    public void ShouldThrowException_WhenNameIsInvalid()
+    {
+        // Arrange
+        var name = "a+a-a";
+        var sut = CommandLine.CreateParser<SampleOptionNames>();
+
+        // Act & Assert
+        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, o => o.WithName(name)))
+            .Message.ShouldStartWith($"Invalid name '{name}' found!");
+    }
+
+    [Fact]
     public void ShouldThrowException_WhenSameCustomNameUsed()
     {
         // Arrange

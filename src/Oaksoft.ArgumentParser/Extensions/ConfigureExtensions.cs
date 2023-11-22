@@ -263,13 +263,6 @@ public static partial class OptionExtensions
         ((ScalarNamedOption<TValue>)option).SetDefaultValue(defaultValue);
         return option;
     }
-
-    public static IScalarValueOption<TValue> WithDefaultValue<TValue>(this IScalarValueOption<TValue> option, TValue defaultValue)
-        where TValue : IComparable, IEquatable<TValue>
-    {
-        ((ScalarValueOption<TValue>)option).SetDefaultValue(defaultValue);
-        return option;
-    }
     #endregion
 
     #region Sequential Value Configuration

@@ -169,8 +169,8 @@ public class AliasSuggestionTests
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(2);
-        namedOption.Aliases.ShouldContain("-e");
-        namedOption.Aliases.ShouldContain("/e");
+        namedOption.Aliases.ShouldContain("-a");
+        namedOption.Aliases.ShouldContain("/a");
     }
 
     [Fact]
@@ -212,7 +212,7 @@ public class AliasSuggestionTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.AllowDoubleDashLongAlias)
-            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.ABCValue)
             .AddNamedOption(s => s.ValueTest)
             .AddNamedOption(s => s.ValueTestProp);
 
@@ -222,10 +222,10 @@ public class AliasSuggestionTests
         // Assert
         parser.GetOptions().Count.ShouldBe(4);
 
-        var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
+        var option = parser.GetOptionByName(nameof(SampleOptionNames.ABCValue));
         var namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
-        namedOption.Aliases.ShouldContain("--value");
+        namedOption.Aliases.ShouldContain("--abc-value");
         namedOption.Aliases.ShouldHaveSingleItem();
 
         option = parser.GetOptionByName(nameof(SampleOptionNames.ValueTest));
@@ -409,9 +409,9 @@ public class AliasSuggestionTests
         // all long aliases have already registered with other options, so long aliases are empty
         // because suggestion algorithm suggests the alias only from first three words of the property name 
         namedOption.Aliases.Count.ShouldBe(3);
-        namedOption.Aliases.ShouldContain("-e");
-        namedOption.Aliases.ShouldContain("--e");
-        namedOption.Aliases.ShouldContain("/e");
+        namedOption.Aliases.ShouldContain("-a");
+        namedOption.Aliases.ShouldContain("--a");
+        namedOption.Aliases.ShouldContain("/a");
     }
 
     [Fact]
@@ -451,7 +451,7 @@ public class AliasSuggestionTests
     public void ShouldSuggestAlias_WhenReservedAliasUsed()
     {
         // Arrange
-        var sut = CommandLine.CreateParser<SampleOptionNames>()
+        var sut = CommandLine.CreateParser<SampleOptionNames>(caseSensitive: true)
             .AddNamedOption(s => s.__1_Help_1)
             .AddNamedOption(s => s.Val1);
 
@@ -467,17 +467,17 @@ public class AliasSuggestionTests
         namedOption.Aliases.Count.ShouldBe(4);
         namedOption.Aliases.ShouldContain("-e");
         namedOption.Aliases.ShouldContain("/e");
-        namedOption.Aliases.ShouldContain("--help-1");
-        namedOption.Aliases.ShouldContain("/help-1");
+        namedOption.Aliases.ShouldContain("--Help-1");
+        namedOption.Aliases.ShouldContain("/Help-1");
 
         option = parser.GetOptionByName(nameof(SampleOptionNames.Val1));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
-        namedOption.Aliases.ShouldContain("-v");
-        namedOption.Aliases.ShouldContain("--val1");
-        namedOption.Aliases.ShouldContain("/v");
-        namedOption.Aliases.ShouldContain("/val1");
+        namedOption.Aliases.ShouldContain("-V");
+        namedOption.Aliases.ShouldContain("--Val1");
+        namedOption.Aliases.ShouldContain("/V");
+        namedOption.Aliases.ShouldContain("/Val1");
     }
 
     [Fact]
@@ -571,6 +571,20 @@ public class AliasSuggestionTests
         var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.AllowDoubleDashLongAlias)
             .AddCountOption(s => s.Val4) // will suggest => val4
             .AddCountOption(s => s.Val4_, o => o.WithName("Test")); // will suggest nothing
+
+        // Act & Assert
+        // Can't suggest alias because all alias possible names have already been used 
+        Should.Throw<Exception>(() => sut.Build())
+            .Message.ShouldStartWith("Unable to suggest option alias!");
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenAliasSuggestionFails4()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.AllowSingleDashShortAlias)
+            .AddCountOption(s => s.Value) // will suggest => v, value
+            .AddCountOption(s => s.V); // will suggest nothing
 
         // Act & Assert
         // Can't suggest alias because all alias possible names have already been used 

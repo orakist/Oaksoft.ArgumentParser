@@ -13,28 +13,11 @@ internal abstract class BaseScalarValueOption<TValue>
     : BaseAllowedValuesOption<TValue>, IScalarValueOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    public Ref<TValue>? DefaultValue { get; private set; }
-
     public Ref<TValue>? ResultValue { get; private set; }
 
     protected BaseScalarValueOption(int requiredValueCount, int maximumValueCount)
         : base(requiredValueCount, maximumValueCount)
     {
-    }
-
-    public void SetDefaultValue(TValue defaultValue)
-    {
-        ParserInitializedGuard();
-
-        if (defaultValue is string strValue)
-        {
-            var value = string.IsNullOrWhiteSpace(strValue) ? null : strValue.Trim();
-            DefaultValue = value is null ? null : new Ref<TValue>((TValue)(object)value);
-        }
-        else
-        {
-            DefaultValue = new Ref<TValue>(defaultValue);
-        }
     }
 
     public override void Validate()
@@ -52,18 +35,6 @@ internal abstract class BaseScalarValueOption<TValue>
         {
             ResultValue = new Ref<TValue>(resultValues[^1]);
         }
-    }
-
-    public override void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty)
-    {
-        if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue))) 
-            return;
-
-        var result = ResultValue != null 
-            ? ResultValue.Value 
-            : DefaultValue != null ? DefaultValue.Value : default;
-
-        keyProperty.SetValue(appOptions, result);
     }
 
     public override void Clear()

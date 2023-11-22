@@ -1,5 +1,6 @@
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Extensions;
+using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.AppModels;
 using Shouldly;
 
@@ -153,5 +154,23 @@ public class UsageConfigurationTests
         option.ShouldNotBeNull();
         option.Usage.ShouldBe($"value for '{nameof(IntAppOptions.ValueFlag)}' option");
         text.ShouldContain(option.Usage);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenTryToUpdateUsageAfterBuild()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value);
+
+        // Act
+        var parser = sut.Build();
+        var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
+        var namedOption = option as IScalarNamedOption<int>;
+
+        // Assert
+        namedOption.ShouldNotBeNull();
+        Should.Throw<Exception>(() => namedOption.WithUsage("test"))
+            .Message.ShouldStartWith("An option cannot be modified after");
     }
 }

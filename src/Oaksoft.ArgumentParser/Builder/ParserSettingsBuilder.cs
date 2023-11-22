@@ -24,5 +24,5 @@ internal class ParserSettingsBuilder : IParserSettingsBuilder
 
     public int? MaxAliasLength { get; set; }
 
-    public int? MaxAliasWordCount { get; set; }
+    public int? MaxSuggestedAliasWordCount { get; set; }
 }

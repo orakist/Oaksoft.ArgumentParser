@@ -56,7 +56,7 @@ public class AliasSuggestionTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>()
-            .ConfigureSettings(s => s.MaxAliasWordCount = 3)
+            .ConfigureSettings(s => s.MaxSuggestedAliasWordCount = 3)
             .AddNamedOption(s => s.ValueTestPropEx);
 
         // Act
@@ -104,7 +104,7 @@ public class AliasSuggestionTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>()
-            .ConfigureSettings(s => s.MaxAliasWordCount = 7)
+            .ConfigureSettings(s => s.MaxSuggestedAliasWordCount = 7)
             .AddNamedOption(s => s.VeryLongApplicationOptionValuePropertyName);
 
         // Act
@@ -128,7 +128,7 @@ public class AliasSuggestionTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>()
-            .ConfigureSettings(s => s.MaxAliasWordCount = 7)
+            .ConfigureSettings(s => s.MaxSuggestedAliasWordCount = 7)
             .ConfigureSettings(s => s.MaxAliasLength = 10)
             .AddNamedOption(s => s.VeryLongApplicationOptionValuePropertyName);
 
@@ -153,7 +153,7 @@ public class AliasSuggestionTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>()
-            .ConfigureSettings(s => s.MaxAliasWordCount = 3)
+            .ConfigureSettings(s => s.MaxSuggestedAliasWordCount = 3)
             .AddNamedOption(s => s.Value)
             .AddNamedOption(s => s.ValueTest)
             .AddNamedOption(s => s.ValueTestProp)
@@ -357,7 +357,7 @@ public class AliasSuggestionTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.All)
-            .ConfigureSettings(s => s.MaxAliasWordCount = 3)
+            .ConfigureSettings(s => s.MaxSuggestedAliasWordCount = 3)
             .AddNamedOption(s => s.Value)
             .AddNamedOption(s => s.ValueTest)
             .AddNamedOption(s => s.ValueTestProp)
@@ -480,7 +480,6 @@ public class AliasSuggestionTests
         namedOption.Aliases.ShouldContain("/val1");
     }
 
-
     [Fact]
     public void ShouldNotSuggestShortAlias_WhenAllLettersAreUsed()
     {
@@ -530,6 +529,53 @@ public class AliasSuggestionTests
         namedOption.Aliases.Count.ShouldBe(2);
         namedOption.Aliases.ShouldContain("--val4");
         namedOption.Aliases.ShouldContain("/val4");
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenAliasSuggestionFails1()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<SampleOptionNames>()
+            .AddNamedOption(s => s.Val1) // will suggest => v, val1
+            .AddNamedOption(s => s.Val2) // will suggest => a, val2
+            .AddCountOption(s => s.Val3) // will suggest => l, val3
+            .AddCountOption(s => s.Val4) // will suggest => val4
+            .AddCountOption(s => s.Val4_, o => o.WithName("Test")); // will suggest nothing
+
+        // Act & Assert
+        // Can't suggest alias because all alias possible names have already been used 
+        Should.Throw<Exception>(() => sut.Build())
+            .Message.ShouldStartWith("Unable to suggest option alias!");
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenAliasSuggestionFails2()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.AllowSingleDashShortAlias)
+            .AddNamedOption(s => s.Val1) // will suggest => v
+            .AddNamedOption(s => s.Val2) // will suggest => a
+            .AddCountOption(s => s.Val3) // will suggest => l
+            .AddCountOption(s => s.Val4); // will suggest => nothing
+
+        // Act & Assert
+        // Can't suggest alias because all alias possible names have already been used 
+        Should.Throw<Exception>(() => sut.Build())
+            .Message.ShouldStartWith("Unable to suggest option alias!");
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenAliasSuggestionFails3()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.AllowDoubleDashLongAlias)
+            .AddCountOption(s => s.Val4) // will suggest => val4
+            .AddCountOption(s => s.Val4_, o => o.WithName("Test")); // will suggest nothing
+
+        // Act & Assert
+        // Can't suggest alias because all alias possible names have already been used 
+        Should.Throw<Exception>(() => sut.Build())
+            .Message.ShouldStartWith("Unable to suggest option alias!");
     }
 
     [Fact]

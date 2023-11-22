@@ -60,10 +60,7 @@ internal sealed class SequentialNamedOption<TValue>
     {
         ParserInitializedGuard();
 
-        var values = aliases
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Select(s => s.Trim().ValidateAlias());
-
+        var values = aliases.Select(s => s.ValidateAlias());
         _aliases.AddRange(values.Distinct());
     }
 

@@ -55,7 +55,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
             Description = _settingsBuilder.Description,
 
             MaxAliasLength = _settingsBuilder.MaxAliasLength ?? 32,
-            MaxAliasWordCount = _settingsBuilder.MaxAliasWordCount ?? 4
+            MaxSuggestedAliasWordCount = _settingsBuilder.MaxSuggestedAliasWordCount ?? 4
         };
     }
 
@@ -133,7 +133,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         _settingsBuilder.ShowDescription ??= true;
         _settingsBuilder.EnableColoring ??= true;
         _settingsBuilder.MaxAliasLength ??= 32;
-        _settingsBuilder.MaxAliasWordCount ??= 4;
+        _settingsBuilder.MaxSuggestedAliasWordCount ??= 4;
 
         if (_settingsBuilder.HelpDisplayWidth is < 40 or > 320)
         {
@@ -148,9 +148,9 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         }
 
 
-        if (_settingsBuilder.MaxAliasWordCount is < 1 or > 8)
+        if (_settingsBuilder.MaxSuggestedAliasWordCount is < 1 or > 8)
         {
-            throw new ArgumentOutOfRangeException(nameof(IParserSettings.MaxAliasWordCount),
+            throw new ArgumentOutOfRangeException(nameof(IParserSettings.MaxSuggestedAliasWordCount),
                 "Invalid Max Alias Word Count value! Valid interval is [1, 8].");
         }
 
@@ -168,7 +168,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         this.AddSwitchOption(p => p.Help);
 
-        var aliases = new[] { "-h", "-?", "--help" };
+        var aliases = new[] { "h", "?", "help" };
         var validAliases = aliases.ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false);
         var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
 

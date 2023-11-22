@@ -30,5 +30,7 @@ public class SampleOptionNames : IApplicationOptions
 
     public int Val4 { get; set; }
 
+    public int Val4_ { get; set; }
+
     public bool Help { get; set; }
 }

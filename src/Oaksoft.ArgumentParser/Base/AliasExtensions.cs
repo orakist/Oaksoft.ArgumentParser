@@ -14,19 +14,27 @@ internal static class AliasExtensions
 
     public static string ValidateAlias(this string alias)
     {
-        var result = string.Join('-', GetNormalizedWords(alias));
+        alias = alias.Trim();
+        if (string.IsNullOrWhiteSpace(alias))
+        {
+            throw new ArgumentException("An alias string should not be empty!");
+        }
 
-        if (string.IsNullOrWhiteSpace(result))
+        var trimmed = TrimStartPrefixes(alias);
+        var result = string.Join('-', GetNormalizedWords(trimmed));
+
+        if (string.IsNullOrWhiteSpace(trimmed) || result.Length < trimmed.Length)
         {
             var validChars = string.Join("', '", _validAliasChars);
             throw new ArgumentException(
-                $"Invalid alias '{alias}' found! Use ascii letters, ascii digits and ('{validChars}') symbols. And an alias should not start with digit.");
+                $"Invalid alias '{alias}' found! Use ascii letters, ascii digits and ('{validChars}') symbols. " +
+                "Alias should not start with digit and should have at least one letter or symbol.");
         }
 
         if (_reservedAliases.Any(r => r.Equals(result, StringComparison.OrdinalIgnoreCase)))
         {
             throw new ArgumentException(
-                $"Invalid alias '{alias}' found! Reserved aliases ('{string.Join("', '", _reservedAliases)}') cannot be used.");
+                $"Invalid alias '{trimmed}' found! Reserved aliases ('{string.Join("', '", _reservedAliases)}') cannot be used.");
         }
 
         return result;
@@ -114,7 +122,7 @@ internal static class AliasExtensions
             : StringComparison.OrdinalIgnoreCase;
 
         // find a short alias
-        for (var i = 0; i < 4; ++i)
+        for (var i = 0; i < 8; ++i)
         {
             var candidateFound = false;
             foreach (var word in words.Where(w => i < w.Length))
@@ -415,5 +423,16 @@ internal static class AliasExtensions
         return string.Join("", validChars)
             .TrimStart(_suggestionTrimChars)
             .Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    private static string TrimStartPrefixes(string input)
+    {
+        if (input.StartsWith("--"))
+            input = input[2..];
+        else if (input.StartsWith('-') || input.StartsWith('/'))
+            input = input[1..];
+
+        input = input.Replace('_', ' ').Replace('-', ' ');
+        return string.Join('-', input.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
     }
 }

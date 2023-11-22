@@ -51,7 +51,7 @@ public class NameConfigurationTests
         // Arrange, should ignore empty names
         var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.Value)
-            .AddCountOption(s => s.NullValue)
+            .AddNamedOption(s => s.NullValue, s => s.NullValueFlag)
             .AddNamedOption(s => s.Values)
             .AddValueOption(s => s.NullValues, o => o.WithName(""))
             .AddValueOption(s => s.ValueFlag, o => o.WithName("   "));
@@ -72,6 +72,8 @@ public class NameConfigurationTests
         option.ShouldNotBeNull();
         option.Name.ShouldBe("Null Value");
         option = result.GetOptionByName(option.Name);
+        option.ShouldNotBeNull();
+        option = result.GetOptionByName(nameof(IntAppOptions.NullValueFlag));
         option.ShouldNotBeNull();
 
         option = result.GetOptionByName(nameof(IntAppOptions.Values));
@@ -144,7 +146,7 @@ public class NameConfigurationTests
     public void ShouldThrowException_WhenSameCustomNameUsed()
     {
         // Arrange
-        var sut = CommandLine.CreateParser<LongAppOptions>()
+        var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.Value, o => o.WithName("Test"))
             .AddNamedOption(s => s.ValueCount, o => o.WithName("Test"));
 
@@ -157,12 +159,12 @@ public class NameConfigurationTests
     public void ShouldThrowException_WhenTryToUpdateNameAfterBuild()
     {
         // Arrange
-        var sut = CommandLine.CreateParser<LongAppOptions>()
+        var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddSwitchOption(s => s.ValueFlag);
 
         // Act
         var result = sut.Build();
-        var option = result.GetOptionByName(nameof(LongAppOptions.ValueFlag));
+        var option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         var namedOption = option as ISwitchOption;
         namedOption.ShouldNotBeNull();
 
@@ -175,7 +177,7 @@ public class NameConfigurationTests
     public void ShouldThrowException_WhenTryToAddReservedProperty()
     {
         // Arrange
-        var sut = CommandLine.CreateParser<LongAppOptions>()
+        var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddSwitchOption(s => s.Help);
 
         // Act & Assert

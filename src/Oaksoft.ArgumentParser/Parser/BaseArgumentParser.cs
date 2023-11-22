@@ -146,7 +146,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
                 var validAliases = option.GetAliases()
                     .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength!.Value, true)
-                    .ToArray();
+                    .Distinct().ToArray();
 
                 foreach (var alias in validAliases)
                 {
@@ -452,14 +452,15 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         // suggest aliases for option by using the registered property name
         var suggestedAliases = option.KeyProperty.Name.SuggestAliasesHeuristically(
-            aliases, CaseSensitive, Settings.MaxAliasLength!.Value, Settings.MaxAliasWordCount!.Value);
+            aliases, CaseSensitive, Settings.MaxAliasLength!.Value, Settings.MaxSuggestedAliasWordCount!.Value);
 
         if (!CaseSensitive)
             suggestedAliases = suggestedAliases.Select(a => a.ToLowerInvariant());
 
         suggestedAliases = suggestedAliases.ValidateAliases(
             OptionPrefix, CaseSensitive, Settings.MaxAliasLength!.Value, false);
-        
+
+        // Can't suggest alias because all alias possible names have already been used 
         var validAliases = suggestedAliases.ToArray();
         if (validAliases.Length < 1)
             throw new ArgumentException("Unable to suggest option alias! Use WithAliases() to set aliases of the option.");
@@ -476,6 +477,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
             name = option.KeyProperty.Name;
 
         var comma = ex.Message.EndsWith(".") ? string.Empty : ",";
-        return $"{ex.Message}{comma} Option: {name}";
+        return $"{ex.Message}{comma} Option Name: {name}";
     }
 }

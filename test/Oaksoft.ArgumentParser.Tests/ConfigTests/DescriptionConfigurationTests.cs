@@ -11,7 +11,7 @@ public class DescriptionConfigurationTests
     {
         // Arrange
         const string description = "Cats have an adorable face with a tiny nose.";
-        var sut = CommandLine.CreateParser<ByteAppOptions>()
+        var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.NullValue, o => o.WithDescription(description))
             .AddCountOption(s => s.NullValueCount, o => o.WithDescription(description))
             .AddNamedOption(s => s.Values, o => o.WithDescription(description))
@@ -25,27 +25,27 @@ public class DescriptionConfigurationTests
         result.GetOptions().Count.ShouldBe(6);
         var text = result.GetHelpText(false);
 
-        var option = result.GetOptionByName(nameof(ByteAppOptions.NullValue));
+        var option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(ByteAppOptions.NullValueCount));
+        option = result.GetOptionByName(nameof(IntAppOptions.NullValueCount));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(ByteAppOptions.Values));
+        option = result.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(ByteAppOptions.NullValues));
+        option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);
 
-        option = result.GetOptionByName(nameof(ByteAppOptions.ValueFlag));
+        option = result.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);

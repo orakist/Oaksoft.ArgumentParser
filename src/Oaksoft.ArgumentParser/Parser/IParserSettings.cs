@@ -24,5 +24,5 @@ public interface IParserSettings
 
     int? MaxAliasLength { get; }
 
-    int? MaxAliasWordCount { get; }
+    int? MaxSuggestedAliasWordCount { get; }
 }

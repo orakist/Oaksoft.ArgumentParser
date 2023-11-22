@@ -16,7 +16,7 @@ public class UsageConfigurationTests
         const string usage2Trimmed = "-v <flag-value>";
         const string usage3 = "type    integer     value";
         const string usage3Trimmed = "type integer value";
-        var sut = CommandLine.CreateParser<UnsignedLongAppOptions>()
+        var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.NullValue, o => o.WithUsage(usage1))
             .AddSwitchOption(s => s.NullValueFlag, o => o.WithUsage(usage2))
             .AddNamedOption(s => s.Values, o => o.WithUsage(usage2))
@@ -30,27 +30,27 @@ public class UsageConfigurationTests
         result.GetOptions().Count.ShouldBe(6);
         var text = result.GetHelpText(false);
 
-        var option = result.GetOptionByName(nameof(ByteAppOptions.NullValue));
+        var option = result.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage1);
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(ByteAppOptions.NullValueFlag));
+        option = result.GetOptionByName(nameof(IntAppOptions.NullValueFlag));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage2Trimmed);
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(ByteAppOptions.Values));
+        option = result.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage2Trimmed);
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(ByteAppOptions.NullValues));
+        option = result.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage3Trimmed);
         text.ShouldContain(option.Usage);
 
-        option = result.GetOptionByName(nameof(ByteAppOptions.Value));
+        option = result.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage3Trimmed);
         text.ShouldContain(option.Usage);

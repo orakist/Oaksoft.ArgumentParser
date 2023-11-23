@@ -15,6 +15,12 @@ public static partial class OptionExtensions
         return option;
     }
 
+    public static ICounterOption WithName(this ICounterOption option, string name)
+    {
+        ((CounterOption)option).SetName(name);
+        return option;
+    }
+
     public static IScalarNamedOption<TValue> WithName<TValue>(this IScalarNamedOption<TValue> option, string name)
         where TValue : IComparable, IEquatable<TValue>
     {
@@ -48,6 +54,12 @@ public static partial class OptionExtensions
     public static ISwitchOption WithUsage(this ISwitchOption option, string usage)
     {
         ((SwitchOption)option).SetUsage(usage);
+        return option;
+    }
+
+    public static ICounterOption WithUsage(this ICounterOption option, string usage)
+    {
+        ((CounterOption)option).SetUsage(usage);
         return option;
     }
 
@@ -87,6 +99,12 @@ public static partial class OptionExtensions
         return option;
     }
 
+    public static ICounterOption WithDescription(this ICounterOption option, string description)
+    {
+        ((CounterOption)option).SetDescription(description);
+        return option;
+    }
+
     public static IScalarNamedOption<TValue> WithDescription<TValue>(this IScalarNamedOption<TValue> option, string description)
         where TValue : IComparable, IEquatable<TValue>
     {
@@ -120,6 +138,12 @@ public static partial class OptionExtensions
     public static ISwitchOption AddAliases(this ISwitchOption option, params string[] aliases)
     {
         ((SwitchOption)option).AddAliases(aliases);
+        return option;
+    }
+
+    public static ICounterOption AddAliases(this ICounterOption option, params string[] aliases)
+    {
+        ((CounterOption)option).AddAliases(aliases);
         return option;
     }
 
@@ -218,6 +242,18 @@ public static partial class OptionExtensions
     public static ISwitchOption WithOptionArity(this ISwitchOption option, int requiredOptionCount, int maximumOptionCount)
     {
         ((SwitchOption)option).SetOptionArity(requiredOptionCount, maximumOptionCount);
+        return option;
+    }
+
+    public static ICounterOption WithOptionArity(this ICounterOption option, ArityType optionArity)
+    {
+        ((CounterOption)option).SetOptionArity(optionArity);
+        return option;
+    }
+    
+    public static ICounterOption WithOptionArity(this ICounterOption option, int requiredOptionCount, int maximumOptionCount)
+    {
+        ((CounterOption)option).SetOptionArity(requiredOptionCount, maximumOptionCount);
         return option;
     }
 

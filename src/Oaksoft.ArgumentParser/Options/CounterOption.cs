@@ -8,9 +8,7 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal class ScalarNamedOption<TValue>
-    : BaseScalarValueOption<TValue>, IScalarNamedOption<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+internal class CounterOption : BaseValueOption, ICounterOption
 {
     public string ShortAlias => _prefixAliases.MinBy(k => k.Length)!;
 
@@ -20,28 +18,18 @@ internal class ScalarNamedOption<TValue>
 
     public override int OptionCount => _optionTokens.Count;
 
-    public Ref<TValue>? DefaultValue { get; private set; }
-
     private readonly List<string> _aliases;
     private readonly List<string> _optionTokens;
     private readonly List<string> _prefixAliases;
 
-    public ScalarNamedOption(
-        int requiredOptionCount, int maximumOptionCount, int requiredValueCount, int maximumValueCount)
-        : base(requiredValueCount, maximumValueCount)
+    public CounterOption(int requiredOptionCount, int maximumOptionCount)
+        : base(0, 0)
     {
         OptionArity = (requiredOptionCount, maximumOptionCount);
 
         _aliases = new List<string>();
         _optionTokens = new List<string>();
         _prefixAliases = new List<string>();
-    }
-
-    public void SetDefaultValue(TValue defaultValue)
-    {
-        ParserInitializedGuard();
-
-        DefaultValue = new Ref<TValue>(defaultValue);
     }
 
     public void SetOptionArity(ArityType optionArity)
@@ -85,7 +73,7 @@ internal class ScalarNamedOption<TValue>
         _prefixAliases.AddRange(prefixedAliases);
 
         if (string.IsNullOrWhiteSpace(Usage))
-            Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
+            Usage = ShortAlias;
 
         if (string.IsNullOrWhiteSpace(Description))
             Description = $"Performs '{Name}' option.";
@@ -147,14 +135,10 @@ internal class ScalarNamedOption<TValue>
 
     public override void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty)
     {
-        if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
+        if (!keyProperty.PropertyType.IsAssignableFrom(typeof(int)))
             return;
 
-        var result = ResultValue != null
-            ? ResultValue.Value
-            : DefaultValue != null ? DefaultValue.Value : default;
-
-        keyProperty.SetValue(appOptions, result);
+        keyProperty.SetValue(appOptions, OptionCount);
     }
 
     public override void Clear()

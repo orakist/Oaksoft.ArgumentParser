@@ -14,16 +14,17 @@ public class DescriptionConfigurationTests
         const string description = "Cats have an adorable face with a tiny nose.";
         var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.NullValue, o => o.WithDescription(description))
-            .AddCountOption(s => s.NullValueCount, o => o.WithDescription(description))
+            .AddCounterOption(s => s.NullValueCount, o => o.WithDescription(description))
             .AddNamedOption(s => s.Values, o => o.WithDescription(description))
             .AddValueOption(s => s.NullValues, o => o.WithDescription(description))
-            .AddValueOption(s => s.ValueFlag, o => o.WithDescription(description));
+            .AddSwitchOption(s => s.ValueFlag, o => o.WithDescription(description))
+            .AddValueOption(s => s.Value, o => o.WithDescription(description));
 
         // Act
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(6);
+        parser.GetOptions().Count.ShouldBe(7);
         var text = parser.GetHelpText(false);
 
         var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
@@ -50,6 +51,11 @@ public class DescriptionConfigurationTests
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
         text.ShouldContain(option.Description!);
+
+        option = parser.GetOptionByName(nameof(IntAppOptions.Value));
+        option.ShouldNotBeNull();
+        option.Description.ShouldBe(description);
+        text.ShouldContain(option.Description!);
     }
 
     [Fact]
@@ -58,7 +64,7 @@ public class DescriptionConfigurationTests
         // Arrange, should ignore empty descriptions
         var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.Value)
-            .AddCountOption(s => s.NullValue)
+            .AddCounterOption(s => s.NullValue)
             .AddNamedOption(s => s.Values)
             .AddValueOption(s => s.NullValues, o => o.WithDescription(""))
             .AddValueOption(s => s.ValueFlag, o => o.WithDescription("   "));

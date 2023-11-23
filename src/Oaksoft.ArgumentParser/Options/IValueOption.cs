@@ -7,10 +7,6 @@ public interface IValueOption : IHaveValueOption, IBaseOption
 {
 }
 
-public interface ISwitchValueOption : IHaveResultValue<bool>, IValueOption
-{
-}
-
 public interface IScalarValueOption : IValueOption
 {
 }

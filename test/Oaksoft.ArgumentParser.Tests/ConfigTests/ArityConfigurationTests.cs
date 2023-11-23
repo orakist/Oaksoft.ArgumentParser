@@ -22,7 +22,6 @@ public class ArityConfigurationTests
             .AddNamedOption(s => s.Value, o => o.WithValueArity(type))
             .AddNamedOption(s => s.Values, o => o.WithValueArity(type))
             .AddSwitchOption(s => s.ValueFlag, o => o.WithValueArity(type))
-            .AddCountOption(s => s.ValueCount, o => o.WithValueArity(type))
             .AddValueOption(s => s.NullValues, o => o.WithValueArity(type))
             .AddValueOption(s => s.NullValue, o => o.WithValueArity(type));
 
@@ -34,6 +33,71 @@ public class ArityConfigurationTests
         {
             option.ValueArity.ShouldBe(type.GetLimits());
             option.ValueCount.ShouldBe(0);
+        }
+    }
+
+    [Theory]
+    [InlineData(ArityType.Zero)]
+    [InlineData(ArityType.ZeroOrOne)]
+    [InlineData(ArityType.ExactlyOne)]
+    [InlineData(ArityType.ZeroOrMore)]
+    [InlineData(ArityType.OneOrMore)]
+    public void ShouldBuild_WhenValidValueArityByParameter(ArityType type)
+    {
+        // Arrange
+        var sut1 = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Values, valueArity: type)
+            .AddNamedOption(s => s.NullValues, valueArity: type);
+        var sut2 = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Values, s => s.ValueCount, valueArity: type)
+            .AddNamedOption(s => s.NullValues, s => s.NullValueCount, valueArity: type);
+        var sut3 = CommandLine.CreateParser<IntAppOptions>()
+            .AddValueOption(s => s.Values, valueArity: type)
+            .AddValueOption(s => s.NullValues, valueArity: type);
+        var sut4 = CommandLine.CreateParser<IntAppOptions>()
+            .AddValueOption(s => s.Values, s => s.ValueCount, valueArity: type)
+            .AddValueOption(s => s.NullValues, s => s.NullValueCount, valueArity: type);
+
+        var builders = new []{ sut1, sut2, sut3, sut4 };
+        foreach (var sut in builders)
+        {        
+            // Act
+            var parser = sut.Build();
+
+            // Assert
+            foreach (var option in parser.GetOptions().Where(o => o.Name != "Help"))
+                option.ValueArity.ShouldBe(type.GetLimits());
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ShouldBuild_WhenMustHaveOneValueIsSet(bool enabled)
+    {
+        // Arrange
+        var sut1 = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value, mustHaveOneValue: enabled)
+            .AddNamedOption(s => s.NullValue, mustHaveOneValue: enabled);
+        var sut2 = CommandLine.CreateParser<IntAppOptions>()
+            .AddValueOption(s => s.Value, mustHaveOneValue: enabled)
+            .AddValueOption(s => s.NullValue, mustHaveOneValue: enabled);
+        var sut3 = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value, s => s.ValueFlag, mustHaveOneValue: enabled)
+            .AddNamedOption(s => s.NullValue, s => s.NullValueFlag, mustHaveOneValue: enabled);
+        var sut4 = CommandLine.CreateParser<IntAppOptions>()
+            .AddValueOption(s => s.Value, s => s.ValueFlag, mustHaveOneValue: enabled)
+            .AddValueOption(s => s.NullValue, s => s.NullValueFlag, mustHaveOneValue: enabled);
+
+        var builders = new[] { sut1, sut2, sut3, sut4 };
+        foreach (var sut in builders)
+        {
+            // Act
+            var parser = sut.Build();
+
+            // Assert
+            foreach (var option in parser.GetOptions().Where(o => o.Name != "Help"))
+                option.ValueArity.ShouldBe(enabled ? (1, 1) : (0, 1));
         }
     }
 
@@ -52,7 +116,6 @@ public class ArityConfigurationTests
             .AddNamedOption(s => s.Value, o => o.WithValueArity(min, max))
             .AddNamedOption(s => s.Values, o => o.WithValueArity(min, max))
             .AddSwitchOption(s => s.ValueFlag, o => o.WithValueArity(min, max))
-            .AddCountOption(s => s.ValueCount, o => o.WithValueArity(min, max))
             .AddValueOption(s => s.NullValues, o => o.WithValueArity(min, max))
             .AddValueOption(s => s.NullValue, o => o.WithValueArity(min, max));
 
@@ -81,7 +144,6 @@ public class ArityConfigurationTests
             .AddNamedOption(s => s.Value, o => o.WithValueArity(min, max))
             .AddNamedOption(s => s.Values, o => o.WithValueArity(min, max))
             .AddSwitchOption(s => s.ValueFlag, o => o.WithValueArity(min, max))
-            .AddCountOption(s => s.ValueCount, o => o.WithValueArity(min, max))
             .AddValueOption(s => s.NullValues, o => o.WithValueArity(min, max))
             .AddValueOption(s => s.NullValue, o => o.WithValueArity(min, max));
 
@@ -103,7 +165,7 @@ public class ArityConfigurationTests
             .AddNamedOption(s => s.Value, o => o.WithOptionArity(type))
             .AddNamedOption(s => s.Values, o => o.WithOptionArity(type))
             .AddSwitchOption(s => s.ValueFlag, o => o.WithOptionArity(type))
-            .AddCountOption(s => s.ValueCount, o => o.WithOptionArity(type));
+            .AddCounterOption(s => s.ValueCount, o => o.WithOptionArity(type));
 
         // Act
         var parser = sut.Build();
@@ -113,6 +175,34 @@ public class ArityConfigurationTests
         {
             option.OptionArity.ShouldBe(type.GetLimits());
             option.OptionCount.ShouldBe(0);
+        }
+    }
+
+    [Theory]
+    [InlineData(ArityType.Zero)]
+    [InlineData(ArityType.ZeroOrOne)]
+    [InlineData(ArityType.ExactlyOne)]
+    [InlineData(ArityType.ZeroOrMore)]
+    [InlineData(ArityType.OneOrMore)]
+    public void ShouldBuild_WhenValidOptionArityByParameter(ArityType type)
+    {
+        // Arrange
+        var sut1 = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Values, optionArity: type)
+            .AddNamedOption(s => s.NullValues, optionArity: type);
+        var sut2 = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Values, s => s.ValueCount, optionArity: type)
+            .AddNamedOption(s => s.NullValues, s => s.NullValueCount, optionArity: type);
+
+        var builders = new[] { sut1, sut2 };
+        foreach (var sut in builders)
+        {
+            // Act
+            var parser = sut.Build();
+
+            // Assert
+            foreach (var option in parser.GetOptions().Where(o => o.Name != "Help"))
+                option.OptionArity.ShouldBe(type.GetLimits());
         }
     }
 
@@ -131,7 +221,7 @@ public class ArityConfigurationTests
             .AddNamedOption(s => s.Value, o => o.WithOptionArity(min, max))
             .AddNamedOption(s => s.Values, o => o.WithOptionArity(min, max))
             .AddSwitchOption(s => s.ValueFlag, o => o.WithOptionArity(min, max))
-            .AddCountOption(s => s.ValueCount, o => o.WithOptionArity(min, max));
+            .AddCounterOption(s => s.ValueCount, o => o.WithOptionArity(min, max));
 
         // Act
         var parser = sut.Build();
@@ -140,6 +230,31 @@ public class ArityConfigurationTests
         foreach (var option in parser.GetOptions().Where(o => o.Name != "Help"))
         {
             option.OptionArity.ShouldBe((min, max));
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ShouldBuild_WhenMandatoryOptionIsSet(bool enabled)
+    {
+        // Arrange
+        var sut1 = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value, mandatoryOption: enabled)
+            .AddNamedOption(s => s.NullValue, mandatoryOption: enabled);
+        var sut2 = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value, s => s.ValueFlag, mandatoryOption: enabled)
+            .AddNamedOption(s => s.NullValue, s => s.NullValueFlag, mandatoryOption: enabled);
+
+        var builders = new[] { sut1, sut2 };
+        foreach (var sut in builders)
+        {
+            // Act
+            var parser = sut.Build();
+
+            // Assert
+            foreach (var option in parser.GetOptions().Where(o => o.Name != "Help"))
+                option.OptionArity.ShouldBe(enabled ? (1, 1) : (0, 1));
         }
     }
 
@@ -158,11 +273,22 @@ public class ArityConfigurationTests
             .AddNamedOption(s => s.Value, o => o.WithOptionArity(min, max))
             .AddNamedOption(s => s.Values, o => o.WithOptionArity(min, max))
             .AddSwitchOption(s => s.ValueFlag, o => o.WithOptionArity(min, max))
-            .AddCountOption(s => s.ValueCount, o => o.WithOptionArity(min, max));
+            .AddCounterOption(s => s.ValueCount, o => o.WithOptionArity(min, max));
 
         // Act & Assert
         Should.Throw<Exception>(() => sut.Build())
             .Message.ShouldStartWith($"Invalid option {(min, max)} arity!");
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenInvalidArityEnumeration()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<IntAppOptions>();
+
+        // Act & Assert
+        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, o => o.WithOptionArity((ArityType)100)))
+            .Message.ShouldStartWith("Invalid ArityType enum value!");
     }
 
     [Fact]

@@ -15,13 +15,14 @@ public class AliasConfigurationTests
         var sut = CommandLine.CreateParser<StringAppOptions>()
             .AddNamedOption(s => s.Value, o => o.AddAliases("v", "value"))
             .AddNamedOption(s => s.NullValues, o => o.AddAliases("n", "null-value"))
-            .AddSwitchOption(s => s.NullValueFlag, o => o.AddAliases("f", "null-value-flag"));
+            .AddSwitchOption(s => s.NullValueFlag, o => o.AddAliases("f", "null-value-flag"))
+            .AddCounterOption(s => s.ValueCount, o => o.AddAliases("c", "value-count"));
 
         // Act
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(5);
 
         var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
@@ -49,6 +50,15 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("--null-value-flag");
         namedOption.Aliases.ShouldContain("/f");
         namedOption.Aliases.ShouldContain("/null-value-flag");
+
+        option = parser.GetOptionByName(nameof(StringAppOptions.ValueCount));
+        namedOption = option as INamedOption;
+        namedOption.ShouldNotBeNull();
+        namedOption.Aliases.Count.ShouldBe(4);
+        namedOption.Aliases.ShouldContain("-c");
+        namedOption.Aliases.ShouldContain("--value-count");
+        namedOption.Aliases.ShouldContain("/c");
+        namedOption.Aliases.ShouldContain("/value-count");
     }
 
     [Fact]
@@ -138,7 +148,7 @@ public class AliasConfigurationTests
         var sut = CommandLine.CreateParser<StringAppOptions>()
             .AddNamedOption(s => s.Value, o => o.AddAliases("v", "-- value"))
             .AddNamedOption(s => s.NullValues, o => o.AddAliases("n", "   null value  "))
-            .AddSwitchOption(s => s.NullValueFlag, o => o.AddAliases("f", "--null -  value  --- flag--"));
+            .AddCounterOption(s => s.NullValueCount, o => o.AddAliases("f", "--null -  value  --- flag--"));
 
         // Act
         var parser = sut.Build();
@@ -164,7 +174,7 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/n");
         namedOption.Aliases.ShouldContain("/null-value");
 
-        option = parser.GetOptionByName(nameof(StringAppOptions.NullValueFlag));
+        option = parser.GetOptionByName(nameof(StringAppOptions.NullValueCount));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
         namedOption.Aliases.Count.ShouldBe(4);
@@ -244,7 +254,7 @@ public class AliasConfigurationTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<StringAppOptions>()
-            .AddCountOption(s => s.NullValueCount)
+            .AddNamedOption(s => s.NullValueCount)
             .AddNamedOption(s => s.Value, o => o.AddAliases("v", "value"))
             .AddNamedOption(s => s.NullValue, o => o.AddAliases("n", "null-value-count"));
 

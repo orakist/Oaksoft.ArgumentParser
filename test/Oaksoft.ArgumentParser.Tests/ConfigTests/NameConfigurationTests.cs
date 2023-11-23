@@ -13,7 +13,8 @@ public class NameConfigurationTests
         // Arrange
         var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.Value, o => o.WithName("Value"))
-            .AddCountOption(s => s.NullValue, o => o.WithName("ValueCount"))
+            .AddCounterOption(s => s.NullValue, o => o.WithName("ValueCount"))
+            .AddSwitchOption(s => s.NullValueFlag, o => o.WithName("ValueFlag"))
             .AddNamedOption(s => s.Values, o => o.WithName("ValueList"))
             .AddValueOption(s => s.NullValues, o => o.WithName("ValueX"))
             .AddValueOption(s => s.ValueFlag, o => o.WithName("ValueY"));
@@ -22,7 +23,7 @@ public class NameConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(6);
+        parser.GetOptions().Count.ShouldBe(7);
 
         var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
@@ -33,6 +34,12 @@ public class NameConfigurationTests
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("ValueCount");
+        option = parser.GetOptionByName(option.Name);
+        option.ShouldNotBeNull();
+
+        option = parser.GetOptionByName(nameof(IntAppOptions.NullValueFlag));
+        option.ShouldNotBeNull();
+        option.Name.ShouldBe("ValueFlag");
         option = parser.GetOptionByName(option.Name);
         option.ShouldNotBeNull();
 
@@ -50,7 +57,7 @@ public class NameConfigurationTests
 
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
-        option.Name.ShouldBe("ValueY");
+        option.Name.ShouldBe("ValueFlag");
         option = parser.GetOptionByName(option.Name);
         option.ShouldNotBeNull();
     }

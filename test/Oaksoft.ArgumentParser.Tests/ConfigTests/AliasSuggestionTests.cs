@@ -361,7 +361,7 @@ public class AliasSuggestionTests
             .AddNamedOption(s => s.Value)
             .AddNamedOption(s => s.ValueTest)
             .AddNamedOption(s => s.ValueTestProp)
-            .AddCountOption(s => s.ValueTestPropEx);
+            .AddCounterOption(s => s.ValueTestPropEx);
 
         // Act
         var parser = sut.Build();
@@ -487,8 +487,8 @@ public class AliasSuggestionTests
         var sut = CommandLine.CreateParser<SampleOptionNames>()
             .AddNamedOption(s => s.Val1)
             .AddNamedOption(s => s.Val2)
-            .AddCountOption(s => s.Val3)
-            .AddCountOption(s => s.Val4);
+            .AddCounterOption(s => s.Val3)
+            .AddCounterOption(s => s.Val4);
 
         // Act
         var parser = sut.Build();
@@ -538,9 +538,9 @@ public class AliasSuggestionTests
         var sut = CommandLine.CreateParser<SampleOptionNames>()
             .AddNamedOption(s => s.Val1) // will suggest => v, val1
             .AddNamedOption(s => s.Val2) // will suggest => a, val2
-            .AddCountOption(s => s.Val3) // will suggest => l, val3
-            .AddCountOption(s => s.Val4) // will suggest => val4
-            .AddCountOption(s => s.Val4_, o => o.WithName("Test")); // will suggest nothing
+            .AddNamedOption(s => s.Val3) // will suggest => l, val3
+            .AddNamedOption(s => s.Val4) // will suggest => val4
+            .AddNamedOption(s => s.Val4_, o => o.WithName("Test")); // will suggest nothing
 
         // Act & Assert
         // Can't suggest alias because all alias possible names have already been used 
@@ -555,8 +555,8 @@ public class AliasSuggestionTests
         var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.AllowSingleDashShortAlias)
             .AddNamedOption(s => s.Val1) // will suggest => v
             .AddNamedOption(s => s.Val2) // will suggest => a
-            .AddCountOption(s => s.Val3) // will suggest => l
-            .AddCountOption(s => s.Val4); // will suggest => nothing
+            .AddNamedOption(s => s.Val3) // will suggest => l
+            .AddNamedOption(s => s.Val4); // will suggest => nothing
 
         // Act & Assert
         // Can't suggest alias because all alias possible names have already been used 
@@ -569,8 +569,8 @@ public class AliasSuggestionTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.AllowDoubleDashLongAlias)
-            .AddCountOption(s => s.Val4) // will suggest => val4
-            .AddCountOption(s => s.Val4_, o => o.WithName("Test")); // will suggest nothing
+            .AddNamedOption(s => s.Val4) // will suggest => val4
+            .AddNamedOption(s => s.Val4_, o => o.WithName("Test")); // will suggest nothing
 
         // Act & Assert
         // Can't suggest alias because all alias possible names have already been used 
@@ -583,8 +583,8 @@ public class AliasSuggestionTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.AllowSingleDashShortAlias)
-            .AddCountOption(s => s.Value) // will suggest => v, value
-            .AddCountOption(s => s.V); // will suggest nothing
+            .AddNamedOption(s => s.Value) // will suggest => v, value
+            .AddNamedOption(s => s.V); // will suggest nothing
 
         // Act & Assert
         // Can't suggest alias because all alias possible names have already been used 

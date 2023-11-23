@@ -24,13 +24,13 @@ internal static class OptionRegistrar
         return option;
     }
 
-    public static ISwitchOption RegisterSwitchOption<TSource>(
+    public static ICounterOption RegisterCounterOption<TSource>(
         this IArgumentParserBuilder builder,
         PropertyInfo keyProperty, ArityType optionArity)
         where TSource : IApplicationOptions
     {
         var optionLimits = optionArity.GetLimits();
-        var option = new SwitchOption(optionLimits.Min, optionLimits.Max);
+        var option = new CounterOption(optionLimits.Min, optionLimits.Max);
 
         builder.RegisterOptionProperty<TSource>(option, keyProperty);
 
@@ -167,6 +167,9 @@ internal static class OptionRegistrar
             member.Member.MemberType != MemberTypes.Property)
             throw new ArgumentException($"Invalid lambda expression, please select a {type} type property!");
 
+        if (member.Type == typeof(string) && type == typeof(char).ToString())
+            throw new ArgumentException($"Invalid lambda expression, string property cannot be used as a collection!");
+
         var parserBuilder = (ArgumentParserBuilder<TSource>)builder;
         var properties = parserBuilder.GetAppOptions().GetType().GetProperties();
 
@@ -210,7 +213,7 @@ internal static class OptionRegistrar
             ArityType.ExactlyOne => (1, 1),
             ArityType.ZeroOrMore => (0, int.MaxValue),
             ArityType.OneOrMore => (1, int.MaxValue),
-            _ => throw new ArgumentOutOfRangeException(nameof(ArityType), arityType, "Invalid ArityType enum value.")
+            _ => throw new ArgumentOutOfRangeException(nameof(ArityType), arityType, "Invalid ArityType enum value!")
         };
     }
 }

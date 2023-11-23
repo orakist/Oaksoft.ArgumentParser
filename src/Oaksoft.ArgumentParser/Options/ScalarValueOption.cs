@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-internal sealed class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
+internal class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
     public override int OptionCount => 0;

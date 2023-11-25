@@ -1,8 +1,8 @@
 using Oaksoft.ArgumentParser.Definitions;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Tests.AppModels;
-using Oaksoft.ArgumentParser.Tests.Extensions;
+using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
@@ -141,15 +141,17 @@ public class ArityConfigurationTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Value, o => o.WithValueArity(min, max))
-            .AddNamedOption(s => s.Values, o => o.WithValueArity(min, max))
-            .AddSwitchOption(s => s.ValueFlag, o => o.WithValueArity(min, max))
-            .AddValueOption(s => s.NullValues, o => o.WithValueArity(min, max))
-            .AddValueOption(s => s.NullValue, o => o.WithValueArity(min, max));
+            .AddNamedOption(s => s.ValueFlag, o => o.WithValueArity(min, max));
 
         // Act & Assert
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith($"Invalid value {(min, max)} arity!");
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        exception.Error.Code.ShouldBe(BuilderErrors.InvalidArity.Code);
+        exception.Error.Values.ShouldNotBeNull();
+        exception.Error.Values.ShouldContain(nameof(IBaseOption.ValueArity));
+        exception.Error.Values.ShouldContain((min, max));
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
+        var message = string.Format(exception.Error.Message, nameof(IBaseOption.ValueArity), (min, max));
+        exception.Message.ShouldStartWith(message);
     }
 
     [Theory]
@@ -266,18 +268,21 @@ public class ArityConfigurationTests
     [InlineData(1, 0)]
     [InlineData(10, -10)]
     [InlineData(-20, -10)]
-    public void ShouldThrowException_WhenInvalidOptionValueArity(int min, int max)
+    public void ShouldThrowException_WhenInvalidCustomOptionArity(int min, int max)
     {
         // Arrange
         var sut = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Value, o => o.WithOptionArity(min, max))
-            .AddNamedOption(s => s.Values, o => o.WithOptionArity(min, max))
-            .AddSwitchOption(s => s.ValueFlag, o => o.WithOptionArity(min, max))
-            .AddCounterOption(s => s.ValueCount, o => o.WithOptionArity(min, max));
+            .AddNamedOption(s => s.Values, o => o.WithOptionArity(min, max));
 
         // Act & Assert
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith($"Invalid option {(min, max)} arity!");
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        exception.Error.Code.ShouldBe(BuilderErrors.InvalidArity.Code);
+        exception.Error.Values.ShouldNotBeNull();
+        exception.Error.Values.ShouldContain(nameof(IBaseOption.OptionArity));
+        exception.Error.Values.ShouldContain((min, max));
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Values));
+        var message = string.Format(exception.Error.Message, nameof(IBaseOption.OptionArity), (min, max));
+        exception.Message.ShouldStartWith(message);
     }
 
     [Fact]
@@ -287,8 +292,15 @@ public class ArityConfigurationTests
         var sut = CommandLine.CreateParser<IntAppOptions>();
 
         // Act & Assert
-        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, o => o.WithOptionArity((ArityType)100)))
-            .Message.ShouldStartWith("Invalid ArityType enum value!");
+        var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value, o => o.WithOptionArity((ArityType)100)));
+        exception.Error.Code.ShouldBe(BuilderErrors.InvalidEnum.Code);
+        exception.Error.Values.ShouldNotBeNull();
+        exception.Error.Values.ShouldContain(nameof(ArityType));
+        exception.Error.Values.ShouldContain((ArityType)100);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, nameof(ArityType), (ArityType)100);
+        exception.Message.ShouldStartWith(message);
+
     }
 
     [Fact]
@@ -305,9 +317,15 @@ public class ArityConfigurationTests
 
         // Assert
         namedOption.ShouldNotBeNull();
-        Should.Throw<Exception>(() => namedOption.WithValueArity(ArityType.ZeroOrOne))
-            .Message.ShouldStartWith("An option cannot be modified after");
-        Should.Throw<Exception>(() => namedOption.WithOptionArity(ArityType.ZeroOrOne))
-            .Message.ShouldStartWith("An option cannot be modified after");
+
+        var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithValueArity(ArityType.ZeroOrOne));
+        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        exception.Error.Values.ShouldBeNull();
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+
+        exception = Should.Throw<OptionBuilderException>(() => namedOption.WithOptionArity(ArityType.ZeroOrOne));
+        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        exception.Error.Values.ShouldBeNull();
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }
 }

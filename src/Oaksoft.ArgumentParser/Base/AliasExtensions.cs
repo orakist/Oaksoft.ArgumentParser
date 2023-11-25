@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Base;
@@ -12,29 +13,28 @@ internal static class AliasExtensions
     private static readonly char[] _allowedAliasSymbols = { '?', '%', '$', '€', '£', '#', '@', '-' };
     private static readonly string[] _reservedAliases = { "h", "?", "help" };
 
-    public static string ValidateName(this string name)
+    public static Result<string> ValidateName(this string name)
     {
         name = name.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("The name string cannot be empty!");
+            return BuilderErrors.EmptyValue.With(nameof(name));
         }
 
         if (!name.All(c => char.IsAsciiDigit(c) || char.IsAsciiLetter(c) || c is '_' or '-'))
         {
-            throw new ArgumentException(
-                $"Invalid name '{name}' found! Only use ascii letters, ascii digits and ('_', '-') symbols.");
+            return BuilderErrors.InvalidName.With(name);
         }
 
         return string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
     }
 
-    public static string ValidateAlias(this string alias)
+    public static Result<string> ValidateAlias(this string alias)
     {
         alias = alias.Trim();
         if (string.IsNullOrWhiteSpace(alias))
         {
-            throw new ArgumentException("The alias string cannot be empty!");
+            return BuilderErrors.EmptyValue.With(nameof(alias));
         }
 
         var trimmed = TrimStartPrefixes(alias);
@@ -42,33 +42,31 @@ internal static class AliasExtensions
 
         if (string.IsNullOrWhiteSpace(trimmed) || result.Length < trimmed.Length)
         {
-            var validChars = string.Join("', '", _allowedAliasSymbols);
-            throw new ArgumentException(
-                $"Invalid alias '{alias}' found! Only use ascii letters, ascii digits and ('{validChars}') symbols. " +
-                "Alias should not start with digit and should have at least one letter or symbol.");
+            var symbols = string.Join(", ", _allowedAliasSymbols.Select(s => $"'{s}'"));
+            return BuilderErrors.InvalidAlias.With(alias, symbols);
         }
 
         if (_reservedAliases.Any(r => r.Equals(result, StringComparison.OrdinalIgnoreCase)))
         {
-            throw new ArgumentException(
-                $"Invalid alias '{trimmed}' found! Reserved aliases ('{string.Join("', '", _reservedAliases)}') cannot be used.");
+            var aliases = string.Join(", ", _reservedAliases.Select(s => $"'{s}'"));
+            return BuilderErrors.ReservedAlias.With(trimmed, aliases);
         }
 
         return result;
     }
 
-    public static IEnumerable<string> ValidateAliases(
+    public static Result<List<string>> ValidateAliases(
         this IEnumerable<string> aliases, OptionPrefixRules rules,
         bool caseSensitive, int maxAliasLength, bool throwException)
     {
+        var resultAliases = new List<string>();
         foreach (var alias in aliases.Select(a => caseSensitive ? a : a.ToLowerInvariant()))
         {
             if (alias.Length > maxAliasLength)
             {
                 if (throwException)
                 {
-                    throw new ArgumentException(
-                        $"Option alias '{alias}' not allowed! Allowed max alias length is {maxAliasLength}.");
+                    return BuilderErrors.TooLongAlias.With(alias, maxAliasLength);
                 }
 
                 continue;
@@ -78,15 +76,16 @@ internal static class AliasExtensions
             {
                 if (throwException)
                 {
-                    var message = $"{(alias.Length < 2 ? "Short" : "Long")} option alias '{alias}' not allowed!";
-                    throw new ArgumentException($"{message} Use appropriate {nameof(OptionPrefixRules)} and alias combination.");
+                    return BuilderErrors.NotAllowedAlias.With(alias.Length < 2 ? "Short" : "Long", alias);
                 }
 
                 continue;
             }
 
-            yield return alias;
+            resultAliases.Add(alias);
         }
+
+        return resultAliases;
     }
 
     public static IEnumerable<string> SuggestAliasesHeuristically(

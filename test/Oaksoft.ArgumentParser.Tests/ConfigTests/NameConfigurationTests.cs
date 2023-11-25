@@ -1,6 +1,7 @@
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Tests.AppModels;
+using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
@@ -8,7 +9,7 @@ namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 public class NameConfigurationTests
 {
     [Fact]
-    public void ShouldBuildOptions_WhenDifferentNamesUsed()
+    public void ShouldBuild_WhenDifferentNamesUsed()
     {
         // Arrange
         var sut = CommandLine.CreateParser<IntAppOptions>()
@@ -63,7 +64,7 @@ public class NameConfigurationTests
     }
 
     [Fact]
-    public void ShouldBuildOptions_WhenDefaultNamesUsed()
+    public void ShouldBuild_WhenDefaultNamesUsed()
     {
         // Arrange, should ignore empty names
         var sut = CommandLine.CreateParser<IntAppOptions>()
@@ -103,7 +104,7 @@ public class NameConfigurationTests
     }
 
     [Fact]
-    public void ShouldBuildOptions_WhenNumberAndLetterNamesUsed()
+    public void ShouldBuild_WhenNumberAndLetterNamesUsed()
     {
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>()
@@ -131,52 +132,75 @@ public class NameConfigurationTests
     }
 
     [Fact]
-    public void ShouldThrowException_WhenSameNameWithPropertyUsed()
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<SampleOptionNames>()
-            .AddNamedOption(s => s.Value)
-            .AddNamedOption(s => s.__2_Value, o => o.WithName("Value"));
-
-        // Act & Assert
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Name 'Value' is already in use!");
-    }
-
-    [Fact]
     public void ShouldThrowException_WhenNameIsEmpty()
     {
         // Arrange
-        var sut = CommandLine.CreateParser<SampleOptionNames>();
+        const string value = "name";
+        var sut = CommandLine.CreateParser<IntAppOptions>();
 
         // Act & Assert
-        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, o => o.WithName(" ")))
-            .Message.ShouldStartWith("The name string cannot be empty!");
+        var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value, o => o.WithName(" ")));
+        exception.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(value);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, value);
+        exception.Message.ShouldStartWith(message);
     }
 
     [Fact]
     public void ShouldThrowException_WhenNameIsInvalid()
     {
         // Arrange
-        var name = "a+a-a";
-        var sut = CommandLine.CreateParser<SampleOptionNames>();
+        const string name = "a+a-a";
+        var sut = CommandLine.CreateParser<IntAppOptions>();
 
         // Act & Assert
-        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, o => o.WithName(name)))
-            .Message.ShouldStartWith($"Invalid name '{name}' found!");
+        var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value, o => o.WithName(name)));
+        exception.Error.Code.ShouldBe(BuilderErrors.InvalidName.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(name);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, name);
+        exception.Message.ShouldStartWith(message);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenSameNameWithPropertyUsed()
+    {
+        // Arrange
+        const string name = "Value";
+        var sut = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.ValueCount, o => o.WithName(name));
+
+        // Act & Assert
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        exception.Error.Code.ShouldBe(BuilderErrors.NameAlreadyInUse.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(name);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, name);
+        exception.Message.ShouldStartWith(message);
     }
 
     [Fact]
     public void ShouldThrowException_WhenSameCustomNameUsed()
     {
         // Arrange
+        const string name = "Test";
         var sut = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Value, o => o.WithName("Test"))
-            .AddNamedOption(s => s.ValueCount, o => o.WithName("Test"));
+            .AddNamedOption(s => s.Value, o => o.WithName(name))
+            .AddNamedOption(s => s.ValueCount, o => o.WithName(name));
 
         // Act & Assert
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Name 'Test' is already in use!");
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        exception.Error.Code.ShouldBe(BuilderErrors.NameAlreadyInUse.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(name);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.ValueCount));
+        var message = string.Format(exception.Error.Message, name);
+        exception.Message.ShouldStartWith(message);
     }
 
     [Fact]
@@ -193,19 +217,9 @@ public class NameConfigurationTests
 
         // Assert
         namedOption.ShouldNotBeNull();
-        Should.Throw<Exception>(() => namedOption.WithName("NewName"))
-            .Message.ShouldStartWith("An option cannot be modified after");
-    }
-
-    [Fact]
-    public void ShouldThrowException_WhenTryToAddReservedProperty()
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<IntAppOptions>()
-            .AddSwitchOption(s => s.Help);
-
-        // Act & Assert
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("The reserved 'Help' property is not configurable.");
+        var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithName("NewName"));
+        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        exception.Error.Values.ShouldBeNull();
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
     }
 }

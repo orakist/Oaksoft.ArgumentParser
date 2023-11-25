@@ -1,7 +1,8 @@
 using Oaksoft.ArgumentParser.Definitions;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Tests.AppModels;
+using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
@@ -540,12 +541,19 @@ public class AliasSuggestionTests
             .AddNamedOption(s => s.Val2) // will suggest => a, val2
             .AddNamedOption(s => s.Val3) // will suggest => l, val3
             .AddNamedOption(s => s.Val4) // will suggest => val4
-            .AddNamedOption(s => s.Val4_, o => o.WithName("Test")); // will suggest nothing
+            .AddNamedOption(s => s.Val4_); // will suggest nothing
 
-        // Act & Assert
+        // Act
         // Can't suggest alias because all alias possible names have already been used 
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Unable to suggest option alias!");
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(nameof(SampleOptionNames.Val4_));
+        exception.OptionName.ShouldBeNull();
+        var message = string.Format(exception.Error.Message, nameof(SampleOptionNames.Val4_));
+        exception.Message.ShouldStartWith(message);
     }
 
     [Fact]
@@ -558,10 +566,17 @@ public class AliasSuggestionTests
             .AddNamedOption(s => s.Val3) // will suggest => l
             .AddNamedOption(s => s.Val4); // will suggest => nothing
 
-        // Act & Assert
+        // Act
         // Can't suggest alias because all alias possible names have already been used 
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Unable to suggest option alias!");
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(nameof(SampleOptionNames.Val4));
+        exception.OptionName.ShouldBeNull();
+        var message = string.Format(exception.Error.Message, nameof(SampleOptionNames.Val4));
+        exception.Message.ShouldStartWith(message);
     }
 
     [Fact]
@@ -570,26 +585,40 @@ public class AliasSuggestionTests
         // Arrange
         var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.AllowDoubleDashLongAlias)
             .AddNamedOption(s => s.Val4) // will suggest => val4
-            .AddNamedOption(s => s.Val4_, o => o.WithName("Test")); // will suggest nothing
+            .AddNamedOption(s => s.Val4_); // will suggest nothing
 
-        // Act & Assert
+        // Act
         // Can't suggest alias because all alias possible names have already been used 
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Unable to suggest option alias!");
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(nameof(SampleOptionNames.Val4_));
+        exception.OptionName.ShouldBeNull();
+        var message = string.Format(exception.Error.Message, nameof(SampleOptionNames.Val4_));
+        exception.Message.ShouldStartWith(message);
     }
 
     [Fact]
     public void ShouldThrowException_WhenAliasSuggestionFails4()
     {
         // Arrange
-        var sut = CommandLine.CreateParser<SampleOptionNames>(OptionPrefixRules.AllowSingleDashShortAlias)
+        var sut = CommandLine.CreateParser<SampleOptionNames>()
             .AddNamedOption(s => s.Value) // will suggest => v, value
             .AddNamedOption(s => s.V); // will suggest nothing
 
-        // Act & Assert
+        // Act
         // Can't suggest alias because all alias possible names have already been used 
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Unable to suggest option alias!");
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(nameof(SampleOptionNames.V));
+        exception.OptionName.ShouldBeNull();
+        var message = string.Format(exception.Error.Message, nameof(SampleOptionNames.V));
+        exception.Message.ShouldStartWith(message);
     }
 
     [Fact]

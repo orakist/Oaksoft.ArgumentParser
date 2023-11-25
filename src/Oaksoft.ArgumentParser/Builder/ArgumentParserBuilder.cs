@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Parser;
@@ -108,22 +109,19 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     {
         if ((OptionPrefix & OptionPrefixRules.All) == 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(OptionPrefix),
-                "Empty option alias prefix rule is not allowed.");
+            throw BuilderErrors.InvalidEnum.With(nameof(OptionPrefixRules), (int)OptionPrefix).ToException();
         }
 
         if ((AliasDelimiter & AliasDelimiterRules.All) == 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(AliasDelimiter),
-                "Empty alias delimiter rule is not allowed.");
+            throw BuilderErrors.InvalidEnum.With(nameof(AliasDelimiterRules), (int)AliasDelimiter).ToException();
         }
-        
+
         if ((ValueDelimiter & ValueDelimiterRules.All) == 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(ValueDelimiter),
-                "Empty value delimiter rule is not allowed.");
+            throw BuilderErrors.InvalidEnum.With(nameof(ValueDelimiterRules), (int)ValueDelimiter).ToException();
         }
-        
+
         _settingsBuilder.AutoPrintHeader ??= true;
         _settingsBuilder.AutoPrintHelp ??= true;
         _settingsBuilder.AutoPrintErrors ??= true;
@@ -137,21 +135,17 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         if (_settingsBuilder.HelpDisplayWidth is < 40 or > 320)
         {
-            throw new ArgumentOutOfRangeException(nameof(IParserSettings.HelpDisplayWidth),
-                "Invalid Help Display Width value! Valid interval is [40, 320].");
+            throw BuilderErrors.OutOfRange.With(nameof(IParserSettings.HelpDisplayWidth), (40, 320)).ToException();
         }
 
-        if (_settingsBuilder.MaxAliasLength is < 4 or > 64)
+        if (_settingsBuilder.MaxAliasLength is < 8 or > 64)
         {
-            throw new ArgumentOutOfRangeException(nameof(IParserSettings.MaxAliasLength),
-                "Invalid Max Alias Length value! Valid interval is [4, 64].");
+            throw BuilderErrors.OutOfRange.With(nameof(IParserSettings.MaxAliasLength), (8, 64)).ToException();
         }
-
 
         if (_settingsBuilder.MaxSuggestedAliasWordCount is < 1 or > 8)
         {
-            throw new ArgumentOutOfRangeException(nameof(IParserSettings.MaxSuggestedAliasWordCount),
-                "Invalid Max Alias Word Count value! Valid interval is [1, 8].");
+            throw BuilderErrors.OutOfRange.With(nameof(IParserSettings.MaxSuggestedAliasWordCount), (1, 8)).ToException();
         }
 
         if (string.IsNullOrWhiteSpace(_settingsBuilder.Title))
@@ -164,16 +158,21 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     private void BuildDefaultOptions()
     {
         if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help)))
-            throw new ArgumentException("The reserved 'Help' property is not configurable.");
+        {
+            throw BuilderErrors.ReservedProperty.With(nameof(IApplicationOptions.Help)).ToException();
+        }
 
         this.AddSwitchOption(p => p.Help);
 
         var aliases = new[] { "h", "?", "help" };
-        var validAliases = aliases.ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false);
         var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
 
+        var validAliases = aliases
+            .ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false)
+            .GetOrThrow();
+        
         option.SetName("Help");
-        option.SetValidAliases(validAliases.ToArray());
+        option.SetValidAliases(validAliases);
         option.SetDescription("Prints this help information.");
     }
 

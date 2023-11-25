@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Oaksoft.ArgumentParser.Base;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
@@ -51,7 +52,8 @@ internal abstract class BaseOption : IBaseOption
     {
         ParserInitializedGuard();
 
-        Name = name.ValidateName();
+        Name = name.ValidateName()
+            .GetOrThrow(KeyProperty.Name);
     }
 
     public void SetValidName(string name)
@@ -65,7 +67,7 @@ internal abstract class BaseOption : IBaseOption
 
         if (string.IsNullOrWhiteSpace(usage))
         {
-            throw new ArgumentException("The usage string cannot be empty!");
+            throw BuilderErrors.EmptyValue.With(nameof(usage)).ToException(KeyProperty.Name);
         }
 
         Usage = string.Join(' ', usage.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
@@ -83,33 +85,23 @@ internal abstract class BaseOption : IBaseOption
 
     public virtual List<string> GetAliases()
     {
-        throw new NotSupportedException("GetAliases() not supported by value options.");
+        return default!;
     }
 
-    public virtual void AddAliases(params string[] aliases)
+    public virtual void SetValidAliases(IEnumerable<string> aliases)
     {
-        throw new NotSupportedException("AddAliases() not supported by value options.");
-    }
-
-    public virtual void SetValidAliases(params string[] aliases)
-    {
-        throw new NotSupportedException("SetValidAliases() not supported by value options.");
     }
 
     public virtual void Initialize()
     {
         if (ValueArity.Min < 0 || ValueArity.Max < ValueArity.Min)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(ValueArity),
-                $"Invalid value {ValueArity} arity! Do not use negative or inconsistent values.");
+            throw BuilderErrors.InvalidArity.With(nameof(ValueArity), ValueArity).ToException(Name);
         }
 
         if (OptionArity.Min < 0 || OptionArity.Max < OptionArity.Min)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(OptionArity),
-                $"Invalid option {OptionArity} arity! Do not use negative or inconsistent values.");
+            throw BuilderErrors.InvalidArity.With(nameof(OptionArity), OptionArity).ToException(Name);
         }
     }
 
@@ -119,14 +111,12 @@ internal abstract class BaseOption : IBaseOption
     {
         if (OptionCount < OptionArity.Min)
         {
-            throw new Exception(
-                $"At least '{OptionArity.Min}' option{S(OptionArity.Min)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
+            throw new Exception($"At least '{OptionArity.Min}' option{S(OptionArity.Min)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
         }
 
         if (OptionCount > OptionArity.Max)
         {
-            throw new Exception(
-                $"At most '{OptionArity.Max}' option{S(OptionArity.Max)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
+            throw new Exception($"At most '{OptionArity.Max}' option{S(OptionArity.Max)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
         }
 
         if (OptionArity.Max >= 1 && OptionCount <= 0) 
@@ -134,14 +124,12 @@ internal abstract class BaseOption : IBaseOption
 
         if (ValueCount < ValueArity.Min)
         {
-            throw new Exception(
-                $"At least '{ValueArity.Min}' value{S(ValueArity.Min)} expected but '{ValueCount}' value{S(ValueCount)} provided.");
+            throw new Exception($"At least '{ValueArity.Min}' value{S(ValueArity.Min)} expected but '{ValueCount}' value{S(ValueCount)} provided.");
         }
 
         if (ValueCount > ValueArity.Max)
         {
-            throw new Exception(
-                $"At most '{ValueArity.Max}' value{S(ValueArity.Max)} expected but '{ValueCount}' value{S(ValueCount)} provided.");
+            throw new Exception($"At most '{ValueArity.Max}' value{S(ValueArity.Max)} expected but '{ValueCount}' value{S(ValueCount)} provided.");
         }
     }
 
@@ -157,8 +145,10 @@ internal abstract class BaseOption : IBaseOption
 
     protected void ParserInitializedGuard()
     {
-        if (_parser != null)
-            throw new Exception("An option cannot be modified after building the argument parser.");
+        if (_parser == null)
+            return;
+
+        throw BuilderErrors.CannotBeModified.ToException(KeyProperty.Name);
     }
 
 }

@@ -1,15 +1,18 @@
 using Oaksoft.ArgumentParser.Definitions;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Tests.AppModels;
+using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
+using System;
+using System.Xml.Linq;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
 public class UsageConfigurationTests
 {
     [Fact]
-    public void ShouldBuildOptions_WithCustomUsage()
+    public void ShouldBuild_WithCustomUsage()
     {
         // Arrange
         const string usage1 = "-n <integer-value>";
@@ -68,15 +71,21 @@ public class UsageConfigurationTests
     public void ShouldThrowException_WhenUsageIsEmpty()
     {
         // Arrange
-        var sut = CommandLine.CreateParser<SampleOptionNames>();
+        const string name = "usage";
+        var sut = CommandLine.CreateParser<IntAppOptions>();
 
         // Act & Assert
-        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, o => o.WithUsage(" ")))
-            .Message.ShouldStartWith("The usage string cannot be empty!");
+        var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value, o => o.WithUsage(" ")));
+        exception.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(name);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, name);
+        exception.Message.ShouldStartWith(message);
     }
 
     [Fact]
-    public void ShouldBuildOptions_WithDefaultUsage()
+    public void ShouldBuild_WithDefaultUsage()
     {
         // Arrange, should ignore empty usages
         var sut = CommandLine.CreateParser<IntAppOptions>()
@@ -120,7 +129,7 @@ public class UsageConfigurationTests
     }
 
     [Fact]
-    public void ShouldBuildOptions_WithDefaultUsageForwardSlash()
+    public void ShouldBuild_WithDefaultUsageForwardSlash()
     {
         // Arrange
         var sut = CommandLine.CreateParser<IntAppOptions>(OptionPrefixRules.AllowForwardSlash)
@@ -177,7 +186,9 @@ public class UsageConfigurationTests
 
         // Assert
         namedOption.ShouldNotBeNull();
-        Should.Throw<Exception>(() => namedOption.WithUsage("test"))
-            .Message.ShouldStartWith("An option cannot be modified after");
+        var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithUsage("test"));
+        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        exception.Error.Values.ShouldBeNull();
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }
 }

@@ -48,7 +48,7 @@ internal class ScalarNamedOption<TValue>
     {
         ParserInitializedGuard();
 
-        OptionArity = optionArity.GetLimits();
+        OptionArity = optionArity.GetLimits().GetOrThrow(KeyProperty.Name);
     }
 
     public void SetOptionArity(int requiredOptionCount, int maximumOptionCount)
@@ -63,15 +63,15 @@ internal class ScalarNamedOption<TValue>
         return _aliases;
     }
 
-    public override void AddAliases(params string[] aliases)
+    public void AddAliases(params string[] aliases)
     {
         ParserInitializedGuard();
 
-        var values = aliases.Select(s => s.ValidateAlias());
+        var values = aliases.Select(s => s.ValidateAlias().GetOrThrow(KeyProperty.Name));
         _aliases.AddRange(values.Distinct());
     }
 
-    public override void SetValidAliases(params string[] aliases)
+    public override void SetValidAliases(IEnumerable<string> aliases)
     {
         _aliases.Clear();
         _aliases.AddRange(aliases);

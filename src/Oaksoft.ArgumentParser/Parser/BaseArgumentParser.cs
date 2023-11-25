@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
@@ -95,73 +96,57 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         foreach (var option in _baseOptions)
         {
-            try
-            {
-                AutoInitializeOptionName(option, names);
+            AutoInitializeOptionName(option, names);
 
-                AutoInitializeOptionAliases(option, aliases);
+            AutoInitializeOptionAliases(option, aliases);
 
-                option.SetParser(this);
+            option.SetParser(this);
 
-                option.Initialize();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(BuildErrorMessage(option, ex));
-            }
+            option.Initialize();
         }
 
         _allAliases.AddRange(aliases.OrderByDescending(a => a.Length));
     }
 
-    private void ValidateCustomNames(List<string> names, List<string> aliases)
+    private void ValidateCustomNames(ICollection<string> names, ICollection<string> aliases)
     {
         foreach (var option in _baseOptions)
         {
-            try
-            {
-                if (string.IsNullOrEmpty(option.Name))
-                    continue;
+            if (string.IsNullOrEmpty(option.Name))
+                continue;
 
-                if (names.Contains(option.Name))
-                    throw new Exception($"Name '{option.Name}' is already in use! An option name must be unique!");
-
-                names.Add(option.Name);
-            }
-            catch (Exception ex)
+            if (names.Contains(option.Name))
             {
-                throw new Exception(BuildErrorMessage(option, ex));
+                throw BuilderErrors.NameAlreadyInUse.With(option.Name).ToException(option.KeyProperty.Name);
             }
+
+            names.Add(option.Name);
         }
 
         foreach (var option in _baseOptions)
         {
-            try
+            if (option is not INamedOption)
+                continue;
+
+            if (option.GetAliases().Count < 1)
+                continue;
+
+            var validAliases = option.GetAliases()
+                .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength!.Value, true)
+                .GetOrThrow(option.KeyProperty.Name)
+                .Distinct().ToList();
+
+            foreach (var alias in validAliases)
             {
-                if (option is not INamedOption)
-                    continue;
-
-                if (option.GetAliases().Count < 1)
-                    continue;
-
-                var validAliases = option.GetAliases()
-                    .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength!.Value, true)
-                    .Distinct().ToArray();
-
-                foreach (var alias in validAliases)
+                if (aliases.Contains(alias))
                 {
-                    if (aliases.Contains(alias))
-                        throw new Exception($"Alias '{alias}' is already in use! An option alias must be unique!");
-
-                    aliases.Add(alias);
+                    throw BuilderErrors.AliasAlreadyInUse.With(alias).ToException(option.KeyProperty.Name);
                 }
 
-                option.SetValidAliases(validAliases);
+                aliases.Add(alias);
             }
-            catch (Exception ex)
-            {
-                throw new Exception(BuildErrorMessage(option, ex));
-            }
+
+            option.SetValidAliases(validAliases);
         }
     }
 
@@ -429,9 +414,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (!string.IsNullOrEmpty(option.Name))
             return;
 
-        // suggest a name for option by using the registered property name
         if (names.Contains(option.KeyProperty.Name))
-            throw new Exception($"Name '{option.KeyProperty.Name}' is already in use! An option name must be unique!");
+        {
+            throw BuilderErrors.NameAlreadyInUse.With(option.KeyProperty.Name).ToException(option.KeyProperty.Name);
+        }
 
         option.SetValidName(option.KeyProperty.Name);
         names.Add(option.KeyProperty.Name);
@@ -452,13 +438,15 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (!CaseSensitive)
             suggestedAliases = suggestedAliases.Select(a => a.ToLowerInvariant());
 
-        suggestedAliases = suggestedAliases.ValidateAliases(
-            OptionPrefix, CaseSensitive, Settings.MaxAliasLength!.Value, false);
+        var validAliases = suggestedAliases
+            .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength!.Value, false)
+            .GetOrThrow(option.Name);
 
         // Can't suggest alias because all alias possible names have already been used 
-        var validAliases = suggestedAliases.ToArray();
-        if (validAliases.Length < 1)
-            throw new ArgumentException("Unable to suggest option alias! Use WithAliases() to set aliases of the option.");
+        if (validAliases.Count < 1)
+        {
+            throw BuilderErrors.UnableToSuggestAlias.With(option.Name).ToException();
+        }
 
         aliases.AddRange(validAliases);
         option.SetValidAliases(validAliases);

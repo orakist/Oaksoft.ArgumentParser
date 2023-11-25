@@ -1,7 +1,8 @@
 using Oaksoft.ArgumentParser.Definitions;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Tests.AppModels;
+using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
@@ -103,8 +104,8 @@ public class AliasConfigurationTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<StringAppOptions>(caseSensitive: true)
-            .AddNamedOption(s => s.Value, o => o.AddAliases("v", "v"))
-            .AddNamedOption(s => s.NullValues, o => o.AddAliases("value", "value", "Value"))
+            .AddNamedOption(s => s.Value, o => o.AddAliases("v", "/v"))
+            .AddNamedOption(s => s.NullValues, o => o.AddAliases("value", "/value", "Value"))
             .AddSwitchOption(s => s.NullValueFlag, o => o.AddAliases("test", "Test", "TEST", "TEST"));
 
         // Act
@@ -182,71 +183,6 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("--null-value-flag");
         namedOption.Aliases.ShouldContain("/f");
         namedOption.Aliases.ShouldContain("/null-value-flag");
-    }
-
-    [Theory]
-    [InlineData("Test.Property")]
-    [InlineData("---")]
-    [InlineData("TestProperty!")]
-    public void ShouldThrowException_WhenInvalidSymbolUsed1(string alias)
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<StringAppOptions>();
-
-        // Act & Assert
-        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, a => a.AddAliases(alias)))
-            .Message.ShouldStartWith($"Invalid alias '{alias}' found!");
-    }
-
-    [Fact]
-    public void ShouldThrowException_WhenEmptyAliasUsed()
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<StringAppOptions>();
-
-        // Act & Assert
-        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, a => a.AddAliases("  ")))
-            .Message.ShouldStartWith("The alias string cannot be empty!");
-    }
-
-    [Fact]
-    public void ShouldThrowException_WhenReservedAliasUsed()
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<StringAppOptions>();
-
-        // Act & Assert
-        Should.Throw<Exception>(() => sut.AddNamedOption(s => s.Value, a => a.AddAliases("--help ")))
-            .Message.ShouldStartWith("Invalid alias 'help' found! Reserved aliases ('h', '?', 'help') cannot be used.");
-    }
-
-    [Fact]
-    public void ShouldThrowException_WhenLongAliasUsed_WithCustomWordLength()
-    {
-        // Arrange
-        var alias = "Test-Property";
-        var validAlias = alias.ToLowerInvariant();
-        var sut = CommandLine.CreateParser<StringAppOptions>()
-            .ConfigureSettings(s => s.MaxAliasLength = 10)
-            .AddNamedOption(s => s.Value, a => a.AddAliases(alias));
-
-        // Act & Assert
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith($"Option alias '{validAlias}' not allowed! Allowed max alias length is 10.");
-    }
-
-    [Fact]
-    public void ShouldThrowException_WhenLongAliasUsed_WithDefaultAliasLength()
-    {
-        // Arrange
-        var alias = "This is Very Long Application Alias Name";
-        var validAlias = alias.Replace(' ', '-').ToLowerInvariant();
-        var sut = CommandLine.CreateParser<StringAppOptions>()
-            .AddNamedOption(s => s.Value, a => a.AddAliases("This is Very Long Application Alias Name"));
-
-        // Act & Assert
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith($"Option alias '{validAlias}' not allowed! Allowed max alias length is 32.");
     }
 
     [Fact]
@@ -402,44 +338,6 @@ public class AliasConfigurationTests
     }
 
     [Fact]
-    public void ShouldThrowException_WhenSameCustomAliasUsed()
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<StringAppOptions>()
-            .AddNamedOption(s => s.Value, o => o.AddAliases("v"))
-            .AddNamedOption(s => s.NullValues, o => o.AddAliases("v"));
-
-        // Act & Assert
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Alias 'v' is already in use!");
-    }
-
-    [Fact]
-    public void ShouldThrowException_WhenShortAliasNotAllowed()
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<StringAppOptions>(OptionPrefixRules.AllowDoubleDashLongAlias)
-            .AddNamedOption(s => s.Value, o => o.AddAliases("v", "test"));
-
-        // Act & Assert
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Short option alias 'v' not allowed!");
-    }
-
-    [Fact]
-    public void ShouldThrowException_WhenLongAliasNotAllowed()
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<StringAppOptions>(OptionPrefixRules.AllowSingleDashShortAlias)
-            .AddNamedOption(s => s.Value, o => o.AddAliases("v", "test"));
-
-        // Act & Assert
-        Should.Throw<Exception>(() => sut.Build())
-            .Message.ShouldStartWith("Long option alias 'test' not allowed!");
-    }
-
- 
-    [Fact]
     public void ShouldBuild_WhenAllAliasPrefixesAllowed()
     {
         // Arrange
@@ -521,6 +419,180 @@ public class AliasConfigurationTests
         namedOption.Aliases.ShouldContain("/Values");
     }
 
+    [Theory]
+    [InlineData("Test.Property")]
+    [InlineData("---")]
+    [InlineData("TestProperty!")]
+    public void ShouldThrowException_WhenInvalidSymbolUsed(string alias)
+    {
+        // Arrange
+        const string symbols = "'?', '%', '$', '€', '£', '#', '@', '-'";
+        var sut = CommandLine.CreateParser<IntAppOptions>();
+
+        // Act
+        var exception = Should.Throw<OptionBuilderException>(
+            () => sut.AddNamedOption(s => s.Value, a => a.AddAliases(alias)));
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.InvalidAlias.Code);
+        exception.Error.Values.ShouldNotBeEmpty();
+        exception.Error.Values.ShouldContain(alias);
+        exception.Error.Values.ShouldContain(symbols);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, alias, symbols);
+        exception.Message.ShouldStartWith(message);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenEmptyAliasUsed()
+    {
+        // Arrange
+        const string value = "alias";
+        var sut = CommandLine.CreateParser<IntAppOptions>();
+
+        // Act
+        var exception = Should.Throw<OptionBuilderException>(
+            () => sut.AddNamedOption(s => s.Value, a => a.AddAliases("  ")));
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(value);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, value);
+        exception.Message.ShouldStartWith(message);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenReservedAliasUsed()
+    {
+        // Arrange
+        const string alias = "help";
+        const string symbols = "'h', '?', 'help'";
+        var sut = CommandLine.CreateParser<IntAppOptions>();
+
+        // Act
+        var exception = Should.Throw<OptionBuilderException>(
+            () => sut.AddNamedOption(s => s.Value, a => a.AddAliases(alias)));
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.ReservedAlias.Code);
+        exception.Error.Values.ShouldNotBeEmpty();
+        exception.Error.Values.ShouldContain(alias);
+        exception.Error.Values.ShouldContain(symbols);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, alias, symbols);
+        exception.Message.ShouldStartWith(message);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenLongAliasUsed_WithCustomWordLength()
+    {
+        // Arrange
+        const int length = 10;
+        const string alias = "Test-Property";
+        var sut = CommandLine.CreateParser<IntAppOptions>(caseSensitive: true)
+            .ConfigureSettings(s => s.MaxAliasLength = length)
+            .AddNamedOption(s => s.Value, a => a.AddAliases(alias));
+
+        // Act
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.TooLongAlias.Code);
+        exception.Error.Values.ShouldNotBeEmpty();
+        exception.Error.Values.ShouldContain(alias);
+        exception.Error.Values.ShouldContain(length);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, alias, length);
+        exception.Message.ShouldStartWith(message);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenLongAliasUsed_WithDefaultAliasLength()
+    {
+        // Arrange
+        const string alias = "This is Very Long Application Alias Name";
+        var sut = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value, a => a.AddAliases(alias));
+
+        // Act
+        var validAlias = alias.Replace(' ', '-').ToLowerInvariant();
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.TooLongAlias.Code);
+        exception.Error.Values.ShouldNotBeEmpty();
+        exception.Error.Values.ShouldContain(validAlias);
+        exception.Error.Values.ShouldContain(32);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, validAlias, 32);
+        exception.Message.ShouldStartWith(message);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenSameCustomAliasUsed()
+    {
+        // Arrange
+        const string alias = "same";
+        var sut = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value, o => o.AddAliases(alias))
+            .AddNamedOption(s => s.NullValues, o => o.AddAliases(alias));
+
+        // Act
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.AliasAlreadyInUse.Code);
+        exception.Error.Values.ShouldHaveSingleItem();
+        exception.Error.Values.ShouldContain(alias);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.NullValues));
+        var message = string.Format(exception.Error.Message, alias);
+        exception.Message.ShouldStartWith(message);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenShortAliasNotAllowed()
+    {
+        // Arrange
+        string[] aliases = { "t", "test" };
+        var sut = CommandLine.CreateParser<StringAppOptions>(OptionPrefixRules.AllowDoubleDashLongAlias)
+            .AddNamedOption(s => s.Value, o => o.AddAliases(aliases));
+
+        // Act
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.NotAllowedAlias.Code);
+        exception.Error.Values.ShouldNotBeEmpty();
+        exception.Error.Values.ShouldContain("Short");
+        exception.Error.Values.ShouldContain(aliases[0]);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, "Short", aliases[0]);
+        exception.Message.ShouldStartWith(message);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenLongAliasNotAllowed()
+    {
+        // Arrange
+        string[] aliases = { "t", "test" };
+        var sut = CommandLine.CreateParser<StringAppOptions>(OptionPrefixRules.AllowSingleDashShortAlias)
+            .AddNamedOption(s => s.Value, o => o.AddAliases(aliases));
+
+        // Act
+        var exception = Should.Throw<OptionBuilderException>(sut.Build);
+
+        // Assert
+        exception.Error.Code.ShouldBe(BuilderErrors.NotAllowedAlias.Code);
+        exception.Error.Values.ShouldNotBeEmpty();
+        exception.Error.Values.ShouldContain("Long");
+        exception.Error.Values.ShouldContain(aliases[1]);
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(exception.Error.Message, "Long", aliases[1]);
+        exception.Message.ShouldStartWith(message);
+    }
+
     [Fact]
     public void ShouldThrowException_WhenTryToUpdateAliasAfterBuild()
     {
@@ -535,7 +607,9 @@ public class AliasConfigurationTests
 
         // Assert
         namedOption.ShouldNotBeNull();
-        Should.Throw<Exception>(() => namedOption.AddAliases("s"))
-            .Message.ShouldStartWith("An option cannot be modified after");
+        var exception = Should.Throw<OptionBuilderException>(() => namedOption.AddAliases("s"));
+        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        exception.Error.Values.ShouldBeNull();
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }
 }

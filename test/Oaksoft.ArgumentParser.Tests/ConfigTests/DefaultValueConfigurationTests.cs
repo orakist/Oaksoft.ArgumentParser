@@ -1,14 +1,17 @@
+using Oaksoft.ArgumentParser.Definitions;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Tests.AppModels;
+using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
+using System;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
 public class DefaultValueConfigurationTests
 {
     [Fact]
-    public void ShouldBuildOptions_WhenDefaultValueUsed1()
+    public void ShouldBuild_WhenDefaultValueUsed1()
     {
         // Arrange
         var sut = CommandLine.CreateParser<IntAppOptions>()
@@ -41,7 +44,7 @@ public class DefaultValueConfigurationTests
     }
 
     [Fact]
-    public void ShouldBuildOptions_WhenDefaultValueUsed2()
+    public void ShouldBuild_WhenDefaultValueUsed2()
     {
         // Arrange
         var sut = CommandLine.CreateParser<StringAppOptions>()
@@ -54,19 +57,19 @@ public class DefaultValueConfigurationTests
 
         // Assert
         parser.GetOptions().Count.ShouldBe(4);
-        var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
+        var option = parser.GetOptionByName(nameof(StringAppOptions.NullValue));
         var namedOption = option as IScalarNamedOption<string>;
         namedOption.ShouldNotBeNull();
         namedOption.DefaultValue.ShouldNotBeNull();
         namedOption.DefaultValue.Value.ShouldBe("Funny Cat");
 
-        option = parser.GetOptionByName(nameof(IntAppOptions.Value));
+        option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         namedOption = option as IScalarNamedOption<string>;
         namedOption.ShouldNotBeNull();
         namedOption.DefaultValue.ShouldNotBeNull();
         namedOption.DefaultValue.Value.ShouldBe(" ");
 
-        option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
+        option = parser.GetOptionByName(nameof(StringAppOptions.ValueFlag));
         var switchOption = option as ISwitchOption;
         switchOption.ShouldNotBeNull();
         switchOption.DefaultValue.ShouldNotBeNull();
@@ -74,7 +77,7 @@ public class DefaultValueConfigurationTests
     }
 
     [Fact]
-    public void ShouldBuildOptions_WhenDefaultValueNotUsed()
+    public void ShouldBuild_WhenDefaultValueNotUsed()
     {
         // Arrange
         var sut = CommandLine.CreateParser<IntAppOptions>()
@@ -104,7 +107,7 @@ public class DefaultValueConfigurationTests
     }
 
     [Fact]
-    public void ShouldBuildOptions_WhenDefaultValueNotUsed2()
+    public void ShouldBuild_WhenDefaultValueNotUsed2()
     {
         // Arrange
         var sut = CommandLine.CreateParser<StringAppOptions>()
@@ -117,17 +120,17 @@ public class DefaultValueConfigurationTests
 
         // Assert
         parser.GetOptions().Count.ShouldBe(4);
-        var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
+        var option = parser.GetOptionByName(nameof(StringAppOptions.NullValue));
         var namedOption = option as IScalarNamedOption<string>;
         namedOption.ShouldNotBeNull();
         namedOption.DefaultValue.ShouldBeNull();
 
-        option = parser.GetOptionByName(nameof(IntAppOptions.Value));
+        option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         namedOption = option as IScalarNamedOption<string>;
         namedOption.ShouldNotBeNull();
         namedOption.DefaultValue.ShouldBeNull();
 
-        option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
+        option = parser.GetOptionByName(nameof(StringAppOptions.ValueFlag));
         var switchOption = option as ISwitchOption;
         switchOption.ShouldNotBeNull();
         switchOption.DefaultValue.ShouldBeNull();
@@ -150,10 +153,15 @@ public class DefaultValueConfigurationTests
 
         // Assert
         namedOption.ShouldNotBeNull();
-        Should.Throw<Exception>(() => namedOption.WithDefaultValue(5))
-            .Message.ShouldStartWith("An option cannot be modified after");
+        var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithDefaultValue(5));
+        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        exception.Error.Values.ShouldBeNull();
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+
         switchOption.ShouldNotBeNull();
-        Should.Throw<Exception>(() => switchOption.WithDefaultValue(true))
-            .Message.ShouldStartWith("An option cannot be modified after");
+        exception = Should.Throw<OptionBuilderException>(() => switchOption.WithDefaultValue(false));
+        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        exception.Error.Values.ShouldBeNull();
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
     }
 }

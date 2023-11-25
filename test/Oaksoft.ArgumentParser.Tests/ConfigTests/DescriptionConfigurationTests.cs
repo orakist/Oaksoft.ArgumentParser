@@ -1,14 +1,16 @@
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Tests.AppModels;
+using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
+using System;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
 public class DescriptionConfigurationTests
 {
     [Fact]
-    public void ShouldBuildOptions_WhenDescriptionUsed()
+    public void ShouldBuild_WhenDescriptionUsed()
     {
         // Arrange
         const string description = "Cats have an adorable face with a tiny nose.";
@@ -59,7 +61,7 @@ public class DescriptionConfigurationTests
     }
 
     [Fact]
-    public void ShouldBuildOptions_WithDefaultDescription()
+    public void ShouldBuild_WithDefaultDescription()
     {
         // Arrange, should ignore empty descriptions
         var sut = CommandLine.CreateParser<IntAppOptions>()
@@ -116,7 +118,9 @@ public class DescriptionConfigurationTests
 
         // Assert
         namedOption.ShouldNotBeNull();
-        Should.Throw<Exception>(() => namedOption.WithDescription("test"))
-            .Message.ShouldStartWith("An option cannot be modified after");
+        var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithDescription("test"));
+        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        exception.Error.Values.ShouldBeNull();
+        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }
 }

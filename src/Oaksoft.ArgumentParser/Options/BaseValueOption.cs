@@ -5,6 +5,7 @@ using System.Reflection;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Callbacks;
 using Oaksoft.ArgumentParser.Definitions;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
@@ -145,9 +146,14 @@ internal abstract class BaseAllowedValuesOption<TValue>
     {
         ParserInitializedGuard();
 
+        if (allowedValues.Cast<object?>()
+            .Any(v => v is null || (v is string s && string.IsNullOrWhiteSpace(s))))
+        {
+            throw BuilderErrors.InvalidAllowedValue.ToException(KeyProperty.Name);
+        }
+
         var values = allowedValues
-            .Where(s => s is not string value || !string.IsNullOrWhiteSpace(value))
-            .Select(s => s is string value ? (TValue)(object)value.Trim() : s);
+            .Select(v => v is string s ? (TValue)(object)s.Trim() : v);
 
         _allowedValues.Clear();
         foreach (var value in values)
@@ -247,8 +253,7 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
 
         if (_tryParseValueCallback is null && _tryParseValuesCallback is null)
         {
-            throw new Exception(
-                $"Missing TryParse callback for custom type! Configure a TryParse callback for type '{typeof(TValue).Name}'.");
+            throw BuilderErrors.MissingCallback.With(typeof(TValue).Name, Name).ToException();
         }
     }
 
@@ -320,7 +325,7 @@ internal abstract class BaseValueOption : BaseOption, IValueOption
     {
         ParserInitializedGuard();
 
-        ValueArity = valueArity.GetLimits();
+        ValueArity = valueArity.GetLimits().GetOrThrow(KeyProperty.Name);
     }
 
     public void SetValueArity(int requiredValueCount, int maximumValueCount)

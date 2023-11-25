@@ -44,11 +44,11 @@ internal static class Program
             .AddSwitchOption(p => p.SubtractSwitch,
                 o => o.WithDescription("Enables the subtraction operator."))
 
-            .AddCountOption(o => o.MultiplySwitch,
+            .AddCounterOption(o => o.MultiplySwitch,
                 o => o.WithOptionArity(0, 5)
                     .WithDescription("Enables the multiplication operator."))
 
-            .AddCountOption(o => o.DivideSwitch,
+            .AddCounterOption(o => o.DivideSwitch,
                 o => o.WithDescription("Enables the division operator."))
 
             .AddNamedOption(o => o.AddCount,

@@ -162,14 +162,14 @@ internal static class OptionRegistrar
     {
         if (expression?.Body == null)
         {
-            throw BuilderErrors.NullValue.With(nameof(expression)).ToException();
+            throw BuilderErrors.NullValue.ToException(nameof(expression));
         }
 
         if (expression.NodeType != ExpressionType.Lambda ||
             expression.Body is not MemberExpression member ||
             member.Member.MemberType != MemberTypes.Property)
         {
-            throw BuilderErrors.InvalidPropertyExpression.With(type).ToException();
+            throw BuilderErrors.InvalidPropertyExpression.ToException(type);
         }
 
         var parserBuilder = (ArgumentParserBuilder<TSource>)builder;
@@ -178,7 +178,7 @@ internal static class OptionRegistrar
 
         if (member.Type == typeof(string) && type == typeof(char).ToString())
         {
-            throw BuilderErrors.InvalidStringPropertyUsage.With(property.Name).ToException();
+            throw BuilderErrors.InvalidStringPropertyUsage.ToException(property.Name);
         }
 
         return property;
@@ -195,17 +195,17 @@ internal static class OptionRegistrar
 
         if (keyProperty.Name == countProperty?.Name)
         {
-            throw BuilderErrors.SamePropertyUsage.With(keyProperty.Name, countProperty.Name).ToException();
+            throw BuilderErrors.SamePropertyUsage.ToException(keyProperty.Name, countProperty.Name);
         }
 
         if (propertyNames.Contains(keyProperty.Name))
         {
-            throw BuilderErrors.PropertyAlreadyInUse.With(keyProperty.Name).ToException();
+            throw BuilderErrors.PropertyAlreadyInUse.ToException(keyProperty.Name);
         }
 
         if (countProperty != null && propertyNames.Contains(countProperty.Name))
         {
-            throw BuilderErrors.PropertyAlreadyInUse.With(countProperty.Name).ToException();
+            throw BuilderErrors.PropertyAlreadyInUse.ToException(countProperty.Name);
         }
 
         option.SetKeyProperty(keyProperty);

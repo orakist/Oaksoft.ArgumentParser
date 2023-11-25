@@ -432,14 +432,15 @@ public class AliasConfigurationTests
         // Act
         var exception = Should.Throw<OptionBuilderException>(
             () => sut.AddNamedOption(s => s.Value, a => a.AddAliases(alias)));
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.InvalidAlias.Code);
-        exception.Error.Values.ShouldNotBeEmpty();
-        exception.Error.Values.ShouldContain(alias);
-        exception.Error.Values.ShouldContain(symbols);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, alias, symbols);
+        info.Error.Code.ShouldBe(BuilderErrors.InvalidAlias.Code);
+        info.Values.ShouldNotBeEmpty();
+        info.Values.ShouldContain(alias);
+        info.Values.ShouldContain(symbols);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, alias, symbols);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -453,13 +454,14 @@ public class AliasConfigurationTests
         // Act
         var exception = Should.Throw<OptionBuilderException>(
             () => sut.AddNamedOption(s => s.Value, a => a.AddAliases("  ")));
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(value);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, value);
+        info.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(value);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, value);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -474,14 +476,15 @@ public class AliasConfigurationTests
         // Act
         var exception = Should.Throw<OptionBuilderException>(
             () => sut.AddNamedOption(s => s.Value, a => a.AddAliases(alias)));
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.ReservedAlias.Code);
-        exception.Error.Values.ShouldNotBeEmpty();
-        exception.Error.Values.ShouldContain(alias);
-        exception.Error.Values.ShouldContain(symbols);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, alias, symbols);
+        info.Error.Code.ShouldBe(BuilderErrors.ReservedAlias.Code);
+        info.Values.ShouldNotBeEmpty();
+        info.Values.ShouldContain(alias);
+        info.Values.ShouldContain(symbols);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, alias, symbols);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -497,14 +500,15 @@ public class AliasConfigurationTests
 
         // Act
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.TooLongAlias.Code);
-        exception.Error.Values.ShouldNotBeEmpty();
-        exception.Error.Values.ShouldContain(alias);
-        exception.Error.Values.ShouldContain(length);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, alias, length);
+        info.Error.Code.ShouldBe(BuilderErrors.TooLongAlias.Code);
+        info.Values.ShouldNotBeEmpty();
+        info.Values.ShouldContain(alias);
+        info.Values.ShouldContain(length);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, alias, length);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -519,14 +523,15 @@ public class AliasConfigurationTests
         // Act
         var validAlias = alias.Replace(' ', '-').ToLowerInvariant();
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.TooLongAlias.Code);
-        exception.Error.Values.ShouldNotBeEmpty();
-        exception.Error.Values.ShouldContain(validAlias);
-        exception.Error.Values.ShouldContain(32);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, validAlias, 32);
+        info.Error.Code.ShouldBe(BuilderErrors.TooLongAlias.Code);
+        info.Values.ShouldNotBeEmpty();
+        info.Values.ShouldContain(validAlias);
+        info.Values.ShouldContain(32);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, validAlias, 32);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -541,13 +546,14 @@ public class AliasConfigurationTests
 
         // Act
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.AliasAlreadyInUse.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(alias);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.NullValues));
-        var message = string.Format(exception.Error.Message, alias);
+        info.Error.Code.ShouldBe(BuilderErrors.AliasAlreadyInUse.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(alias);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.NullValues));
+        var message = string.Format(info.Error.Format, alias);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -561,14 +567,15 @@ public class AliasConfigurationTests
 
         // Act
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.NotAllowedAlias.Code);
-        exception.Error.Values.ShouldNotBeEmpty();
-        exception.Error.Values.ShouldContain("Short");
-        exception.Error.Values.ShouldContain(aliases[0]);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, "Short", aliases[0]);
+        info.Error.Code.ShouldBe(BuilderErrors.NotAllowedAlias.Code);
+        info.Values.ShouldNotBeEmpty();
+        info.Values.ShouldContain("Short");
+        info.Values.ShouldContain(aliases[0]);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, "Short", aliases[0]);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -582,14 +589,15 @@ public class AliasConfigurationTests
 
         // Act
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.NotAllowedAlias.Code);
-        exception.Error.Values.ShouldNotBeEmpty();
-        exception.Error.Values.ShouldContain("Long");
-        exception.Error.Values.ShouldContain(aliases[1]);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, "Long", aliases[1]);
+        info.Error.Code.ShouldBe(BuilderErrors.NotAllowedAlias.Code);
+        info.Values.ShouldNotBeEmpty();
+        info.Values.ShouldContain("Long");
+        info.Values.ShouldContain(aliases[1]);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, "Long", aliases[1]);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -608,8 +616,10 @@ public class AliasConfigurationTests
         // Assert
         namedOption.ShouldNotBeNull();
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.AddAliases("s"));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var info = exception.Error;
+
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }
 }

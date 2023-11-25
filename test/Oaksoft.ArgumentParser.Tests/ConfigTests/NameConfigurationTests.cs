@@ -138,13 +138,16 @@ public class NameConfigurationTests
         const string value = "name";
         var sut = CommandLine.CreateParser<IntAppOptions>();
 
-        // Act & Assert
+        // Act
         var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value, o => o.WithName(" ")));
-        exception.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(value);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, value);
+        var info = exception.Error;
+
+        // Assert
+        info.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(value);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, value);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -155,13 +158,16 @@ public class NameConfigurationTests
         const string name = "a+a-a";
         var sut = CommandLine.CreateParser<IntAppOptions>();
 
-        // Act & Assert
+        // Act
         var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value, o => o.WithName(name)));
-        exception.Error.Code.ShouldBe(BuilderErrors.InvalidName.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(name);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, name);
+        var info = exception.Error;
+
+        // Assert
+        info.Error.Code.ShouldBe(BuilderErrors.InvalidName.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(name);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, name);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -174,13 +180,16 @@ public class NameConfigurationTests
             .AddNamedOption(s => s.Value)
             .AddNamedOption(s => s.ValueCount, o => o.WithName(name));
 
-        // Act & Assert
+        // Act
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
-        exception.Error.Code.ShouldBe(BuilderErrors.NameAlreadyInUse.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(name);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, name);
+        var info = exception.Error;
+
+        // Assert
+        info.Error.Code.ShouldBe(BuilderErrors.NameAlreadyInUse.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(name);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, name);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -193,13 +202,16 @@ public class NameConfigurationTests
             .AddNamedOption(s => s.Value, o => o.WithName(name))
             .AddNamedOption(s => s.ValueCount, o => o.WithName(name));
 
-        // Act & Assert
+        // Act
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
-        exception.Error.Code.ShouldBe(BuilderErrors.NameAlreadyInUse.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(name);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.ValueCount));
-        var message = string.Format(exception.Error.Message, name);
+        var info = exception.Error;
+
+        // Assert
+        info.Error.Code.ShouldBe(BuilderErrors.NameAlreadyInUse.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(name);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.ValueCount));
+        var message = string.Format(info.Error.Format, name);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -218,8 +230,10 @@ public class NameConfigurationTests
         // Assert
         namedOption.ShouldNotBeNull();
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithName("NewName"));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
+        var info = exception.Error;
+
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
     }
 }

@@ -1,19 +1,19 @@
 ﻿namespace Oaksoft.ArgumentParser.Exceptions;
 
-public class Result<TValue>
+internal class Result<TValue>
 {
     public TValue? Value { get; }
 
-    public BaseError? Error { get; }
+    public ErrorMessage? Error { get; }
 
-    public bool Success => Error is null && Value is not null;
+    public bool Success => Error is null;
 
     private Result(TValue value)
     {
         Value = value;
     }
 
-    private Result(BaseError? error)
+    private Result(ErrorMessage? error)
     {
         Error = error;
     }
@@ -31,17 +31,16 @@ public class Result<TValue>
         if (Success)
             return Value!;
 
-        if (string.IsNullOrWhiteSpace(optionName))
-            return GetOrThrow();
+        Error!.WithName(optionName);
 
-        throw new OptionBuilderException(Error!, optionName);
+        throw new OptionBuilderException(Error!);
     }
 
     public static Result<TValue> Create(TValue value) => new(value);
 
-    public static Result<TValue> Create(BaseError error) => new(error);
+    public static Result<TValue> Create(ErrorMessage error) => new(error);
 
     public static implicit operator Result<TValue>(TValue value) => Create(value);
 
-    public static implicit operator Result<TValue>(BaseError error) => Create(error);
+    public static implicit operator Result<TValue>(ErrorMessage error) => Create(error);
 }

@@ -57,14 +57,14 @@ internal static class AliasExtensions
 
     public static Result<List<string>> ValidateAliases(
         this IEnumerable<string> aliases, OptionPrefixRules rules,
-        bool caseSensitive, int maxAliasLength, bool throwException)
+        bool caseSensitive, int maxAliasLength, bool allowFailureResult)
     {
         var resultAliases = new List<string>();
         foreach (var alias in aliases.Select(a => caseSensitive ? a : a.ToLowerInvariant()))
         {
             if (alias.Length > maxAliasLength)
             {
-                if (throwException)
+                if (allowFailureResult)
                 {
                     return BuilderErrors.TooLongAlias.With(alias, maxAliasLength);
                 }
@@ -74,7 +74,7 @@ internal static class AliasExtensions
 
             if (!IsAliasAllowed(alias, rules))
             {
-                if (throwException)
+                if (allowFailureResult)
                 {
                     return BuilderErrors.NotAllowedAlias.With(alias.Length < 2 ? "Short" : "Long", alias);
                 }

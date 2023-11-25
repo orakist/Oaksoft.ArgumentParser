@@ -121,19 +121,24 @@ public class SequentialValueConfigurationTests
 
         // Assert
         option1.ShouldNotBeNull();
-        var exception = Should.Throw<OptionBuilderException>(() => option1.WithAllowSequentialValues(true));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Values));
-        exception = Should.Throw<OptionBuilderException>(() => option1.WithEnableValueTokenSplitting(true));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Values));
-
         option2.ShouldNotBeNull();
+
+        var exception = Should.Throw<OptionBuilderException>(() => option1.WithAllowSequentialValues(true));
+        var info = exception.Error;
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Values));
+
+        exception = Should.Throw<OptionBuilderException>(() => option1.WithEnableValueTokenSplitting(true));
+        info = exception.Error;
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Values));
+
         exception = Should.Throw<OptionBuilderException>(() => option2.WithEnableValueTokenSplitting(true));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.NullValues));
+        info = exception.Error;
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.NullValues));
     }
 }

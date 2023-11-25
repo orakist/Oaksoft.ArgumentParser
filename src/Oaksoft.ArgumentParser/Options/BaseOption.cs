@@ -67,7 +67,7 @@ internal abstract class BaseOption : IBaseOption
 
         if (string.IsNullOrWhiteSpace(usage))
         {
-            throw BuilderErrors.EmptyValue.With(nameof(usage)).ToException(KeyProperty.Name);
+            throw BuilderErrors.EmptyValue.WithName(KeyProperty.Name).ToException(nameof(usage));
         }
 
         Usage = string.Join(' ', usage.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
@@ -96,12 +96,12 @@ internal abstract class BaseOption : IBaseOption
     {
         if (ValueArity.Min < 0 || ValueArity.Max < ValueArity.Min)
         {
-            throw BuilderErrors.InvalidArity.With(nameof(ValueArity), ValueArity).ToException(Name);
+            throw BuilderErrors.InvalidArity.WithName(Name).ToException(nameof(ValueArity), ValueArity);
         }
 
         if (OptionArity.Min < 0 || OptionArity.Max < OptionArity.Min)
         {
-            throw BuilderErrors.InvalidArity.With(nameof(OptionArity), OptionArity).ToException(Name);
+            throw BuilderErrors.InvalidArity.WithName(Name).ToException(nameof(OptionArity), OptionArity);
         }
     }
 
@@ -148,7 +148,7 @@ internal abstract class BaseOption : IBaseOption
         if (_parser == null)
             return;
 
-        throw BuilderErrors.CannotBeModified.ToException(KeyProperty.Name);
+        throw BuilderErrors.CannotBeModified.WithName(KeyProperty.Name).ToException();
     }
 
 }

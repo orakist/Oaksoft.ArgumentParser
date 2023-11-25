@@ -4,8 +4,6 @@ using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
-using System;
-using System.Xml.Linq;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
@@ -74,13 +72,16 @@ public class UsageConfigurationTests
         const string name = "usage";
         var sut = CommandLine.CreateParser<IntAppOptions>();
 
-        // Act & Assert
+        // Act 
         var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value, o => o.WithUsage(" ")));
-        exception.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(name);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, name);
+        var info = exception.Error;
+
+        // Assert
+        info.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(name);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, name);
         exception.Message.ShouldStartWith(message);
     }
 
@@ -187,8 +188,10 @@ public class UsageConfigurationTests
         // Assert
         namedOption.ShouldNotBeNull();
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithUsage("test"));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var info = exception.Error;
+
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }
 }

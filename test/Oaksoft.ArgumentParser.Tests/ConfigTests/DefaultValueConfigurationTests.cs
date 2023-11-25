@@ -1,10 +1,8 @@
-using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
-using System;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
@@ -154,14 +152,18 @@ public class DefaultValueConfigurationTests
         // Assert
         namedOption.ShouldNotBeNull();
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithDefaultValue(5));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var info = exception.Error;
+
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
 
         switchOption.ShouldNotBeNull();
         exception = Should.Throw<OptionBuilderException>(() => switchOption.WithDefaultValue(false));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
+        info = exception.Error;
+
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
     }
 }

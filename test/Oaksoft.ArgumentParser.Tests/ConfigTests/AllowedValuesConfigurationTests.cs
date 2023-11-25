@@ -100,14 +100,16 @@ public class AllowedValuesConfigurationTests
 
         // Act
         var parser = sut.Build();
-
-        // Assert
         var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         var option1 = option as IScalarNamedOption<int>;
+
+        // Assert
         option1.ShouldNotBeNull();
         var exception = Should.Throw<OptionBuilderException>(() => option1.WithAllowedValues(2));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var info = exception.Error;
+
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }
 }

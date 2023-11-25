@@ -143,14 +143,17 @@ public class ArityConfigurationTests
         var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.ValueFlag, o => o.WithValueArity(min, max));
 
-        // Act & Assert
+        // Act 
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
-        exception.Error.Code.ShouldBe(BuilderErrors.InvalidArity.Code);
-        exception.Error.Values.ShouldNotBeNull();
-        exception.Error.Values.ShouldContain(nameof(IBaseOption.ValueArity));
-        exception.Error.Values.ShouldContain((min, max));
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
-        var message = string.Format(exception.Error.Message, nameof(IBaseOption.ValueArity), (min, max));
+        var info = exception.Error;
+
+        // Assert
+        info.Error.Code.ShouldBe(BuilderErrors.InvalidArity.Code);
+        info.Values.ShouldNotBeNull();
+        info.Values.ShouldContain(nameof(IBaseOption.ValueArity));
+        info.Values.ShouldContain((min, max));
+        info.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
+        var message = string.Format(info.Error.Format, nameof(IBaseOption.ValueArity), (min, max));
         exception.Message.ShouldStartWith(message);
     }
 
@@ -274,14 +277,17 @@ public class ArityConfigurationTests
         var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.Values, o => o.WithOptionArity(min, max));
 
-        // Act & Assert
+        // Act
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
-        exception.Error.Code.ShouldBe(BuilderErrors.InvalidArity.Code);
-        exception.Error.Values.ShouldNotBeNull();
-        exception.Error.Values.ShouldContain(nameof(IBaseOption.OptionArity));
-        exception.Error.Values.ShouldContain((min, max));
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Values));
-        var message = string.Format(exception.Error.Message, nameof(IBaseOption.OptionArity), (min, max));
+        var info = exception.Error;
+
+        // Assert
+        info.Error.Code.ShouldBe(BuilderErrors.InvalidArity.Code);
+        info.Values.ShouldNotBeNull();
+        info.Values.ShouldContain(nameof(IBaseOption.OptionArity));
+        info.Values.ShouldContain((min, max));
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Values));
+        var message = string.Format(info.Error.Format, nameof(IBaseOption.OptionArity), (min, max));
         exception.Message.ShouldStartWith(message);
     }
 
@@ -291,14 +297,17 @@ public class ArityConfigurationTests
         // Arrange
         var sut = CommandLine.CreateParser<IntAppOptions>();
 
-        // Act & Assert
+        // Act
         var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value, o => o.WithOptionArity((ArityType)100)));
-        exception.Error.Code.ShouldBe(BuilderErrors.InvalidEnum.Code);
-        exception.Error.Values.ShouldNotBeNull();
-        exception.Error.Values.ShouldContain(nameof(ArityType));
-        exception.Error.Values.ShouldContain((ArityType)100);
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(exception.Error.Message, nameof(ArityType), (ArityType)100);
+        var info = exception.Error;
+
+        // Assert
+        info.Error.Code.ShouldBe(BuilderErrors.InvalidEnum.Code);
+        info.Values.ShouldNotBeNull();
+        info.Values.ShouldContain(nameof(ArityType));
+        info.Values.ShouldContain((ArityType)100);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, nameof(ArityType), (ArityType)100);
         exception.Message.ShouldStartWith(message);
 
     }
@@ -319,13 +328,17 @@ public class ArityConfigurationTests
         namedOption.ShouldNotBeNull();
 
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithValueArity(ArityType.ZeroOrOne));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var info = exception.Error;
+
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
 
         exception = Should.Throw<OptionBuilderException>(() => namedOption.WithOptionArity(ArityType.ZeroOrOne));
-        exception.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
-        exception.Error.Values.ShouldBeNull();
-        exception.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        info = exception.Error;
+
+        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }
 }

@@ -14,13 +14,16 @@ public class OptionRegistrationTests
         var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddSwitchOption(s => s.Help);
 
-        // Act & Assert
+        // Act
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
-        exception.Error.Code.ShouldBe(BuilderErrors.ReservedProperty.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(nameof(IntAppOptions.Help));
-        exception.OptionName.ShouldBeNull();
-        var message = string.Format(exception.Error.Message, nameof(IntAppOptions.Help));
+        var info = exception.Error;
+
+        // Assert
+        info.Error.Code.ShouldBe(BuilderErrors.ReservedProperty.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(nameof(IntAppOptions.Help));
+        info.OptionName.ShouldBeNull();
+        var message = string.Format(info.Error.Format, nameof(IntAppOptions.Help));
         exception.Message.ShouldBe(message);
     }
 }

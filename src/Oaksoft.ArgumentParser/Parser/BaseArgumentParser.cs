@@ -117,7 +117,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
             if (names.Contains(option.Name))
             {
-                throw BuilderErrors.NameAlreadyInUse.With(option.Name).ToException(option.KeyProperty.Name);
+                throw BuilderErrors.NameAlreadyInUse.WithName(option.KeyProperty.Name).ToException(option.Name);
             }
 
             names.Add(option.Name);
@@ -140,7 +140,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 if (aliases.Contains(alias))
                 {
-                    throw BuilderErrors.AliasAlreadyInUse.With(alias).ToException(option.KeyProperty.Name);
+                    throw BuilderErrors.AliasAlreadyInUse.WithName(option.KeyProperty.Name).ToException(alias);
                 }
 
                 aliases.Add(alias);
@@ -416,7 +416,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         if (names.Contains(option.KeyProperty.Name))
         {
-            throw BuilderErrors.NameAlreadyInUse.With(option.KeyProperty.Name).ToException(option.KeyProperty.Name);
+            throw BuilderErrors.NameAlreadyInUse.WithName(option.KeyProperty.Name)
+                .ToException(option.KeyProperty.Name);
         }
 
         option.SetValidName(option.KeyProperty.Name);
@@ -445,7 +446,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         // Can't suggest alias because all alias possible names have already been used 
         if (validAliases.Count < 1)
         {
-            throw BuilderErrors.UnableToSuggestAlias.With(option.Name).ToException();
+            throw BuilderErrors.UnableToSuggestAlias.WithName(option.Name).ToException(option.Name);
         }
 
         aliases.AddRange(validAliases);

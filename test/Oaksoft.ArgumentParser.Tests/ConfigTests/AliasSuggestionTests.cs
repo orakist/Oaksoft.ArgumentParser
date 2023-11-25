@@ -546,13 +546,14 @@ public class AliasSuggestionTests
         // Act
         // Can't suggest alias because all alias possible names have already been used 
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(nameof(SampleOptionNames.Val4_));
-        exception.OptionName.ShouldBeNull();
-        var message = string.Format(exception.Error.Message, nameof(SampleOptionNames.Val4_));
+        info.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(nameof(SampleOptionNames.Val4_));
+        info.OptionName.ShouldBe(nameof(SampleOptionNames.Val4_));
+        var message = string.Format(info.Error.Format, nameof(SampleOptionNames.Val4_));
         exception.Message.ShouldStartWith(message);
     }
 
@@ -569,13 +570,14 @@ public class AliasSuggestionTests
         // Act
         // Can't suggest alias because all alias possible names have already been used 
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(nameof(SampleOptionNames.Val4));
-        exception.OptionName.ShouldBeNull();
-        var message = string.Format(exception.Error.Message, nameof(SampleOptionNames.Val4));
+        info.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(nameof(SampleOptionNames.Val4));
+        info.OptionName.ShouldBe(nameof(SampleOptionNames.Val4));
+        var message = string.Format(info.Error.Format, nameof(SampleOptionNames.Val4));
         exception.Message.ShouldStartWith(message);
     }
 
@@ -590,13 +592,14 @@ public class AliasSuggestionTests
         // Act
         // Can't suggest alias because all alias possible names have already been used 
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(nameof(SampleOptionNames.Val4_));
-        exception.OptionName.ShouldBeNull();
-        var message = string.Format(exception.Error.Message, nameof(SampleOptionNames.Val4_));
+        info.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(nameof(SampleOptionNames.Val4_));
+        info.OptionName.ShouldBe(nameof(SampleOptionNames.Val4_));
+        var message = string.Format(info.Error.Format, nameof(SampleOptionNames.Val4_));
         exception.Message.ShouldStartWith(message);
     }
 
@@ -611,13 +614,14 @@ public class AliasSuggestionTests
         // Act
         // Can't suggest alias because all alias possible names have already been used 
         var exception = Should.Throw<OptionBuilderException>(sut.Build);
+        var info = exception.Error;
 
         // Assert
-        exception.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
-        exception.Error.Values.ShouldHaveSingleItem();
-        exception.Error.Values.ShouldContain(nameof(SampleOptionNames.V));
-        exception.OptionName.ShouldBeNull();
-        var message = string.Format(exception.Error.Message, nameof(SampleOptionNames.V));
+        info.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        info.Values.ShouldHaveSingleItem();
+        info.Values.ShouldContain(nameof(SampleOptionNames.V));
+        info.OptionName.ShouldBe(nameof(SampleOptionNames.V));
+        var message = string.Format(info.Error.Format, nameof(SampleOptionNames.V));
         exception.Message.ShouldStartWith(message);
     }
 

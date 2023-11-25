@@ -149,7 +149,7 @@ internal abstract class BaseAllowedValuesOption<TValue>
         if (allowedValues.Cast<object?>()
             .Any(v => v is null || (v is string s && string.IsNullOrWhiteSpace(s))))
         {
-            throw BuilderErrors.InvalidAllowedValue.ToException(KeyProperty.Name);
+            throw BuilderErrors.InvalidAllowedValue.WithName(KeyProperty.Name).ToException();
         }
 
         var values = allowedValues
@@ -253,7 +253,7 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
 
         if (_tryParseValueCallback is null && _tryParseValuesCallback is null)
         {
-            throw BuilderErrors.MissingCallback.With(typeof(TValue).Name, Name).ToException();
+            throw BuilderErrors.MissingCallback.WithName(Name).ToException(typeof(TValue).Name);
         }
     }
 

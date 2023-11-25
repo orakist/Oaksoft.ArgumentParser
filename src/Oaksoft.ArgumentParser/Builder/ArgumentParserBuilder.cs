@@ -109,17 +109,17 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     {
         if ((OptionPrefix & OptionPrefixRules.All) == 0)
         {
-            throw BuilderErrors.InvalidEnum.With(nameof(OptionPrefixRules), (int)OptionPrefix).ToException();
+            throw BuilderErrors.InvalidEnum.ToException(nameof(OptionPrefixRules), (int)OptionPrefix);
         }
 
         if ((AliasDelimiter & AliasDelimiterRules.All) == 0)
         {
-            throw BuilderErrors.InvalidEnum.With(nameof(AliasDelimiterRules), (int)AliasDelimiter).ToException();
+            throw BuilderErrors.InvalidEnum.ToException(nameof(AliasDelimiterRules), (int)AliasDelimiter);
         }
 
         if ((ValueDelimiter & ValueDelimiterRules.All) == 0)
         {
-            throw BuilderErrors.InvalidEnum.With(nameof(ValueDelimiterRules), (int)ValueDelimiter).ToException();
+            throw BuilderErrors.InvalidEnum.ToException(nameof(ValueDelimiterRules), (int)ValueDelimiter);
         }
 
         _settingsBuilder.AutoPrintHeader ??= true;
@@ -135,17 +135,17 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         if (_settingsBuilder.HelpDisplayWidth is < 40 or > 320)
         {
-            throw BuilderErrors.OutOfRange.With(nameof(IParserSettings.HelpDisplayWidth), (40, 320)).ToException();
+            throw BuilderErrors.OutOfRange.ToException(nameof(IParserSettings.HelpDisplayWidth), (40, 320));
         }
 
         if (_settingsBuilder.MaxAliasLength is < 8 or > 64)
         {
-            throw BuilderErrors.OutOfRange.With(nameof(IParserSettings.MaxAliasLength), (8, 64)).ToException();
+            throw BuilderErrors.OutOfRange.ToException(nameof(IParserSettings.MaxAliasLength), (8, 64));
         }
 
         if (_settingsBuilder.MaxSuggestedAliasWordCount is < 1 or > 8)
         {
-            throw BuilderErrors.OutOfRange.With(nameof(IParserSettings.MaxSuggestedAliasWordCount), (1, 8)).ToException();
+            throw BuilderErrors.OutOfRange.ToException(nameof(IParserSettings.MaxSuggestedAliasWordCount), (1, 8));
         }
 
         if (string.IsNullOrWhiteSpace(_settingsBuilder.Title))
@@ -159,7 +159,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     {
         if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help)))
         {
-            throw BuilderErrors.ReservedProperty.With(nameof(IApplicationOptions.Help)).ToException();
+            throw BuilderErrors.ReservedProperty.ToException(nameof(IApplicationOptions.Help));
         }
 
         this.AddSwitchOption(p => p.Help);

@@ -2,7 +2,7 @@
 
 namespace Oaksoft.ArgumentParser.Exceptions;
 
-public abstract class ErrorMessage : IErrorMessage
+internal abstract class ErrorMessage : IErrorMessage
 {
     public ErrorInfo Error { get; }
 
@@ -76,6 +76,6 @@ internal sealed class ParserError : ErrorMessage
     public override Exception ToException(params object[] values)
     {
         With(values);
-        throw new NotImplementedException();
+        return new OptionParserException(this);
     }
 }

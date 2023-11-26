@@ -111,12 +111,12 @@ internal abstract class BaseOption : IBaseOption
     {
         if (OptionCount < OptionArity.Min)
         {
-            throw new Exception($"At least '{OptionArity.Min}' option{S(OptionArity.Min)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
+            throw ParserErrors.VeryFewOption.ToException(OptionArity.Min, OptionCount);
         }
 
         if (OptionCount > OptionArity.Max)
         {
-            throw new Exception($"At most '{OptionArity.Max}' option{S(OptionArity.Max)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
+            throw ParserErrors.TooManyOption.ToException(OptionArity.Max, OptionCount);
         }
 
         if (OptionArity.Max >= 1 && OptionCount <= 0) 
@@ -124,23 +124,18 @@ internal abstract class BaseOption : IBaseOption
 
         if (ValueCount < ValueArity.Min)
         {
-            throw new Exception($"At least '{ValueArity.Min}' value{S(ValueArity.Min)} expected but '{ValueCount}' value{S(ValueCount)} provided.");
+            throw ParserErrors.VeryFewValue.ToException(ValueArity.Min, ValueCount);
         }
 
         if (ValueCount > ValueArity.Max)
         {
-            throw new Exception($"At most '{ValueArity.Max}' value{S(ValueArity.Max)} expected but '{ValueCount}' value{S(ValueCount)} provided.");
+            throw ParserErrors.TooManyValue.ToException(ValueArity.Max, ValueCount);
         }
     }
 
     public virtual void Clear()
     {
         IsValid = false;
-    }
-
-    protected static string S(int value)
-    {
-        return value < 2 ? " was" : "s were";
     }
 
     protected void ParserInitializedGuard()
@@ -150,5 +145,4 @@ internal abstract class BaseOption : IBaseOption
 
         throw BuilderErrors.CannotBeModified.WithName(KeyProperty.Name).ToException();
     }
-
 }

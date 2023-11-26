@@ -38,19 +38,7 @@ internal sealed class ArgumentParser<TOptions>
 
     public TOptions Parse(string[] arguments)
     {
-        ClearOptions();
-
-        var tokens = PrepareTokens(arguments);
-
-        ParseOptions(tokens);
-
-        ValidateOptions(tokens);
-
-        BindOptionsToAttributes();
-
-        AutoPrintHelpText();
-
-        AutoPrintErrorText();
+        ParseTokens(arguments);
 
         return _appOptions;
     }

@@ -206,7 +206,7 @@ internal static class AliasExtensions
             return null;
 
         if (token.Length < 3)
-            throw new Exception($"Invalid token '{token}' found!");
+            throw ParserErrors.InvalidToken.ToException(token);
 
         foreach (var alias in aliases)
         {
@@ -227,7 +227,7 @@ internal static class AliasExtensions
             if (prefixRules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
             {
                 if (alias.Length < 2)
-                    throw new Exception($"Double dash '--' is not allowed with short aliases! Invalid token: {token}");
+                    throw ParserErrors.InvalidDoubleDashToken.ToException(token);
 
                 // allow only --opt
                 if (token.Length == alias.Length + 2)
@@ -238,10 +238,10 @@ internal static class AliasExtensions
                     return token[..(alias.Length + 2)];
             }
 
-            throw new Exception($"Invalid double dash alias '{alias}' usage! Token: {token}");
+            break;
         }
 
-        throw new Exception($"Unknown double dash alias token '{token}' found!");
+        throw ParserErrors.UnknownDoubleDashToken.ToException(token);
     }
 
     private static string? CheckSingleDashAlias(
@@ -255,7 +255,7 @@ internal static class AliasExtensions
             return null;
 
         if (token.Length < 2)
-            throw new Exception($"Invalid token '{token}' found!");
+            throw ParserErrors.InvalidToken.ToException(token);
 
         if (!char.IsAsciiLetter(token[1]) && !_allowedAliasSymbols.Contains(token[1]))
             return null;
@@ -283,7 +283,7 @@ internal static class AliasExtensions
             if (prefixRules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
             {
                 if (alias.Length > 1)
-                    throw new Exception($"Single dash '-' is not allowed with long aliases! Invalid token: {token}");
+                    throw ParserErrors.InvalidSingleDashToken.ToException(token);
 
                 // allow only -o
                 if (token.Length == 2)
@@ -298,10 +298,10 @@ internal static class AliasExtensions
                     return token[..2];
             }
 
-            throw new Exception($"Invalid single dash alias '{alias}' usage! Token: {token}");
+            break;
         }
 
-        throw new Exception($"Unknown single dash alias token '{token}' found!");
+        throw ParserErrors.UnknownSingleDashToken.ToException(token);
     }
 
     private static string? CheckForwardSlashAlias(
@@ -315,7 +315,7 @@ internal static class AliasExtensions
             return null;
 
         if (token.Length < 2)
-            throw new Exception($"Invalid token '{token}' found!");
+            throw ParserErrors.InvalidToken.ToException(token);
 
         foreach (var alias in aliases)
         {
@@ -330,10 +330,10 @@ internal static class AliasExtensions
             if (token.Length > alias.Length + 2 && aliasRules.GetSymbols().Any(s => token[alias.Length + 1] == s))
                 return token[..(alias.Length + 1)];
 
-            throw new Exception($"Invalid forward slash alias '{alias}' usage! Token: {token}");
+            break;
         }
 
-        throw new Exception($"Unknown forward slash token '{token}' found!");
+        throw ParserErrors.UnknownForwardSlashToken.ToException(token);
     }
 
     private static bool IsAliasAllowed(string alias, OptionPrefixRules rules)

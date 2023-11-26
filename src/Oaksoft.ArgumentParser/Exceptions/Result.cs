@@ -1,6 +1,6 @@
 ﻿namespace Oaksoft.ArgumentParser.Exceptions;
 
-internal class Result<TValue>
+internal sealed class Result<TValue>
 {
     public TValue? Value { get; }
 
@@ -8,14 +8,14 @@ internal class Result<TValue>
 
     public bool Success => Error is null;
 
-    private Result(TValue value)
-    {
-        Value = value;
-    }
-
     private Result(ErrorMessage? error)
     {
         Error = error;
+    }
+
+    private Result(TValue value)
+    {
+        Value = value;
     }
 
     public TValue GetOrThrow()
@@ -23,24 +23,17 @@ internal class Result<TValue>
         if (Success)
             return Value!;
 
-        throw new OptionBuilderException(Error!);
+        throw Error!.ToException();
     }
 
     public TValue GetOrThrow(string optionName)
     {
-        if (Success)
-            return Value!;
+        Error?.WithName(optionName);
 
-        Error!.WithName(optionName);
-
-        throw new OptionBuilderException(Error!);
+        return GetOrThrow();
     }
 
-    public static Result<TValue> Create(TValue value) => new(value);
+    public static implicit operator Result<TValue>(TValue value) => new(value);
 
-    public static Result<TValue> Create(ErrorMessage error) => new(error);
-
-    public static implicit operator Result<TValue>(TValue value) => Create(value);
-
-    public static implicit operator Result<TValue>(ErrorMessage error) => Create(error);
+    public static implicit operator Result<TValue>(ErrorMessage error) => new(error);
 }

@@ -168,19 +168,19 @@ internal abstract class BaseAllowedValuesOption<TValue>
 
         foreach (var predicate in _predicates)
         {
-            for (var index = 0; index < resultValues.Count; index++)
+            for (var i = 0; i < resultValues.Count; ++i)
             {
-                if (predicate(resultValues[index]))
+                if (predicate(resultValues[i]))
                     continue;
 
-                throw new Exception($"Value '{_inputValues[index]}' is not validated by the predicate callback.");
+                throw ParserErrors.PredicateFailure.ToException(_inputValues[i]);
             }
         }
 
         return resultValues;
     }
 
-    private void ValidateByAllowedValues(List<TValue> inputValues)
+    private void ValidateByAllowedValues(IReadOnlyList<TValue> inputValues)
     {
         if (_allowedValues.Count <= 0)
             return;
@@ -189,24 +189,26 @@ internal abstract class BaseAllowedValuesOption<TValue>
         {
             var flag = _parser!.CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
-            foreach (var inputValue in inputValues.Cast<string>())
+            for (var i = 0; i < inputValues.Count; ++i)
             {
+                var inputValue = inputValues[i] as string;
                 if (_allowedValues.Cast<string>().Any(a => a.Equals(inputValue, flag)))
                     continue;
 
-                var values = string.Join('|', _allowedValues);
-                throw new Exception($"Option value '{inputValue}' not recognized. Must be one of: {values}");
+                var values = string.Join(", ", _allowedValues);
+                throw ParserErrors.ValueMustBeOneOf.ToException(_inputValues[i], values);
             }
         }
         else
         {
-            foreach (var inputValue in inputValues)
+            for (var i = 0; i < inputValues.Count; ++i)
             {
+                var inputValue = inputValues[i];
                 if (_allowedValues.Any(a => a.Equals(inputValue)))
                     continue;
 
-                var values = string.Join('|', _allowedValues);
-                throw new Exception($"Option value '{inputValue}' not recognized. Must be one of: {values}");
+                var values = string.Join(", ", _allowedValues);
+                throw ParserErrors.ValueMustBeOneOf.ToException(_inputValues[i], values);
             }
         }
     }
@@ -257,7 +259,7 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
         }
     }
 
-    protected virtual List<TValue> GetValidatedValues()
+protected virtual List<TValue> GetValidatedValues()
     {
         var resultValues = new List<TValue>();
         if (_tryParseValuesCallback is not null)
@@ -265,14 +267,19 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
             resultValues.AddRange(_tryParseValuesCallback(_inputValues));
 
             if (resultValues == null || resultValues.Count < _inputValues.Count)
-                throw new Exception("Option values cannot be validated.");
+            {
+                var values = string.Join(", ", _inputValues);
+                throw ParserErrors.InvalidOptionValues.ToException(values);
+            }
         }
         else if (_tryParseValueCallback is not null)
         {
             foreach (var inputValue in _inputValues)
             {
                 if (!_tryParseValueCallback(inputValue, out var result))
-                    throw new Exception($"Invalid input value found!. Value: {inputValue}");
+                {
+                    throw ParserErrors.InvalidOptionValue.ToException(inputValue);
+                }
 
                 resultValues.Add(result);
             }

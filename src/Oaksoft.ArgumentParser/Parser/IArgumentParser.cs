@@ -1,5 +1,6 @@
 ﻿using Oaksoft.ArgumentParser.Definitions;
 using System.Collections.Generic;
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
@@ -18,7 +19,7 @@ public interface IArgumentParser
 
     bool IsValid { get; }
 
-    List<string> Errors { get; }
+    List<IErrorMessage> Errors { get; }
     
     string GetHeaderText();
 

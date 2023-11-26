@@ -24,12 +24,12 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public bool IsValid => _errors.Count < 1;
 
-    public List<string> Errors => _errors.ToList();
+    public List<IErrorMessage> Errors => _errors.ToList();
 
     protected readonly List<BaseOption> _baseOptions;
     protected readonly List<PropertyInfo> _propertyInfos;
 
-    private readonly List<string> _errors;
+    private readonly List<IErrorMessage> _errors;
     private readonly List<string> _allAliases;
 
     protected BaseArgumentParser(
@@ -44,7 +44,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         _baseOptions = new List<BaseOption>();
         _propertyInfos = new List<PropertyInfo>();
 
-        _errors = new List<string>();
+        _errors = new List<IErrorMessage>();
         _allAliases = new List<string>();
     }
 
@@ -84,10 +84,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         return BuildErrorText(coloring).ToString();
     }
 
-    protected abstract void ClearOptionPropertiesByReflection();
-
-    protected abstract void UpdateOptionPropertiesByReflection(BaseOption option);
-
     protected void InitializeOptions()
     {
         var names = new List<string>();
@@ -107,6 +103,35 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         _allAliases.AddRange(aliases.OrderByDescending(a => a.Length));
     }
+
+    protected void ParseTokens(string[] arguments)
+    {
+        try
+        {
+            ClearOptions();
+
+            var tokens = PrepareTokens(arguments);
+
+            ParseOptions(tokens);
+
+            ValidateOptions(tokens);
+
+            BindOptionsToAttributes();
+
+            AutoPrintHelpText();
+
+            AutoPrintErrorText();
+        }
+        catch (Exception ex)
+        {
+            var error = new ErrorInfo($"{ParserErrors.Name}.UnexpectedError", ex.Message);
+            _errors.Add(error.With());
+        }
+    }
+
+    protected abstract void ClearOptionPropertiesByReflection();
+
+    protected abstract void UpdateOptionPropertiesByReflection(BaseOption option);
 
     private void ValidateCustomNames(ICollection<string> names, ICollection<string> aliases)
     {
@@ -150,7 +175,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
     }
 
-    protected void ClearOptions()
+    private void ClearOptions()
     {
         _errors.Clear();
 
@@ -162,7 +187,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         ClearOptionPropertiesByReflection();
     }
 
-    protected TokenItem[] PrepareTokens(string[] arguments)
+    private TokenItem[] PrepareTokens(string[] arguments)
     {
         var tokens = arguments
             .Select(a => new TokenItem { Token = a })
@@ -175,9 +200,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 token.ExtractAliasAndValue(
                     _allAliases, CaseSensitive, OptionPrefix, AliasDelimiter);
             }
-            catch (Exception ex)
+            catch (OptionParserException ex)
             {
-                _errors.Add(ex.Message);
+                _errors.Add(ex.Error);
                 token.Invalid = true;
             }
         }
@@ -185,7 +210,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         return tokens;
     }
 
-    protected void ParseOptions(TokenItem[] tokens)
+    private void ParseOptions(TokenItem[] tokens)
     {
         var orderedOptions = new List<BaseOption>();
         orderedOptions.AddRange(_baseOptions.Where(o => o is ISwitchOption));
@@ -199,14 +224,14 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 option.Parse(tokens);
             }
-            catch (Exception ex)
+            catch (OptionParserException ex)
             {
-                _errors.Add(BuildErrorMessage(option, ex));
+                _errors.Add(ex.Error.WithName(option.Name));
             }
         }
     }
 
-    protected void ValidateOptions(TokenItem[] tokens)
+    private void ValidateOptions(IEnumerable<TokenItem> tokens)
     {
         foreach (var option in _baseOptions)
         {
@@ -214,19 +239,19 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 option.Validate();
             }
-            catch (Exception ex)
+            catch (OptionParserException ex)
             {
-                _errors.Add(BuildErrorMessage(option, ex));
+                _errors.Add(ex.Error.WithName(option.Name));
             }
         }
 
         ValidateHelpToken();
 
         foreach (var token in tokens.Where(s => !s.IsParsed && !s.Invalid))
-            _errors.Add($"Unknown token found. Token: {token.Token}");
+            _errors.Add(ParserErrors.UnknownToken.With(token.Token));
     }
 
-    protected void BindOptionsToAttributes()
+    private void BindOptionsToAttributes()
     {
         if (_errors.Count > 0)
             return;
@@ -237,9 +262,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 UpdateOptionPropertiesByReflection(option);
             }
-            catch (Exception ex)
+            catch (OptionParserException ex)
             {
-                _errors.Add(BuildErrorMessage(option, ex));
+                _errors.Add(ex.Error.WithName(option.Name));
             }
         }
     }
@@ -253,7 +278,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         Console.WriteLine();
     }
 
-    protected void AutoPrintHelpText()
+    private void AutoPrintHelpText()
     {
         if (Settings.AutoPrintHelp != true || _errors.Count > 0)
             return;
@@ -268,7 +293,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         Console.WriteLine();
     }
 
-    protected void AutoPrintErrorText()
+    private void AutoPrintErrorText()
     {
         if (Settings.AutoPrintErrors != true || _errors.Count < 1)
             return;
@@ -344,10 +369,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
         sb.Pastel("     Error(s)!", ConsoleColor.Red);
         sb.AppendLine();
 
-        for (int i = 0; i < _errors.Count; i++)
+        for (var i = 0; i < _errors.Count; ++i)
         {
             sb.Pastel($"{(i + 1):00} - ", ConsoleColor.DarkYellow);
-            sb.AppendLine(_errors[i]);
+            sb.AppendLine(_errors[i].Message);
         }
 
         return sb;
@@ -355,16 +380,16 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void ValidateHelpToken()
     {
-        var helpOption = _baseOptions.OfType<SwitchOption>().
+        var help = _baseOptions.OfType<SwitchOption>().
             First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
 
-        if (IsOnlyOption(helpOption))
+        if (IsOnlyOption(help))
         {
             _errors.Clear();
         }
-        else if (helpOption.OptionTokens.Count > 0)
+        else if (help.OptionTokens.Count > 0)
         {
-            _errors.Add($"{helpOption.Name} ({helpOption.ShortAlias}) option cannot be combined with other options.");
+            _errors.Add(ParserErrors.InvalidHelpUsage.With(help.ShortAlias).WithName(help.Name));
         }
     }
 
@@ -451,16 +476,5 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         aliases.AddRange(validAliases);
         option.SetValidAliases(validAliases);
-    }
-
-    private static string BuildErrorMessage(BaseOption option, Exception ex)
-    {
-        var namedOption = option as INamedOption;
-        var name = namedOption?.Aliases.FirstOrDefault() ?? option.Name;
-        if (string.IsNullOrWhiteSpace(name))
-            name = option.KeyProperty.Name;
-
-        var comma = ex.Message.EndsWith(".") ? string.Empty : ",";
-        return $"{ex.Message}{comma} Option Name: {name}";
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Oaksoft.ArgumentParser.Exceptions;
+﻿namespace Oaksoft.ArgumentParser.Exceptions;
 
 public record ErrorInfo(string Code, string Format);
 

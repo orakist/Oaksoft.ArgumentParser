@@ -1,3 +1,4 @@
+using Oaksoft.ArgumentParser.Exceptions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
@@ -77,8 +78,8 @@ public class SwitchOptionTests
 
         // Assert
         sut.IsValid.ShouldBeFalse();
-        sut.Errors.Count.ShouldBe(1);
-        sut.Errors[0].StartsWith("At least '1' option was expected").ShouldBeTrue();
+        sut.Errors.ShouldHaveSingleItem();
+        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.VeryFewOption.Code);
         result.NullValue.ShouldBe(null);
         result.Value.ShouldBe(false);
     }

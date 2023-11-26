@@ -7,7 +7,14 @@ internal static class ErrorInfoExtensions
     public static ErrorMessage With(this ErrorInfo error, params object[] values)
     {
         if (error.Code.StartsWith(BuilderErrors.Name))
+        {
             return new BuilderError(error).With(values);
+        }
+
+        if (error.Code.StartsWith(ParserErrors.Name))
+        {
+            return new ParserError(error).With(values);
+        }
 
         throw new NotSupportedException();
     }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Oaksoft.ArgumentParser.Exceptions;
+namespace Oaksoft.ArgumentParser.Errors.Parser;
 
 internal class OptionParserException : Exception
 {

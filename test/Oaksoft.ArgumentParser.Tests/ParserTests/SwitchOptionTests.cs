@@ -1,4 +1,4 @@
-using Oaksoft.ArgumentParser.Exceptions;
+using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;

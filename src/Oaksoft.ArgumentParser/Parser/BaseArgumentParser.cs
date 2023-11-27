@@ -5,7 +5,9 @@ using System.Reflection;
 using System.Text;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
-using Oaksoft.ArgumentParser.Exceptions;
+using Oaksoft.ArgumentParser.Errors;
+using Oaksoft.ArgumentParser.Errors.Builder;
+using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
@@ -445,7 +447,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 .ToException(option.KeyProperty.Name);
         }
 
-        option.SetValidName(option.KeyProperty.Name);
+        option.SetName(option.KeyProperty.Name);
         names.Add(option.KeyProperty.Name);
     }
 

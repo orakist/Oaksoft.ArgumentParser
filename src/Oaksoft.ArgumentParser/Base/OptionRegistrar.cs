@@ -4,7 +4,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Definitions;
-using Oaksoft.ArgumentParser.Exceptions;
+using Oaksoft.ArgumentParser.Errors;
+using Oaksoft.ArgumentParser.Errors.Builder;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Parser;
 

@@ -1,19 +1,21 @@
 ﻿using System;
+using Oaksoft.ArgumentParser.Errors.Builder;
+using Oaksoft.ArgumentParser.Errors.Parser;
 
-namespace Oaksoft.ArgumentParser.Exceptions;
+namespace Oaksoft.ArgumentParser.Errors;
 
-internal static class ErrorInfoExtensions
+internal static class ErrorExtensions
 {
     public static ErrorMessage With(this ErrorInfo error, params object[] values)
     {
         if (error.Code.StartsWith(BuilderErrors.Name))
         {
-            return new BuilderError(error).With(values);
+            return new BuilderErrorMessage(error).With(values);
         }
 
         if (error.Code.StartsWith(ParserErrors.Name))
         {
-            return new ParserError(error).With(values);
+            return new ParserErrorMessage(error).With(values);
         }
 
         throw new NotSupportedException();

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Oaksoft.ArgumentParser.Exceptions;
+namespace Oaksoft.ArgumentParser.Errors;
 
 internal abstract class ErrorMessage : IErrorMessage
 {
@@ -49,33 +49,5 @@ internal abstract class ErrorMessage : IErrorMessage
         _message = $"{message}{comma} Option: {OptionName}";
 
         return _message;
-    }
-}
-
-internal sealed class BuilderError : ErrorMessage
-{
-    public BuilderError(ErrorInfo error)
-        : base(error)
-    {
-    }
-
-    public override Exception ToException(params object[] values)
-    {
-        With(values);
-        return new OptionBuilderException(this);
-    }
-}
-
-internal sealed class ParserError : ErrorMessage
-{
-    public ParserError(ErrorInfo error)
-        : base(error)
-    {
-    }
-
-    public override Exception ToException(params object[] values)
-    {
-        With(values);
-        return new OptionParserException(this);
     }
 }

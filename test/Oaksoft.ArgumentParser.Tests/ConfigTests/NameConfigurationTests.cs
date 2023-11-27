@@ -1,4 +1,4 @@
-using Oaksoft.ArgumentParser.Exceptions;
+using Oaksoft.ArgumentParser.Errors.Builder;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.TestModels;
@@ -168,6 +168,28 @@ public class NameConfigurationTests
         info.Values.ShouldContain(name);
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
         var message = string.Format(info.Error.Format, name);
+        exception.Message.ShouldStartWith(message);
+    }
+
+    [Fact]
+    public void ShouldThrowException_WhenReservedNameUsed()
+    {
+        // Arrange
+        const string name = "Help";
+        const string reservedNames = "'Help'";
+        var sut = CommandLine.CreateParser<IntAppOptions>();
+
+        // Act
+        var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value, o => o.WithName(name)));
+        var info = exception.Error;
+
+        // Assert
+        info.Error.Code.ShouldBe(BuilderErrors.ReservedOptionName.Code);
+        info.Values.ShouldNotBeEmpty();
+        info.Values.ShouldContain(name);
+        info.Values.ShouldContain(reservedNames);
+        info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
+        var message = string.Format(info.Error.Format, name, reservedNames);
         exception.Message.ShouldStartWith(message);
     }
 

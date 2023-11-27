@@ -1,4 +1,4 @@
-﻿namespace Oaksoft.ArgumentParser.Exceptions;
+﻿namespace Oaksoft.ArgumentParser.Errors.Parser;
 
 public static class ParserErrors
 {
@@ -51,7 +51,7 @@ public static class ParserErrors
     public static readonly ErrorInfo VeryFewValue = new(
         $"{Name}.{nameof(VeryFewValue)}",
         "At most '{0}' value(s) expected but '{1}' value(s) provided.");
-    
+
     public static readonly ErrorInfo InvalidOptionValues = new(
         $"{Name}.{nameof(InvalidOptionValues)}",
         "Option values '{0}' cannot be validated.");
@@ -63,7 +63,7 @@ public static class ParserErrors
     public static readonly ErrorInfo ValueMustBeOneOf = new(
         $"{Name}.{nameof(ValueMustBeOneOf)}",
         "Option value '{0}' not recognized. Must be one of: {1}");
-    
+
     public static readonly ErrorInfo PredicateFailure = new(
         $"{Name}.{nameof(PredicateFailure)}",
         "Value '{0}' is not validated by the predicate callback.");

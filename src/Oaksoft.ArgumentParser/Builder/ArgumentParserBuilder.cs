@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
-using Oaksoft.ArgumentParser.Exceptions;
+using Oaksoft.ArgumentParser.Errors;
+using Oaksoft.ArgumentParser.Errors.Builder;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Parser;
@@ -171,7 +172,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
             .ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false)
             .GetOrThrow();
         
-        option.SetName("Help");
+        option.SetName(nameof(IApplicationOptions.Help), false);
         option.SetValidAliases(validAliases);
         option.SetDescription("Prints this help information.");
     }

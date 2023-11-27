@@ -1,7 +1,7 @@
 ﻿using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Extensions;
 
-namespace Oaksoft.ArgumentParser.Exceptions;
+namespace Oaksoft.ArgumentParser.Errors.Builder;
 
 public static class BuilderErrors
 {
@@ -54,6 +54,10 @@ public static class BuilderErrors
     public static readonly ErrorInfo NameAlreadyInUse = new(
         $"{Name}.{nameof(NameAlreadyInUse)}",
         "Name '{0}' is already in use! An option name must be unique.");
+
+    public static readonly ErrorInfo ReservedOptionName = new(
+        $"{Name}.{nameof(ReservedOptionName)}",
+        "Invalid name '{0}' found! Reserved option names ({1}) cannot be used.");
 
     public static readonly ErrorInfo InvalidArity = new(
         $"{Name}.{nameof(InvalidArity)}",

@@ -1,4 +1,4 @@
-﻿namespace Oaksoft.ArgumentParser.Exceptions;
+﻿namespace Oaksoft.ArgumentParser.Errors;
 
 internal sealed class Result<TValue>
 {

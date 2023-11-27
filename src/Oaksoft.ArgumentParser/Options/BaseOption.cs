@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Oaksoft.ArgumentParser.Base;
-using Oaksoft.ArgumentParser.Exceptions;
+using Oaksoft.ArgumentParser.Errors;
+using Oaksoft.ArgumentParser.Errors.Builder;
+using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
@@ -48,17 +50,13 @@ internal abstract class BaseOption : IBaseOption
         _parser = parser;
     }
 
-    public void SetName(string name)
+    public void SetName(string name, bool validate = true)
     {
         ParserInitializedGuard();
 
-        Name = name.ValidateName()
-            .GetOrThrow(KeyProperty.Name);
-    }
-
-    public void SetValidName(string name)
-    {
-        Name = name;
+        Name = validate 
+            ? name.ValidateName().GetOrThrow(KeyProperty.Name)
+            : name;
     }
 
     public void SetUsage(string usage)

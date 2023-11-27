@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Oaksoft.ArgumentParser.Exceptions;
+using Oaksoft.ArgumentParser.Errors;
 using Oaksoft.ArgumentParser.Parser;
+using Oaksoft.ArgumentParser.Errors.Builder;
+using Oaksoft.ArgumentParser.Errors.Parser;
 
 namespace Oaksoft.ArgumentParser.Base;
 
@@ -12,6 +14,7 @@ internal static class AliasExtensions
     private static readonly char[] _suggestionTrimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
     private static readonly char[] _allowedAliasSymbols = { '?', '%', '$', '€', '£', '#', '@', '-' };
     private static readonly string[] _reservedAliases = { "h", "?", "help" };
+    private static readonly string[] _reservedOptionNames = { "Help" };
 
     public static Result<string> ValidateName(this string name)
     {
@@ -24,6 +27,12 @@ internal static class AliasExtensions
         if (!name.All(c => char.IsAsciiDigit(c) || char.IsAsciiLetter(c) || c is '_' or '-'))
         {
             return BuilderErrors.InvalidName.With(name);
+        }
+
+        if (_reservedOptionNames.Any(r => r.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        {
+            var names = string.Join(", ", _reservedOptionNames.Select(s => $"'{s}'"));
+            return BuilderErrors.ReservedOptionName.With(name, names);
         }
 
         return string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));

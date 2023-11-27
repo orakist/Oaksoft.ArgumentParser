@@ -1,6 +1,6 @@
 ﻿using Oaksoft.ArgumentParser.Definitions;
 using System.Collections.Generic;
-using Oaksoft.ArgumentParser.Exceptions;
+using Oaksoft.ArgumentParser.Errors;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;

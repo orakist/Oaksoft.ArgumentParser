@@ -1,4 +1,4 @@
-﻿namespace Oaksoft.ArgumentParser.Exceptions;
+﻿namespace Oaksoft.ArgumentParser.Errors;
 
 public record ErrorInfo(string Code, string Format);
 

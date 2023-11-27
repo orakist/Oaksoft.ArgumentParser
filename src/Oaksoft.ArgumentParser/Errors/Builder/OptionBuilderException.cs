@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Oaksoft.ArgumentParser.Exceptions;
+namespace Oaksoft.ArgumentParser.Errors.Builder;
 
 public class OptionBuilderException : Exception
 {

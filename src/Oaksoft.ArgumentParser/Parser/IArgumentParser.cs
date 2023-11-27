@@ -31,7 +31,7 @@ public interface IArgumentParser
 
     IBaseOption? GetOptionByName(string name);
 
-    IBaseOption? GetOptionByAlias(string alias);
+    INamedOption? GetOptionByAlias(string alias);
 }
 
 public interface IArgumentParser<out TOptions> : IArgumentParser

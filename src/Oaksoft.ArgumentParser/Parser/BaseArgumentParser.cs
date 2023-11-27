@@ -63,10 +63,12 @@ internal abstract class BaseArgumentParser : IArgumentParser
                  o.CountProperty != null && o.CountProperty.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 
-    public IBaseOption? GetOptionByAlias(string alias)
+    public INamedOption? GetOptionByAlias(string alias)
     {
-        return _baseOptions.OfType<INamedOption>().FirstOrDefault(
-            o => o.Aliases.Any(a => a.Equals(alias, StringComparison.OrdinalIgnoreCase)));
+        var flag = CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+        return _baseOptions.OfType<INamedOption>()
+            .FirstOrDefault(o => o.Aliases.Any(a => a.Equals(alias, flag)));
     }
 
     public string GetHeaderText()

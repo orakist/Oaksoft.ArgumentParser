@@ -52,10 +52,6 @@ public static class ParserErrors
         $"{Name}.{nameof(VeryFewValue)}",
         "At most '{0}' value(s) expected but '{1}' value(s) provided.");
 
-    public static readonly ErrorInfo InvalidOptionValues = new(
-        $"{Name}.{nameof(InvalidOptionValues)}",
-        "Option values '{0}' cannot be validated.");
-
     public static readonly ErrorInfo InvalidOptionValue = new(
         $"{Name}.{nameof(InvalidOptionValue)}",
         "Invalid option value '{0}' found!");
@@ -66,5 +62,5 @@ public static class ParserErrors
 
     public static readonly ErrorInfo PredicateFailure = new(
         $"{Name}.{nameof(PredicateFailure)}",
-        "Value '{0}' is not validated by the predicate callback.");
+        "At least one value is not validated by the predicate callback. Value(s): {0}");
 }

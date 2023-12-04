@@ -382,90 +382,48 @@ public static partial class OptionExtensions
         ((SequentialValueOption<TValue>)option).AddPredicate(predicate);
         return option;
     }
+
+    public static ISequentialNamedOption<TValue> AddListPredicate<TValue>(this ISequentialNamedOption<TValue> option, Predicate<List<TValue>> predicate)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        ((SequentialNamedOption<TValue>)option).AddListPredicate(predicate);
+        return option;
+    }
+
+    public static ISequentialValueOption<TValue> AddListPredicate<TValue>(this ISequentialValueOption<TValue> option, Predicate<List<TValue>> predicate)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        ((SequentialValueOption<TValue>)option).AddListPredicate(predicate);
+        return option;
+    }
     #endregion
 
     #region Parsing Callbacks Configuration
-    public static IScalarNamedOption<TValue> WithParsingCallbacks<TValue>(this IScalarNamedOption<TValue> option, IParsingCallbacks<TValue> optionCallbacks)
+    public static IScalarNamedOption<TValue> WithTryParseCallback<TValue>(this IScalarNamedOption<TValue> option, TryParse<TValue> callback)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarNamedOption<TValue>)option).SetParsingCallbacks(optionCallbacks);
+        ((ScalarNamedOption<TValue>)option).SetTryParseCallback(callback);
         return option;
     }
 
-    public static ISequentialNamedOption<TValue> WithParsingCallbacks<TValue>(this ISequentialNamedOption<TValue> option, IParsingCallbacks<TValue> optionCallbacks)
+    public static ISequentialNamedOption<TValue> WithTryParseCallback<TValue>(this ISequentialNamedOption<TValue> option, TryParse<TValue> callback)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((SequentialNamedOption<TValue>)option).SetParsingCallbacks(optionCallbacks);
+        ((SequentialNamedOption<TValue>)option).SetTryParseCallback(callback);
         return option;
     }
 
-    public static IScalarValueOption<TValue> WithParsingCallbacks<TValue>(this IScalarValueOption<TValue> option, IParsingCallbacks<TValue> optionCallbacks)
+    public static IScalarValueOption<TValue> WithTryParseCallback<TValue>(this IScalarValueOption<TValue> option, TryParse<TValue> callback)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((ScalarValueOption<TValue>)option).SetParsingCallbacks(optionCallbacks);
-        return option;
-    }
-    
-    public static ISequentialValueOption<TValue> WithParsingCallbacks<TValue>(this ISequentialValueOption<TValue> option, IParsingCallbacks<TValue> optionCallbacks)
-        where TValue : IComparable, IEquatable<TValue>
-    {
-        ((SequentialValueOption<TValue>)option).SetParsingCallbacks(optionCallbacks);
-        return option;
-    }
-    
-    public static IScalarNamedOption<TValue> WithTryParseValueCallback<TValue>(this IScalarNamedOption<TValue> option, TryParse<TValue> callback)
-        where TValue : IComparable, IEquatable<TValue>
-    {
-        ((ScalarNamedOption<TValue>)option).SetTryParseValueCallback(callback);
+        ((ScalarValueOption<TValue>)option).SetTryParseCallback(callback);
         return option;
     }
 
-    public static ISequentialNamedOption<TValue> WithTryParseValueCallback<TValue>(this ISequentialNamedOption<TValue> option, TryParse<TValue> callback)
+    public static ISequentialValueOption<TValue> WithTryParseCallback<TValue>(this ISequentialValueOption<TValue> option, TryParse<TValue> callback)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((SequentialNamedOption<TValue>)option).SetTryParseValueCallback(callback);
-        return option;
-    }
-
-    public static IScalarValueOption<TValue> WithTryParseValueCallback<TValue>(this IScalarValueOption<TValue> option, TryParse<TValue> callback)
-        where TValue : IComparable, IEquatable<TValue>
-    {
-        ((ScalarValueOption<TValue>)option).SetTryParseValueCallback(callback);
-        return option;
-    }
-
-    public static ISequentialValueOption<TValue> WithTryParseValueCallback<TValue>(this ISequentialValueOption<TValue> option, TryParse<TValue> callback)
-        where TValue : IComparable, IEquatable<TValue>
-    {
-        ((SequentialValueOption<TValue>)option).SetTryParseValueCallback(callback);
-        return option;
-    }
-
-    public static IScalarNamedOption<TValue> WithTryParseValuesCallback<TValue>(this IScalarNamedOption<TValue> option, Func<List<string>, List<TValue>> callback)
-        where TValue : IComparable, IEquatable<TValue>
-    {
-        ((ScalarNamedOption<TValue>)option).SetTryParseValuesCallback(callback);
-        return option;
-    }
-
-    public static ISequentialNamedOption<TValue> WithTryParseValuesCallback<TValue>(this ISequentialNamedOption<TValue> option, Func<List<string>, List<TValue>> callback)
-        where TValue : IComparable, IEquatable<TValue>
-    {
-        ((SequentialNamedOption<TValue>)option).SetTryParseValuesCallback(callback);
-        return option;
-    }
-
-    public static IScalarValueOption<TValue> WithTryParseValuesCallback<TValue>(this IScalarValueOption<TValue> option, Func<List<string>, List<TValue>> callback)
-        where TValue : IComparable, IEquatable<TValue>
-    {
-        ((ScalarValueOption<TValue>)option).SetTryParseValuesCallback(callback);
-        return option;
-    }
-
-    public static ISequentialValueOption<TValue> WithTryParseValuesCallback<TValue>(this ISequentialValueOption<TValue> option, Func<List<string>, List<TValue>> callback)
-        where TValue : IComparable, IEquatable<TValue>
-    {
-        ((SequentialValueOption<TValue>)option).SetTryParseValuesCallback(callback);
+        ((SequentialValueOption<TValue>)option).SetTryParseCallback(callback);
         return option;
     }
     #endregion

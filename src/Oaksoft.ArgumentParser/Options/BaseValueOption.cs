@@ -27,7 +27,7 @@ internal abstract class BaseScalarValueOption<TValue>
     {
         base.Validate();
 
-        if (_inputValues.Count <= 0) 
+        if (_inputValues.Count <= 0)
             return;
 
         var resultValues = GetValidatedValues();
@@ -57,11 +57,21 @@ internal abstract class BaseSequentialValueOption<TValue>
 
     protected readonly List<TValue> _resultValues;
 
+    protected readonly List<Predicate<List<TValue>>> _listPredicates;
+
     protected BaseSequentialValueOption(int requiredValueCount, int maximumValueCount)
         : base(requiredValueCount, maximumValueCount)
     {
         _resultValues = new List<TValue>();
+        _listPredicates = new List<Predicate<List<TValue>>>();
         EnableValueTokenSplitting = true;
+    }
+
+    public void AddListPredicate(Predicate<List<TValue>> predicate)
+    {
+        ParserInitializedGuard();
+
+        _listPredicates.Add(predicate);
     }
 
     public void SetEnableValueTokenSplitting(bool enabled)
@@ -79,6 +89,12 @@ internal abstract class BaseSequentialValueOption<TValue>
             return;
 
         var resultValues = GetValidatedValues();
+
+        if (_listPredicates.Any(predicate => !predicate.Invoke(resultValues)))
+        {
+            var values = string.Join(", ", _inputValues);
+            throw ParserErrors.PredicateFailure.ToException(values);
+        }
 
         _resultValues.AddRange(resultValues);
     }
@@ -103,7 +119,7 @@ internal abstract class BaseSequentialValueOption<TValue>
 
     protected IEnumerable<string> SplitByValueDelimiter(string value)
     {
-        if(string.IsNullOrWhiteSpace(value))
+        if (string.IsNullOrWhiteSpace(value))
             yield break;
 
         if (!EnableValueTokenSplitting)
@@ -220,71 +236,45 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
     where TValue : IComparable, IEquatable<TValue>
 {
     private TryParse<TValue>? _tryParseValueCallback;
-    private Func<List<string>, List<TValue>>? _tryParseValuesCallback;
 
     protected BaseValueOption(int requiredValueCount, int maximumValueCount)
         : base(requiredValueCount, maximumValueCount)
     {
     }
 
-    public void SetParsingCallbacks(IParsingCallbacks<TValue> optionCallbacks)
-    {
-        ParserInitializedGuard();
-
-        SetTryParseValueCallbacks(optionCallbacks);
-    }
-
-    public void SetTryParseValueCallback(TryParse<TValue> callback)
+    public void SetTryParseCallback(TryParse<TValue> callback)
     {
         ParserInitializedGuard();
 
         _tryParseValueCallback = callback;
     }
 
-    public void SetTryParseValuesCallback(Func<List<string>, List<TValue>> callback)
-    {
-        ParserInitializedGuard();
-
-        _tryParseValuesCallback = callback;
-    }
-
     public override void Initialize()
     {
         base.Initialize();
 
-        if (DefaultParsingCallbacks<TValue>.Instance.IsValidParser)
-            SetTryParseValueCallbacks(DefaultParsingCallbacks<TValue>.Instance);
+        if (_tryParseValueCallback is null && DefaultTryParseCallback<TValue>.Instance.IsValidParser)
+        {
+            _tryParseValueCallback = DefaultTryParseCallback<TValue>.Instance.TryParse;
+        }
 
-        if (_tryParseValueCallback is null && _tryParseValuesCallback is null)
+        if (_tryParseValueCallback is null)
         {
             throw BuilderErrors.MissingCallback.WithName(Name).ToException(typeof(TValue).Name);
         }
     }
 
-protected virtual List<TValue> GetValidatedValues()
+    protected virtual List<TValue> GetValidatedValues()
     {
         var resultValues = new List<TValue>();
-        if (_tryParseValuesCallback is not null)
+        foreach (var inputValue in _inputValues)
         {
-            resultValues.AddRange(_tryParseValuesCallback(_inputValues));
-
-            if (resultValues == null || resultValues.Count < _inputValues.Count)
+            if (!_tryParseValueCallback!.Invoke(inputValue, out var result))
             {
-                var values = string.Join(", ", _inputValues);
-                throw ParserErrors.InvalidOptionValues.ToException(values);
+                throw ParserErrors.InvalidOptionValue.ToException(inputValue);
             }
-        }
-        else if (_tryParseValueCallback is not null)
-        {
-            foreach (var inputValue in _inputValues)
-            {
-                if (!_tryParseValueCallback(inputValue, out var result))
-                {
-                    throw ParserErrors.InvalidOptionValue.ToException(inputValue);
-                }
 
-                resultValues.Add(result);
-            }
+            resultValues.Add(result);
         }
 
         return resultValues;
@@ -294,20 +284,6 @@ protected virtual List<TValue> GetValidatedValues()
     {
         return _tryParseValueCallback is not null &&
                _tryParseValueCallback(value, out _);
-    }
-
-    private void SetTryParseValueCallbacks(IParsingCallbacks<TValue> optionCallbacks)
-    {
-        var type = optionCallbacks.GetType();
-
-        // only use overriden methods
-        var methodName = nameof(IParsingCallbacks<TValue>.TryParseValue);
-        if (type.GetMethod(methodName)?.DeclaringType == type)
-            _tryParseValueCallback ??= optionCallbacks.TryParseValue;
-
-        methodName = nameof(IParsingCallbacks<TValue>.TryParseValues);
-        if (type.GetMethod(methodName)?.DeclaringType == type)
-            _tryParseValuesCallback ??= optionCallbacks.TryParseValues;
     }
 }
 

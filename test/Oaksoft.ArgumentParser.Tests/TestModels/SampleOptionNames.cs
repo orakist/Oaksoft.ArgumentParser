@@ -2,7 +2,7 @@
 
 namespace Oaksoft.ArgumentParser.Tests.TestModels;
 
-public class SampleOptionNames : IApplicationOptions
+internal class SampleOptionNames : IApplicationOptions
 {
     public int V { get; set; }
 
@@ -12,6 +12,10 @@ public class SampleOptionNames : IApplicationOptions
 
     public List<int>? ValueTestProp { get; set; }
 
+    public Coordinate? PointValue { get; set; }
+
+    public List<Coordinate>? PointValues { get; set; }
+    
     public int ValueTestPropEx { get; set; }
 
     public int ABCValue { get; set; }

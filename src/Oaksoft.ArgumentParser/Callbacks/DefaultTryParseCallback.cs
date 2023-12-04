@@ -3,17 +3,16 @@ using System.Reflection;
 
 namespace Oaksoft.ArgumentParser.Callbacks;
 
-internal sealed class DefaultParsingCallbacks<TValue> : BaseParsingCallbacks<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+internal sealed class DefaultTryParseCallback<TValue>
 {
-    public static readonly DefaultParsingCallbacks<TValue> Instance = new();
+    public static readonly DefaultTryParseCallback<TValue> Instance = new();
 
     public bool IsValidParser { get; }
 
     private readonly bool _isStringType;
     private readonly MethodInfo? _tryParseValueMethod;
 
-    private DefaultParsingCallbacks()
+    private DefaultTryParseCallback()
     {
         var type = typeof(TValue);
 
@@ -31,7 +30,7 @@ internal sealed class DefaultParsingCallbacks<TValue> : BaseParsingCallbacks<TVa
         IsValidParser = true;
     }
 
-    public override bool TryParseValue(string value, out TValue result)
+    public bool TryParse(string value, out TValue result)
     {
         if (_isStringType)
         {

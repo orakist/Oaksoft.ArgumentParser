@@ -251,7 +251,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         ValidateHelpToken();
 
-        foreach (var token in tokens.Where(s => !s.IsParsed && !s.Invalid))
+        foreach (var token in tokens.Where(s => s is { IsParsed: false, Invalid: false }))
             _errors.Add(ParserErrors.UnknownToken.With(token.Token));
     }
 

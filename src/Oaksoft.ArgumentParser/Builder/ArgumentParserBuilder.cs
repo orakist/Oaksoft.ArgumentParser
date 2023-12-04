@@ -113,12 +113,12 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
             throw BuilderErrors.InvalidEnum.ToException(nameof(OptionPrefixRules), (int)OptionPrefix);
         }
 
-        if ((AliasDelimiter & AliasDelimiterRules.All) == 0)
+        if (AliasDelimiter != 0 && (AliasDelimiter & AliasDelimiterRules.All) == 0)
         {
             throw BuilderErrors.InvalidEnum.ToException(nameof(AliasDelimiterRules), (int)AliasDelimiter);
         }
 
-        if ((ValueDelimiter & ValueDelimiterRules.All) == 0)
+        if (ValueDelimiter != 0 && (ValueDelimiter & ValueDelimiterRules.All) == 0)
         {
             throw BuilderErrors.InvalidEnum.ToException(nameof(ValueDelimiterRules), (int)ValueDelimiter);
         }

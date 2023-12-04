@@ -266,7 +266,7 @@ internal static class AliasExtensions
         if (token.Length < 2)
             throw ParserErrors.InvalidToken.ToException(token);
 
-        if (!char.IsAsciiLetter(token[1]) && !_allowedAliasSymbols.Contains(token[1]))
+        if (token[1] == '-' || (!char.IsAsciiLetter(token[1]) && !_allowedAliasSymbols.Contains(token[1])))
             return null;
 
         foreach (var alias in aliases)

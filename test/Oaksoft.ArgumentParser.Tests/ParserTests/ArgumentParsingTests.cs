@@ -12,10 +12,14 @@ public class ArgumentParsingTests
 {
     [Theory]
     [InlineData("-v", "10")]
+    [InlineData("--v", "10")]
+    [InlineData("-value", "10")]
     [InlineData("--value", "10")]
     [InlineData("/v", "10")]
     [InlineData("/value", "10")]
     [InlineData("-c", "15")]
+    [InlineData("--c", "15")]
+    [InlineData("-value-count", "15")]
     [InlineData("--value-count", "15")]
     [InlineData("/c", "15")]
     [InlineData("/value-count", "10")]
@@ -27,7 +31,77 @@ public class ArgumentParsingTests
     [InlineData("--value", "10", "-c", "15")]
     [InlineData("/v", "10", "/value-count", "15")]
     [InlineData("--value", "10", "/c", "15")]
-    public void ShouldParseScalar_WhenAliasArgumentsValid_WithoutDelimiter(params string[] args)
+    [InlineData("--v", "10", "--c", "15")]
+    [InlineData("--c", "15", "--v", "10")]
+    [InlineData("-value", "10", "-value-count", "15")]
+    [InlineData("-value-count", "15", "-value", "10")]
+    [InlineData("--v", "10", "-value-count", "15")]
+    [InlineData("-value", "10", "--c", "15")]
+    public void ScalarNamedOption_TestAnyOptionPrefixRules(params string[] args)
+    {
+        foreach (var prefixRule in TestExtensions.AllPrefixRules)
+        {
+            // Arrange
+            var sut = CommandLine.CreateParser<IntAppOptions>(prefixRule, 0)
+                .AddNamedOption(s => s.Value)
+                .AddNamedOption(s => s.ValueCount)
+                .Build();
+
+            // Act
+            sut.Parse(args);
+            var isFirstValid = prefixRule.IsValidAlias(args[0]);
+            var isSecondValid = args.Length < 3 || prefixRule.IsValidAlias(args[2]);
+
+            // Assert
+            sut.IsValid.ShouldBe(isFirstValid && isSecondValid);
+
+            if (!sut.IsValid)
+            {
+                sut.Errors.ShouldNotBeEmpty();
+                var count = (isFirstValid ? 0 : 2) + (isSecondValid ? 0 : 2);
+                sut.Errors.Count.ShouldBe(count);
+            }
+
+            if (isFirstValid)
+            {
+                var option = sut.GetOptionByAlias(args[0]);
+                option.ShouldNotBeNull();
+                option.OptionTokens.ShouldHaveSingleItem();
+                option.OptionTokens.ShouldContain(args[0]);
+                var valueOption = option as IValueOption;
+                valueOption.ShouldNotBeNull();
+                valueOption.ValueTokens.ShouldHaveSingleItem();
+                valueOption.ValueTokens.ShouldContain(args[1]);
+            }
+
+            if (args.Length < 3)
+                return;
+
+            if (isSecondValid)
+            {
+                var option = sut.GetOptionByAlias(args[2]);
+                option.ShouldNotBeNull();
+                option.OptionTokens.ShouldHaveSingleItem();
+                option.OptionTokens.ShouldContain(args[2]);
+                var valueOption = option as IValueOption;
+                valueOption.ShouldNotBeNull();
+                valueOption.ValueTokens.ShouldHaveSingleItem();
+                valueOption.ValueTokens.ShouldContain(args[3]);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData("--v", "10")]
+    [InlineData("--c", "15")]
+    [InlineData("-value-count", "15")]
+    [InlineData("--v", "10", "--c", "15")]
+    [InlineData("--c", "15", "--v", "10")]
+    [InlineData("-value", "10", "-value-count", "15")]
+    [InlineData("-value-count", "15", "-value", "10")]
+    [InlineData("--v", "10", "-value-count", "15")]
+    [InlineData("-value", "10", "--c", "15")]
+    public void ScalarNamedOption_ShouldNotParse_InvalidArguments_WithDefaultRules(params string[] args)
     {
         // Arrange
         var sut = CommandLine.CreateParser<IntAppOptions>()
@@ -39,28 +113,19 @@ public class ArgumentParsingTests
         sut.Parse(args);
 
         // Assert
-        sut.IsValid.ShouldBeTrue();
+        sut.IsValid.ShouldBeFalse();
+        sut.Errors.ShouldNotBeEmpty();
 
-        var option = sut.GetOptionByAlias(args[0]);
-        option.ShouldNotBeNull();
-        option.OptionTokens.ShouldHaveSingleItem();
-        option.OptionTokens.ShouldContain(args[0]);
-        var valueOption = option as IValueOption;
-        valueOption.ShouldNotBeNull();
-        valueOption.ValueTokens.ShouldHaveSingleItem();
-        valueOption.ValueTokens.ShouldContain(args[1]);
+        var isDoubleDash = args[0].StartsWith("--");
+        sut.Errors[0].Error.Code.ShouldBe(isDoubleDash ? ParserErrors.InvalidDoubleDashToken.Code : ParserErrors.InvalidSingleDashToken.Code);
+        sut.Errors[0].Message.ShouldBe(string.Format(sut.Errors[0].Error.Format, args[0]));
 
         if (args.Length < 3)
             return;
 
-        option = sut.GetOptionByAlias(args[2]);
-        option.ShouldNotBeNull();
-        option.OptionTokens.ShouldHaveSingleItem();
-        option.OptionTokens.ShouldContain(args[2]);
-        valueOption = option as IValueOption;
-        valueOption.ShouldNotBeNull();
-        valueOption.ValueTokens.ShouldHaveSingleItem();
-        valueOption.ValueTokens.ShouldContain(args[3]);
+        isDoubleDash = args[2].StartsWith("--");
+        sut.Errors[1].Error.Code.ShouldBe(isDoubleDash ? ParserErrors.InvalidDoubleDashToken.Code : ParserErrors.InvalidSingleDashToken.Code);
+        sut.Errors[1].Message.ShouldBe(string.Format(sut.Errors[1].Error.Format, args[2]));
     }
 
     [Theory]
@@ -110,43 +175,6 @@ public class ArgumentParsingTests
         valueOption.ValueTokens.ShouldContain(args[3]);
     }
 
-    [Theory]
-    [InlineData("--v", "10")]
-    [InlineData("-value", "10")]
-    [InlineData("--c", "15")]
-    [InlineData("-value-count", "15")]
-    [InlineData("--v", "10", "--c", "15")]
-    [InlineData("--c", "15", "--v", "10")]
-    [InlineData("-value", "10", "-value-count", "15")]
-    [InlineData("-value-count", "15", "-value", "10")]
-    [InlineData("--v", "10", "-value-count", "15")]
-    [InlineData("-value", "10", "--c", "15")]
-    public void ShouldNotParseScalar_WhenAliasArgumentsInvalid_WithDefaultPrefixRules(params string[] args)
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Value)
-            .AddNamedOption(s => s.ValueCount)
-            .Build();
-
-        // Act
-        sut.Parse(args);
-
-        // Assert
-        sut.IsValid.ShouldBeFalse();
-        sut.Errors.ShouldNotBeEmpty();
-
-        var isDoubleDash = args[0].StartsWith("--");
-        sut.Errors[0].Error.Code.ShouldBe(isDoubleDash ? ParserErrors.InvalidDoubleDashToken.Code : ParserErrors.InvalidSingleDashToken.Code);
-        sut.Errors[0].Message.ShouldBe(string.Format(sut.Errors[0].Error.Format, args[0]));
-
-        if (args.Length < 3)
-            return;
-
-        isDoubleDash = args[2].StartsWith("--");
-        sut.Errors[1].Error.Code.ShouldBe(isDoubleDash ? ParserErrors.InvalidDoubleDashToken.Code : ParserErrors.InvalidSingleDashToken.Code);
-        sut.Errors[1].Message.ShouldBe(string.Format(sut.Errors[1].Error.Format, args[2]));
-    }
 
     [Theory]
     [InlineData("--v:10")]
@@ -159,7 +187,8 @@ public class ArgumentParsingTests
     [InlineData("-value-count:15", "-value:10")]
     public void ShouldParseScalar_WhenAliasArgumentsValid_WithAllPrefixRulesAndColonDelimiter(params string[] args)
     {
-        var sut = CommandLine.CreateParser<IntAppOptions>(OptionPrefixRules.All);
+        var sut = CommandLine.CreateParser<IntAppOptions>(
+            OptionPrefixRules.All, AliasDelimiterRules.AllowColonSymbol);
         TestAliasDelimiter(sut, args, ':');
     }
 
@@ -183,7 +212,8 @@ public class ArgumentParsingTests
     [InlineData("--value:10", "/c:15")]
     public void ShouldParseScalar_WhenAliasArgumentsValid_WithColonDelimiter(params string[] args)
     {
-        var sut = CommandLine.CreateParser<IntAppOptions>();
+        var sut = CommandLine.CreateParser<IntAppOptions>(
+            aliasDelimiter: AliasDelimiterRules.AllowColonSymbol);
         TestAliasDelimiter(sut, args, ':');
     }
 
@@ -206,7 +236,8 @@ public class ArgumentParsingTests
     [InlineData("--value=10", "/c=15")]
     public void ShouldParseScalar_WhenAliasArgumentsValid_WithEqualsDelimiter(params string[] args)
     {
-        var sut = CommandLine.CreateParser<IntAppOptions>();
+        var sut = CommandLine.CreateParser<IntAppOptions>(
+            aliasDelimiter: AliasDelimiterRules.AllowEqualSymbol);
         TestAliasDelimiter(sut, args, '=');
     }
 
@@ -229,7 +260,8 @@ public class ArgumentParsingTests
     [InlineData("--value 10", "/c 15")]
     public void ShouldParseScalar_WhenAliasArgumentsValid_WithSpaceDelimiter(params string[] args)
     {
-        var sut = CommandLine.CreateParser<IntAppOptions>(aliasDelimiter: AliasDelimiterRules.AllowWhitespace);
+        var sut = CommandLine.CreateParser<IntAppOptions>(
+            aliasDelimiter: AliasDelimiterRules.AllowWhitespace);
         TestAliasDelimiter(sut, args, ' ');
     }
 
@@ -295,37 +327,8 @@ public class ArgumentParsingTests
     public void ShouldParseScalar_WhenAliasArgumentsValid_WithOmittingDelimiter(params string[] args)
     {
         // Arrange
-        var sut = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Value)
-            .AddNamedOption(s => s.ValueCount)
-            .Build();
-
-        // Act
-        sut.Parse(args);
-
-        // Assert
-        foreach (var arg in args)
-        {
-            var option = sut.GetOptionByAlias(arg[..2]);
-            option.ShouldNotBeNull();
-            option.OptionTokens.ShouldHaveSingleItem();
-            option.OptionTokens.ShouldContain(arg[..2]);
-            var valueOption = option as IValueOption;
-            valueOption.ShouldNotBeNull();
-            valueOption.ValueTokens.ShouldHaveSingleItem();
-            valueOption.ValueTokens.ShouldContain(arg[2..]);
-        }
-    }
-
-    [Theory]
-    [InlineData("-v10")]
-    [InlineData("-c15")]
-    [InlineData("-v10", "-c15")]
-    [InlineData("-c15", "-v10")]
-    public void ShouldParseScalar_WhenAliasArgumentsValid_WithOmittingDelimiterAndAllPrefixes(params string[] args)
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<IntAppOptions>(OptionPrefixRules.All)
+        var sut = CommandLine.CreateParser<IntAppOptions>(
+                aliasDelimiter: AliasDelimiterRules.AllowOmittingDelimiter)
             .AddNamedOption(s => s.Value)
             .AddNamedOption(s => s.ValueCount)
             .Build();

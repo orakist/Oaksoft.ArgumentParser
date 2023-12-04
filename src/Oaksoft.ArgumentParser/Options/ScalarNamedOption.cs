@@ -67,8 +67,11 @@ internal class ScalarNamedOption<TValue>
     {
         ParserInitializedGuard();
 
-        var values = aliases.Select(s => s.ValidateAlias().GetOrThrow(KeyProperty.Name));
-        _aliases.AddRange(values.Distinct());
+        foreach (var alias in aliases.Select(s => s.ValidateAlias().GetOrThrow(KeyProperty.Name)))
+        {
+            if(!_aliases.Contains(alias))
+                _aliases.Add(alias);
+        }
     }
 
     public override void SetValidAliases(IEnumerable<string> aliases)

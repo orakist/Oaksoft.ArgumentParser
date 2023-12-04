@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -109,6 +110,53 @@ internal abstract class BaseSequentialValueOption<TValue>
         {
             keyProperty.SetValue(appOptions, _resultValues.ToArray());
         }
+        else // if nullable generic TValue
+        {
+            keyProperty.SetValue(appOptions, CreateNullableListOrArray(keyProperty));
+        }
+    }
+
+    private object? CreateNullableListOrArray(PropertyInfo keyProperty)
+    {
+        Type itemType;
+        if (keyProperty.PropertyType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+        {
+            itemType = keyProperty.PropertyType.GetGenericArguments()[0];
+            if (!itemType.IsAssignableFrom(typeof(TValue)))
+            {
+                return null;
+            }
+        }
+        else
+        {
+            return null;
+        }
+
+        // first try list creation
+        var listType = typeof(List<>);
+        var constructedListType = listType.MakeGenericType(itemType);
+        if (keyProperty.PropertyType.IsAssignableFrom(constructedListType))
+        {
+            var listInstance = (IList)Activator.CreateInstance(constructedListType)!;
+
+            foreach (var resultValue in _resultValues)
+            {
+                listInstance.Add(resultValue);
+            }
+
+            return listInstance;
+        }
+
+        var arrType = Array.CreateInstance(itemType, _resultValues.Count);
+        if(!keyProperty.PropertyType.IsInstanceOfType(arrType))
+            return false;
+
+        for (var index = 0; index < _resultValues.Count; ++index)
+        {
+            arrType.SetValue(_resultValues[index], index);
+        }
+
+        return arrType;
     }
 
     public override void Clear()

@@ -218,6 +218,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         var orderedOptions = new List<BaseOption>();
         orderedOptions.AddRange(_baseOptions.Where(o => o is ISwitchOption));
+        orderedOptions.AddRange(_baseOptions.Where(o => o is ICounterOption));
         orderedOptions.AddRange(_baseOptions.Where(o => o is IScalarNamedOption and not ISwitchOption));
         orderedOptions.AddRange(_baseOptions.Where(o => o is ISequentialNamedOption));
         orderedOptions.AddRange(_baseOptions.Where(o => o is not INamedOption));

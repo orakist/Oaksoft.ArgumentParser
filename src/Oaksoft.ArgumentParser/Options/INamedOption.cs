@@ -25,7 +25,7 @@ public interface ICounterOption : INamedOption, IValueOption
 {
 }
 
-public interface ISwitchOption : IScalarNamedOption, IScalarValueOption<bool>, IHaveDefaultValue<bool>
+public interface ISwitchOption : IScalarNamedOption, IHaveResultValue<bool>, IHaveDefaultValue<bool>
 {
 }
 

@@ -11,7 +11,7 @@ public class OptionRegistrationTests
     public void ShouldThrowException_WhenTryToAddReservedProperty()
     {
         // Arrange
-        var sut = CommandLine.CreateParser<IntAppOptions>()
+        var sut = CommandLine.CreateParser<SampleOptionNames>()
             .AddSwitchOption(s => s.Help);
 
         // Act
@@ -21,9 +21,9 @@ public class OptionRegistrationTests
         // Assert
         info.Error.Code.ShouldBe(BuilderErrors.ReservedProperty.Code);
         info.Values.ShouldHaveSingleItem();
-        info.Values.ShouldContain(nameof(IntAppOptions.Help));
+        info.Values.ShouldContain(nameof(SampleOptionNames.Help));
         info.OptionName.ShouldBeNull();
-        var message = string.Format(info.Error.Format, nameof(IntAppOptions.Help));
+        var message = string.Format(info.Error.Format, nameof(SampleOptionNames.Help));
         exception.Message.ShouldBe(message);
     }
 }

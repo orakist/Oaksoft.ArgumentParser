@@ -5,14 +5,12 @@ using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Errors;
 using Oaksoft.ArgumentParser.Errors.Builder;
-using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Builder;
 
 internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<TOptions>
-    where TOptions : IApplicationOptions
 {
     public bool CaseSensitive { get; }
 
@@ -66,7 +64,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         return _baseOptions;
     }
 
-    public TOptions GetAppOptions()
+    public TOptions GetApplicationOptions()
     {
         return _appOptions;
     }
@@ -158,23 +156,46 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
     private void BuildDefaultOptions()
     {
-        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help)))
+        // add help option
+        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help)))
         {
-            throw BuilderErrors.ReservedProperty.ToException(nameof(IApplicationOptions.Help));
+            throw BuilderErrors.ReservedProperty.ToException(nameof(IBuiltInOptions.Help));
         }
 
-        this.AddSwitchOption(p => p.Help);
+        var properties = typeof(BuiltInOptions).GetProperties();
+        var keyProperty = properties.First(p => p.Name == nameof(IBuiltInOptions.Help));
+        this.RegisterSwitchOption<TOptions>(keyProperty, false);
 
-        var aliases = new[] { "h", "?", "help" };
-        var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
+        var aliases = new[] { "h", "?", "Help" };
+        var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help));
 
         var validAliases = aliases
             .ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false)
             .GetOrThrow();
         
-        option.SetName(nameof(IApplicationOptions.Help), false);
+        option.SetName(nameof(IBuiltInOptions.Help), false);
         option.SetValidAliases(validAliases);
-        option.SetDescription("Prints this help information.");
+        option.SetDescription("Shows help and usage information.");
+
+        // add version option
+        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version)))
+        {
+            throw BuilderErrors.ReservedProperty.ToException(nameof(IBuiltInOptions.Version));
+        }
+
+        keyProperty = properties.First(p => p.Name == nameof(IBuiltInOptions.Version));
+        this.RegisterSwitchOption<TOptions>(keyProperty, false);
+
+        aliases = new[] { ".", "Version" };
+        option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
+
+        validAliases = aliases
+            .ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false)
+            .GetOrThrow();
+
+        option.SetName(nameof(IBuiltInOptions.Version), false);
+        option.SetValidAliases(validAliases);
+        option.SetDescription("Shows version information.");
     }
 
     private static string? BuildTitleLine()

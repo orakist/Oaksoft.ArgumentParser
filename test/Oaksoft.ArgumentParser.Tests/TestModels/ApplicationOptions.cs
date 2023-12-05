@@ -1,8 +1,6 @@
-﻿using Oaksoft.ArgumentParser.Parser;
+﻿namespace Oaksoft.ArgumentParser.Tests.TestModels;
 
-namespace Oaksoft.ArgumentParser.Tests.TestModels;
-
-public class BoolAppOptions : IApplicationOptions
+public class BoolAppOptions
 {
     public bool Value { get; set; }
     public bool? NullValue { get; set; }
@@ -13,11 +11,9 @@ public class BoolAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class ByteAppOptions : IApplicationOptions
+public class ByteAppOptions
 {
     public byte Value { get; set; }
     public byte? NullValue { get; set; }
@@ -28,11 +24,9 @@ public class ByteAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class SignedByteAppOptions : IApplicationOptions
+public class SignedByteAppOptions
 {
     public sbyte Value { get; set; }
     public sbyte? NullValue { get; set; }
@@ -43,11 +37,9 @@ public class SignedByteAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class ShortAppOptions : IApplicationOptions
+public class ShortAppOptions
 {
     public short Value { get; set; }
     public short? NullValue { get; set; }
@@ -58,11 +50,9 @@ public class ShortAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class UnsignedShortAppOptions : IApplicationOptions
+public class UnsignedShortAppOptions
 {
     public ushort Value { get; set; }
     public ushort? NullValue { get; set; }
@@ -73,11 +63,9 @@ public class UnsignedShortAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class IntAppOptions : IApplicationOptions
+public class IntAppOptions
 {
     public int Value { get; set; }
     public int? NullValue { get; set; }
@@ -88,11 +76,9 @@ public class IntAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class UnsignedIntAppOptions : IApplicationOptions
+public class UnsignedIntAppOptions
 {
     public uint Value { get; set; }
     public uint? NullValue { get; set; }
@@ -103,11 +89,9 @@ public class UnsignedIntAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class LongAppOptions : IApplicationOptions
+public class LongAppOptions
 {
     public long Value { get; set; }
     public long? NullValue { get; set; }
@@ -118,11 +102,9 @@ public class LongAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class UnsignedLongAppOptions : IApplicationOptions
+public class UnsignedLongAppOptions
 {
     public ulong Value { get; set; }
     public ulong? NullValue { get; set; }
@@ -133,11 +115,9 @@ public class UnsignedLongAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class FloatAppOptions : IApplicationOptions
+public class FloatAppOptions
 {
     public float Value { get; set; }
     public float? NullValue { get; set; }
@@ -148,11 +128,9 @@ public class FloatAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class DoubleAppOptions : IApplicationOptions
+public class DoubleAppOptions
 {
     public double Value { get; set; }
     public double? NullValue { get; set; }
@@ -163,11 +141,9 @@ public class DoubleAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class DecimalAppOptions : IApplicationOptions
+public class DecimalAppOptions
 {
     public decimal Value { get; set; }
     public decimal? NullValue { get; set; }
@@ -178,11 +154,9 @@ public class DecimalAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class CharAppOptions : IApplicationOptions
+public class CharAppOptions
 {
     public char Value { get; set; }
     public char? NullValue { get; set; }
@@ -193,11 +167,9 @@ public class CharAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class StringAppOptions : IApplicationOptions
+public class StringAppOptions
 {
     public string Value { get; set; } = default!;
     public string? NullValue { get; set; }
@@ -208,11 +180,9 @@ public class StringAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class DateTimeAppOptions : IApplicationOptions
+public class DateTimeAppOptions
 {
     public DateTime Value { get; set; } = default!;
     public DateTime? NullValue { get; set; }
@@ -223,11 +193,9 @@ public class DateTimeAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class DateOnlyAppOptions : IApplicationOptions
+public class DateOnlyAppOptions
 {
     public DateOnly Value { get; set; } = default!;
     public DateOnly? NullValue { get; set; }
@@ -238,11 +206,9 @@ public class DateOnlyAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class TimeOnlyAppOptions : IApplicationOptions
+public class TimeOnlyAppOptions
 {
     public TimeOnly Value { get; set; } = default!;
     public TimeOnly? NullValue { get; set; }
@@ -253,11 +219,9 @@ public class TimeOnlyAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }
 
-public class TimeSpanAppOptions : IApplicationOptions
+public class TimeSpanAppOptions
 {
     public TimeSpan Value { get; set; } = default!;
     public TimeSpan? NullValue { get; set; }
@@ -268,6 +232,4 @@ public class TimeSpanAppOptions : IApplicationOptions
     public bool NullValueFlag { get; set; }
     public int ValueCount { get; set; }
     public int NullValueCount { get; set; }
-
-    public bool Help { get; set; }
 }

@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Extensions;
 
@@ -14,7 +13,6 @@ public static partial class OptionExtensions
         Expression<Func<TSource, bool>> keyPropExpr, 
         Action<ISwitchOption>? configure = null,
         bool mandatoryOption = false)
-        where TSource : IApplicationOptions
     {
         var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(bool).ToString());
 
@@ -30,7 +28,6 @@ public static partial class OptionExtensions
         Expression<Func<TSource, bool?>> keyPropExpr,
         Action<ISwitchOption>? configure = null,
         bool mandatoryOption = false)
-        where TSource : IApplicationOptions
     {
         var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(bool).ToString());
 

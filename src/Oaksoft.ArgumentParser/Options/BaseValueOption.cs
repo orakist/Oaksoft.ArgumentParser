@@ -9,7 +9,6 @@ using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Errors;
 using Oaksoft.ArgumentParser.Errors.Builder;
 using Oaksoft.ArgumentParser.Errors.Parser;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
 
@@ -100,7 +99,7 @@ internal abstract class BaseSequentialValueOption<TValue>
         _resultValues.AddRange(resultValues);
     }
 
-    public override void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty)
+    public override void ApplyOptionResult(object appOptions, PropertyInfo keyProperty)
     {
         if (keyProperty.PropertyType.IsAssignableFrom(typeof(List<TValue>)))
         {
@@ -368,7 +367,7 @@ internal abstract class BaseValueOption : BaseOption, IValueOption
         ValueArity = (requiredValueCount, maximumValueCount);
     }
 
-    public abstract void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty);
+    public abstract void ApplyOptionResult(object appOptions, PropertyInfo keyProperty);
 
     public override void Clear()
     {

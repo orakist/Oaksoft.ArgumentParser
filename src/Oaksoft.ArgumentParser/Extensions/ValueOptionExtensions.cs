@@ -5,7 +5,6 @@ using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Extensions;
 
@@ -16,7 +15,6 @@ public static partial class OptionExtensions
         Expression<Func<TSource, TValue?>> keyPropExpr,
         Action<IScalarValueOption<TValue>>? configure = null,
         bool mustHaveOneValue = false)
-        where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
         var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
@@ -33,7 +31,6 @@ public static partial class OptionExtensions
         Expression<Func<TSource, TValue?>> keyPropExpr,
         Action<IScalarValueOption<TValue>>? configure = null,
         bool mustHaveOneValue = false)
-        where TSource : IApplicationOptions
         where TValue : struct, IComparable, IEquatable<TValue>
     {
         var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
@@ -50,7 +47,6 @@ public static partial class OptionExtensions
         Expression<Func<TSource, IEnumerable<TValue?>?>> keyPropExpr,
         Action<ISequentialValueOption<TValue>>? configure = null,
         ArityType valueArity = ArityType.ZeroOrMore)
-        where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
         var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
@@ -67,7 +63,6 @@ public static partial class OptionExtensions
         Expression<Func<TSource, IEnumerable<TValue?>?>> keyPropExpr,
         Action<ISequentialValueOption<TValue>>? configure = null,
         ArityType valueArity = ArityType.ZeroOrMore)
-        where TSource : IApplicationOptions
         where TValue : struct, IComparable, IEquatable<TValue>
     {
         var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
@@ -85,7 +80,6 @@ public static partial class OptionExtensions
         Expression<Func<TSource, bool>> flagPropExpr,
         Action<IScalarValueOption<TValue>>? configure = null,
         bool mustHaveOneValue = false)
-        where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
         var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
@@ -104,7 +98,6 @@ public static partial class OptionExtensions
         Expression<Func<TSource, bool>> flagPropExpr,
         Action<IScalarValueOption<TValue>>? configure = null,
         bool mustHaveOneValue = false)
-        where TSource : IApplicationOptions
         where TValue : struct, IComparable, IEquatable<TValue>
     {
         var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
@@ -123,7 +116,6 @@ public static partial class OptionExtensions
         Expression<Func<TSource, int>> countPropExpr,
         Action<ISequentialValueOption<TValue>>? configure = null,
         ArityType valueArity = ArityType.ZeroOrMore)
-        where TSource : IApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
         var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
@@ -142,7 +134,6 @@ public static partial class OptionExtensions
         Expression<Func<TSource, int>> countPropExpr,
         Action<ISequentialValueOption<TValue>>? configure = null,
         ArityType valueArity = ArityType.ZeroOrMore)
-        where TSource : IApplicationOptions
         where TValue : struct, IComparable, IEquatable<TValue>
     {
         var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());

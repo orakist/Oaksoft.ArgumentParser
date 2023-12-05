@@ -35,8 +35,9 @@ public interface IArgumentParser
 }
 
 public interface IArgumentParser<out TOptions> : IArgumentParser
-    where TOptions : IApplicationOptions
 {
+    IBuiltInOptions GetBuiltInOptions();
+
     TOptions GetApplicationOptions();
 
     TOptions Parse(string[] args);

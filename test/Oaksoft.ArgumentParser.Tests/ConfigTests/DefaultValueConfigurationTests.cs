@@ -21,7 +21,7 @@ public class DefaultValueConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
         var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         var namedOption = option as IScalarNamedOption<int>;
         namedOption.ShouldNotBeNull();
@@ -54,7 +54,7 @@ public class DefaultValueConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
         var option = parser.GetOptionByName(nameof(StringAppOptions.NullValue));
         var namedOption = option as IScalarNamedOption<string>;
         namedOption.ShouldNotBeNull();
@@ -87,7 +87,7 @@ public class DefaultValueConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
         var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         var namedOption = option as IScalarNamedOption<int>;
         namedOption.ShouldNotBeNull();
@@ -117,7 +117,7 @@ public class DefaultValueConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
         var option = parser.GetOptionByName(nameof(StringAppOptions.NullValue));
         var namedOption = option as IScalarNamedOption<string>;
         namedOption.ShouldNotBeNull();

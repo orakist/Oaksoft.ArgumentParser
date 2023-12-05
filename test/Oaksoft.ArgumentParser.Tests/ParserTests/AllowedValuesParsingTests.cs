@@ -1,4 +1,3 @@
-using Oaksoft.ArgumentParser.Errors.Builder;
 using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;

@@ -1,6 +1,4 @@
-﻿using Oaksoft.ArgumentParser.Callbacks;
-
-namespace Oaksoft.ArgumentParser.Tests.TestModels;
+﻿namespace Oaksoft.ArgumentParser.Tests.TestModels;
 
 internal record Coordinate(int X, int Y) : IComparable
 {

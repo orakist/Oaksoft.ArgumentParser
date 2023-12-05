@@ -148,7 +148,7 @@ internal class ScalarNamedOption<TValue>
         IsValid = true;
     }
 
-    public override void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty)
+    public override void ApplyOptionResult(object appOptions, PropertyInfo keyProperty)
     {
         if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
             return;

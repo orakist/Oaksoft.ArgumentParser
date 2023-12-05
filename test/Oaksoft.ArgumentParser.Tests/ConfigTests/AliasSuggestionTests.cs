@@ -22,7 +22,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
@@ -64,7 +64,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(2);
+        parser.GetOptions().Count.ShouldBe(1);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.ValueTestPropEx));
         var namedOption = option as INamedOption;
@@ -88,7 +88,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(2);
+        parser.GetOptions().Count.ShouldBe(1);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.VeryLongApplicationOptionValuePropertyName));
         var namedOption = option as INamedOption;
@@ -112,7 +112,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(2);
+        parser.GetOptions().Count.ShouldBe(1);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.VeryLongApplicationOptionValuePropertyName));
         var namedOption = option as INamedOption;
@@ -137,7 +137,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(2);
+        parser.GetOptions().Count.ShouldBe(1);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.VeryLongApplicationOptionValuePropertyName));
         var namedOption = option as INamedOption;
@@ -164,7 +164,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(5);
+        parser.GetOptions().Count.ShouldBe(4);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.ValueTestPropEx));
         var namedOption = option as INamedOption;
@@ -187,7 +187,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
@@ -221,7 +221,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.ABCValue));
         var namedOption = option as INamedOption;
@@ -255,7 +255,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
@@ -292,7 +292,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
@@ -329,7 +329,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
@@ -368,7 +368,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(5);
+        parser.GetOptions().Count.ShouldBe(4);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
@@ -427,7 +427,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(3);
+        parser.GetOptions().Count.ShouldBe(2);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
@@ -460,7 +460,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(3);
+        parser.GetOptions().Count.ShouldBe(2);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.__1_Help_1));
         var namedOption = option as INamedOption;
@@ -495,7 +495,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(5);
+        parser.GetOptions().Count.ShouldBe(4);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.Val1));
         var namedOption = option as INamedOption;
@@ -638,7 +638,7 @@ public class AliasSuggestionTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.__1_Help));
         var namedOption = option as INamedOption;

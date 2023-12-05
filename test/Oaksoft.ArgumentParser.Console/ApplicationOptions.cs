@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Console;
 
-internal class ApplicationOptions : IApplicationOptions
+internal class ApplicationOptions
 {
     public bool AddSwitch { get; set; }
     public bool? SubtractSwitch { get; set; }
@@ -29,6 +28,4 @@ internal class ApplicationOptions : IApplicationOptions
     public List<string>? FormulaResults { get; set; }
 
     public IEnumerable<string>? Variables { get; set; }
-
-    public bool Help { get; set; }
 }

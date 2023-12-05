@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Options;
 
@@ -7,11 +8,11 @@ namespace Oaksoft.ArgumentParser.Parser;
 
 internal sealed class ArgumentParser<TOptions> 
     : BaseArgumentParser, IArgumentParser<TOptions>
-    where TOptions : IApplicationOptions
 {
     public override IParserSettings Settings { get; }
 
     private readonly TOptions _appOptions;
+    private readonly BuiltInOptions _builtInOptions;
 
     public ArgumentParser(TOptions options, ArgumentParserBuilder<TOptions> builder)
         : base(builder.CaseSensitive, builder.OptionPrefix, builder.AliasDelimiter, builder.ValueDelimiter)
@@ -19,7 +20,13 @@ internal sealed class ArgumentParser<TOptions>
         Settings = builder.GetSettings();
 
         _appOptions = options;
+        _builtInOptions = new BuiltInOptions();
         _baseOptions.AddRange(builder.GetBaseOptions());
+    }
+
+    public IBuiltInOptions GetBuiltInOptions()
+    {
+        return _builtInOptions;
     }
 
     public TOptions GetApplicationOptions()
@@ -45,17 +52,8 @@ internal sealed class ArgumentParser<TOptions>
 
     private void InitializePropertyInfos()
     {
-        var propertyNames = _baseOptions
-            .Where(o => !string.IsNullOrWhiteSpace(o.CountProperty?.Name))
-            .Select(a => a.CountProperty!.Name)
-            .ToList();
-
-        propertyNames.AddRange(_baseOptions.Select(o => o.KeyProperty.Name));
-
-        var properties = _appOptions.GetType().GetProperties()
-            .Where(p => propertyNames.Contains(p.Name));
-
-        _propertyInfos.AddRange(properties);
+        _propertyInfos.AddRange(_baseOptions.Where(o => o.CountProperty is not null).Select(a => a.CountProperty!));
+        _propertyInfos.AddRange(_baseOptions.Select(o => o.KeyProperty));
     }
 
     protected override void ClearOptionPropertiesByReflection()
@@ -64,7 +62,15 @@ internal sealed class ArgumentParser<TOptions>
         {
             var type = property.PropertyType;
             var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
-            property.SetValue(_appOptions, defaultValue);
+
+            if (AliasExtensions.BuiltInOptionNames.Contains(property.Name))
+            {
+                property.SetValue(_builtInOptions, defaultValue);
+            }
+            else
+            {
+                property.SetValue(_appOptions, defaultValue);
+            }
         }
     }
 
@@ -87,9 +93,17 @@ internal sealed class ArgumentParser<TOptions>
         }
 
         var keyProp = _propertyInfos.First(p => p.Name == option.KeyProperty.Name);
+
         if (option is BaseValueOption valOption)
         {
-            valOption.ApplyOptionResult(_appOptions, keyProp);
+            if (AliasExtensions.BuiltInOptionNames.Contains(keyProp.Name))
+            {
+                valOption.ApplyOptionResult(_builtInOptions, keyProp);
+            }
+            else
+            {
+                valOption.ApplyOptionResult(_appOptions!, keyProp);
+            }
         }
     }
 }

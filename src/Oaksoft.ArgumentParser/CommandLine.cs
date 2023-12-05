@@ -1,6 +1,5 @@
 ﻿using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Definitions;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser;
 
@@ -11,7 +10,7 @@ public static class CommandLine
         AliasDelimiterRules aliasDelimiter = AliasDelimiterRules.Default, 
         ValueDelimiterRules valueDelimiter = ValueDelimiterRules.Default, 
         bool caseSensitive = false)
-        where TOptions : IApplicationOptions, new()
+        where TOptions : new()
     {
         var applicationOptions = new TOptions();
 

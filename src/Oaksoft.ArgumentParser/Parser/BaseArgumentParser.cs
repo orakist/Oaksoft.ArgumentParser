@@ -52,7 +52,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public List<IBaseOption> GetOptions()
     {
-        return _baseOptions.Cast<IBaseOption>().ToList();
+        return _baseOptions
+            .Where(o => !AliasExtensions.BuiltInOptionNames.Contains(o.Name))
+            .Cast<IBaseOption>()
+            .ToList();
     }
 
     public IBaseOption? GetOptionByName(string name)
@@ -289,7 +292,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
 
         var helpOption = _baseOptions.OfType<SwitchOption>().
-            First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
+            First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help));
 
         if (!IsOnlyOption(helpOption))
             return;
@@ -386,7 +389,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private void ValidateHelpToken()
     {
         var help = _baseOptions.OfType<SwitchOption>().
-            First(o => o.KeyProperty.Name == nameof(IApplicationOptions.Help));
+            First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help));
 
         if (IsOnlyOption(help))
         {

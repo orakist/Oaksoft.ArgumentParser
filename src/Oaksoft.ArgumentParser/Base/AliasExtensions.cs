@@ -11,10 +11,12 @@ namespace Oaksoft.ArgumentParser.Base;
 
 internal static class AliasExtensions
 {
+    public static readonly string[] BuiltInOptionNames = { "Help", "Version" };
+
     private static readonly char[] _suggestionTrimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
-    private static readonly char[] _allowedAliasSymbols = { '?', '%', '$', '€', '£', '#', '@', '-' };
-    private static readonly string[] _reservedAliases = { "h", "?", "help" };
-    private static readonly string[] _reservedOptionNames = { "Help" };
+    private static readonly char[] _allowedAliasSymbols = { '?', '.', '-' };
+    private static readonly string[] _reservedAliases = { "?", ".", "h", "help", "version" };
+
 
     public static Result<string> ValidateName(this string name)
     {
@@ -29,9 +31,9 @@ internal static class AliasExtensions
             return BuilderErrors.InvalidName.With(name);
         }
 
-        if (_reservedOptionNames.Any(r => r.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        if (BuiltInOptionNames.Any(r => r.Equals(name, StringComparison.OrdinalIgnoreCase)))
         {
-            var names = string.Join(", ", _reservedOptionNames.Select(s => $"'{s}'"));
+            var names = string.Join(", ", BuiltInOptionNames.Select(s => $"'{s}'"));
             return BuilderErrors.ReservedOptionName.With(name, names);
         }
 

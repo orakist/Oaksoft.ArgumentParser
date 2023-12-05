@@ -1,5 +1,4 @@
-﻿using Oaksoft.ArgumentParser.Parser;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace Oaksoft.ArgumentParser.Options;
 
@@ -11,7 +10,7 @@ internal sealed class SwitchOption
     {
     }
 
-    public override void ApplyOptionResult(IApplicationOptions appOptions, PropertyInfo keyProperty)
+    public override void ApplyOptionResult(object appOptions, PropertyInfo keyProperty)
     {
         if (!keyProperty.PropertyType.IsAssignableFrom(typeof(bool)))
             return;

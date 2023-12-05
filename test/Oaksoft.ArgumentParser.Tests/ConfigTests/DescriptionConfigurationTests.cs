@@ -25,7 +25,7 @@ public class DescriptionConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(7);
+        parser.GetOptions().Count.ShouldBe(6);
         var text = parser.GetHelpText(false);
 
         var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
@@ -74,7 +74,7 @@ public class DescriptionConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(6);
+        parser.GetOptions().Count.ShouldBe(5);
         var text = parser.GetHelpText(false);
 
         var option = parser.GetOptionByName(nameof(IntAppOptions.Value));

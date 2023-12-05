@@ -20,7 +20,7 @@ public class SequentialValueConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(3);
+        parser.GetOptions().Count.ShouldBe(2);
         var option = parser.GetOptionByName(nameof(StringAppOptions.Values));
         var namedOption = option as ISequentialNamedOption<string>;
         namedOption.ShouldNotBeNull();
@@ -44,7 +44,7 @@ public class SequentialValueConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(3);
+        parser.GetOptions().Count.ShouldBe(2);
         var option = parser.GetOptionByName(nameof(StringAppOptions.Values));
         var namedOption = option as ISequentialNamedOption<string>;
         namedOption.ShouldNotBeNull();
@@ -68,7 +68,7 @@ public class SequentialValueConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(3);
+        parser.GetOptions().Count.ShouldBe(2);
         var option = parser.GetOptionByName(nameof(StringAppOptions.Values));
         var namedOption = option as ISequentialValueOption<string>;
         namedOption.ShouldNotBeNull();
@@ -92,7 +92,7 @@ public class SequentialValueConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(3);
+        parser.GetOptions().Count.ShouldBe(2);
         var option = parser.GetOptionByName(nameof(StringAppOptions.Values));
         var namedOption = option as ISequentialValueOption<string>;
         namedOption.ShouldNotBeNull();

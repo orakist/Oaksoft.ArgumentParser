@@ -1,8 +1,6 @@
-﻿using Oaksoft.ArgumentParser.Parser;
+﻿namespace Oaksoft.ArgumentParser.Tests.TestModels;
 
-namespace Oaksoft.ArgumentParser.Tests.TestModels;
-
-internal class SampleOptionNames : IApplicationOptions
+internal class SampleOptionNames
 {
     public int V { get; set; }
 

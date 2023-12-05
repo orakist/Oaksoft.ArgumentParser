@@ -24,7 +24,7 @@ public class NameConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(7);
+        parser.GetOptions().Count.ShouldBe(6);
 
         var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
@@ -78,7 +78,7 @@ public class NameConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(6);
+        parser.GetOptions().Count.ShouldBe(5);
 
         var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
@@ -116,7 +116,7 @@ public class NameConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.__1_2_3));
         option.ShouldNotBeNull();
@@ -176,7 +176,7 @@ public class NameConfigurationTests
     {
         // Arrange
         const string name = "Help";
-        const string reservedNames = "'Help'";
+        const string reservedNames = "'Help', 'Version'";
         var sut = CommandLine.CreateParser<IntAppOptions>();
 
         // Act

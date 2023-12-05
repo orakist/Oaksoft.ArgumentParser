@@ -16,7 +16,6 @@ public interface IArgumentParserBuilder
 }
 
 public interface IArgumentParserBuilder<out TOptions> : IArgumentParserBuilder
-    where TOptions : IApplicationOptions
 {
     IArgumentParserBuilder<TOptions> ConfigureSettings(Action<IParserSettingsBuilder> action);
 

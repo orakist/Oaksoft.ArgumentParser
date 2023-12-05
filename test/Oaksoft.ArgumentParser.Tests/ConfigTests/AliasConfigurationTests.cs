@@ -24,7 +24,7 @@ public class AliasConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(5);
+        parser.GetOptions().Count.ShouldBe(4);
 
         var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
@@ -76,7 +76,7 @@ public class AliasConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
@@ -113,7 +113,7 @@ public class AliasConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
@@ -156,7 +156,7 @@ public class AliasConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
@@ -199,7 +199,7 @@ public class AliasConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
@@ -242,7 +242,7 @@ public class AliasConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
@@ -283,7 +283,7 @@ public class AliasConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
@@ -317,7 +317,7 @@ public class AliasConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(SampleOptionNames.Value));
         var namedOption = option as INamedOption;
@@ -350,7 +350,7 @@ public class AliasConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(3);
+        parser.GetOptions().Count.ShouldBe(2);
 
         var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
@@ -388,7 +388,7 @@ public class AliasConfigurationTests
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(4);
+        parser.GetOptions().Count.ShouldBe(3);
 
         var option = parser.GetOptionByName(nameof(StringAppOptions.Value));
         var namedOption = option as INamedOption;
@@ -421,13 +421,13 @@ public class AliasConfigurationTests
     }
 
     [Theory]
-    [InlineData("Test.Property")]
+    [InlineData("Test#Property")]
     [InlineData("---")]
     [InlineData("TestProperty!")]
     public void ShouldThrowException_WhenInvalidSymbolUsed(string alias)
     {
         // Arrange
-        const string symbols = "'?', '%', '$', '€', '£', '#', '@', '-'";
+        const string symbols = "'?', '.', '-'";
         var sut = CommandLine.CreateParser<IntAppOptions>();
 
         // Act
@@ -471,7 +471,6 @@ public class AliasConfigurationTests
     {
         // Arrange
         const string alias = "help";
-        const string symbols = "'h', '?', 'help'";
         var sut = CommandLine.CreateParser<IntAppOptions>();
 
         // Act
@@ -483,10 +482,7 @@ public class AliasConfigurationTests
         info.Error.Code.ShouldBe(BuilderErrors.ReservedAlias.Code);
         info.Values.ShouldNotBeEmpty();
         info.Values.ShouldContain(alias);
-        info.Values.ShouldContain(symbols);
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
-        var message = string.Format(info.Error.Format, alias, symbols);
-        exception.Message.ShouldStartWith(message);
     }
 
     [Fact]

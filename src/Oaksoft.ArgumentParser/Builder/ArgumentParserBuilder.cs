@@ -44,6 +44,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         {
             AutoPrintHeader = _settingsBuilder.AutoPrintHeader ?? true,
             AutoPrintHelp = _settingsBuilder.AutoPrintHelp ?? true,
+            AutoPrintVersion = _settingsBuilder.AutoPrintVersion ?? true,
             AutoPrintErrors = _settingsBuilder.AutoPrintErrors ?? true,
 
             HelpDisplayWidth = _settingsBuilder.HelpDisplayWidth ?? 75,
@@ -123,6 +124,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         _settingsBuilder.AutoPrintHeader ??= true;
         _settingsBuilder.AutoPrintHelp ??= true;
+        _settingsBuilder.AutoPrintVersion ??= true;
         _settingsBuilder.AutoPrintErrors ??= true;
         _settingsBuilder.HelpDisplayWidth ??= 75;
         _settingsBuilder.NewLineAfterOption ??= true;
@@ -176,6 +178,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         option.SetName(nameof(IBuiltInOptions.Help), false);
         option.SetValidAliases(validAliases);
         option.SetDescription("Shows help and usage information.");
+        ((BaseValueOption)option).SetValueArity(ArityType.Zero);
 
         // add version option
         if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version)))
@@ -186,7 +189,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         keyProperty = properties.First(p => p.Name == nameof(IBuiltInOptions.Version));
         this.RegisterSwitchOption<TOptions>(keyProperty, false);
 
-        aliases = new[] { ".", "Version" };
+        aliases = new[] { "Version" };
         option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
 
         validAliases = aliases
@@ -196,6 +199,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         option.SetName(nameof(IBuiltInOptions.Version), false);
         option.SetValidAliases(validAliases);
         option.SetDescription("Shows version information.");
+        ((BaseValueOption)option).SetValueArity(ArityType.Zero);
     }
 
     private static string? BuildTitleLine()

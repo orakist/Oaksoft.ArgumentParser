@@ -3,6 +3,7 @@ using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
+using System.Reflection;
 
 namespace Oaksoft.ArgumentParser.Tests.ParserTests;
 

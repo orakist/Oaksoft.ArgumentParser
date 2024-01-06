@@ -8,6 +8,8 @@ internal class ParserSettingsBuilder : IParserSettingsBuilder
 
     public bool? AutoPrintHelp { get; set; }
 
+    public bool? AutoPrintVersion { get; set; }
+
     public int? HelpDisplayWidth { get; set; }
 
     public bool? NewLineAfterOption { get; set; }

@@ -32,9 +32,9 @@ public static class ParserErrors
         $"{Name}.{nameof(UnknownForwardSlashToken)}",
         "Unknown forward slash alias token '{0}' found!");
 
-    public static readonly ErrorInfo InvalidHelpUsage = new(
-        $"{Name}.{nameof(InvalidHelpUsage)}",
-        "'{1}' alias cannot be combined with other aliases.");
+    public static readonly ErrorInfo InvalidSingleOptionUsage = new(
+        $"{Name}.{nameof(InvalidSingleOptionUsage)}",
+        "'{0}' option alias cannot be combined with other aliases.");
 
     public static readonly ErrorInfo TooManyOption = new(
         $"{Name}.{nameof(TooManyOption)}",

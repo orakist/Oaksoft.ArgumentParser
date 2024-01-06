@@ -12,7 +12,7 @@ internal class ScalarNamedOption<TValue>
     : BaseScalarValueOption<TValue>, IScalarNamedOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    public string ShortAlias => _prefixAliases.MinBy(k => k.Length)!;
+    public string Alias => _prefixAliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length).First();
 
     public List<string> Aliases => _prefixAliases.ToList();
 
@@ -88,7 +88,7 @@ internal class ScalarNamedOption<TValue>
         _prefixAliases.AddRange(prefixedAliases);
 
         if (string.IsNullOrWhiteSpace(Usage))
-            Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
+            Usage = $"{Alias}{(ValueArity.Min > 0 ? " <value>" : ValueArity.Max > 0 ? " (value)" : string.Empty)}";
 
         if (string.IsNullOrWhiteSpace(Description))
             Description = $"Performs '{Name}' option.";

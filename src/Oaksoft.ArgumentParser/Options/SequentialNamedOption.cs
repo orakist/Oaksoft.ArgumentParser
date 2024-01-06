@@ -13,7 +13,7 @@ internal sealed class SequentialNamedOption<TValue>
 {
     public bool AllowSequentialValues { get; private set; }
 
-    public string ShortAlias => _prefixAliases.MinBy(k => k.Length)!;
+    public string Alias => _prefixAliases.MinBy(k => k.Length)!;
 
     public List<string> Aliases => _prefixAliases.ToList();
 
@@ -88,7 +88,7 @@ internal sealed class SequentialNamedOption<TValue>
         _prefixAliases.AddRange(prefixedAliases);
 
         if (string.IsNullOrWhiteSpace(Usage))
-            Usage = $"{ShortAlias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
+            Usage = $"{Alias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
 
         if (string.IsNullOrWhiteSpace(Description))
             Description = $"Performs '{Name}' option.";

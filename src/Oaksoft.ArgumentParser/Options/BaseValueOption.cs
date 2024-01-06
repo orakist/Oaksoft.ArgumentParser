@@ -55,9 +55,9 @@ internal abstract class BaseSequentialValueOption<TValue>
 
     public List<TValue> ResultValues => _resultValues.ToList();
 
-    protected readonly List<TValue> _resultValues;
+    private readonly List<TValue> _resultValues;
 
-    protected readonly List<Predicate<List<TValue>>> _listPredicates;
+    private readonly List<Predicate<List<TValue>>> _listPredicates;
 
     protected BaseSequentialValueOption(int requiredValueCount, int maximumValueCount)
         : base(requiredValueCount, maximumValueCount)
@@ -190,8 +190,8 @@ internal abstract class BaseAllowedValuesOption<TValue>
 {
     public List<TValue> AllowedValues => _allowedValues.ToList();
 
-    protected readonly HashSet<TValue> _allowedValues;
-    protected readonly List<Predicate<TValue>> _predicates;
+    private readonly HashSet<TValue> _allowedValues;
+    private readonly List<Predicate<TValue>> _predicates;
 
     protected BaseAllowedValuesOption(int requiredValueCount, int maximumValueCount)
         : base(requiredValueCount, maximumValueCount)
@@ -257,7 +257,8 @@ internal abstract class BaseAllowedValuesOption<TValue>
             for (var i = 0; i < inputValues.Count; ++i)
             {
                 var inputValue = inputValues[i] as string;
-                if (_allowedValues.Cast<string>().Any(a => a.Equals(inputValue, flag)))
+                var allowedValues = _allowedValues.Select(a => (a as string)!);
+                if (allowedValues.Any(a => a.Equals(inputValue, flag)))
                     continue;
 
                 var values = string.Join(", ", _allowedValues);
@@ -327,7 +328,7 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
         return resultValues;
     }
 
-    protected virtual bool IsValidValue(string value)
+    protected bool IsValidValue(string value)
     {
         return _tryParseValueCallback is not null &&
                _tryParseValueCallback(value, out _);
@@ -342,8 +343,8 @@ internal abstract class BaseValueOption : BaseOption, IValueOption
 
     public override int ValueCount => _inputValues.Count;
 
-    protected List<string> _valueTokens;
-    protected List<string> _inputValues;
+    protected readonly List<string> _valueTokens;
+    protected readonly List<string> _inputValues;
 
     protected BaseValueOption(int requiredValueCount, int maximumValueCount)
     {

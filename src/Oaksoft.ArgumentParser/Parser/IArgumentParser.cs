@@ -1,4 +1,5 @@
-﻿using Oaksoft.ArgumentParser.Definitions;
+﻿using System;
+using Oaksoft.ArgumentParser.Definitions;
 using System.Collections.Generic;
 using Oaksoft.ArgumentParser.Errors;
 using Oaksoft.ArgumentParser.Options;
@@ -41,4 +42,12 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
     TOptions GetApplicationOptions();
 
     TOptions Parse(string[] args);
+
+    void Run(Action<TOptions> callback);
+
+    void Run(Action<IArgumentParser<TOptions>, TOptions> callback);
+
+    void Run(string[] args, Action<TOptions> callback);
+
+    void Run(string[] args, Action<IArgumentParser<TOptions>, TOptions> callback);
 }

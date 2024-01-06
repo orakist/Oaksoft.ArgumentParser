@@ -1,9 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <AssemblyName>Oaksoft.ArgumentParser</AssemblyName>
+    <RootNamespace>Oaksoft.ArgumentParser</RootNamespace>
     <Nullable>enable</Nullable>
+    <Version>1.0.0</Version>
+    <Title>Oaksoft.ArgumentParser</Title>
     <Product>Oaksoft Command Line Arguments Parser</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

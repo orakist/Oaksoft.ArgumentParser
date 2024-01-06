@@ -5,7 +5,7 @@ namespace Oaksoft.ArgumentParser.Options;
 
 public interface INamedOption : IBaseOption
 {
-    string ShortAlias { get; }
+    string Alias { get; }
 
     List<string> Aliases { get; }
 

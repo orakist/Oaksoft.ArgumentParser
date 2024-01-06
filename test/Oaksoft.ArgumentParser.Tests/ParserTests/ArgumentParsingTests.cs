@@ -175,7 +175,6 @@ public class ArgumentParsingTests
         valueOption.ValueTokens.ShouldContain(args[3]);
     }
 
-
     [Theory]
     [InlineData("--v:10")]
     [InlineData("-value:10")]
@@ -191,7 +190,6 @@ public class ArgumentParsingTests
             OptionPrefixRules.All, AliasDelimiterRules.AllowColonSymbol);
         TestAliasDelimiter(sut, args, ':');
     }
-
 
     [Theory]
     [InlineData("-v:10")]
@@ -490,7 +488,6 @@ public class ArgumentParsingTests
             valueOption.ValueTokens.ShouldContain(token[1]);
         }
     }
-
 
     private static void TestSequentialValues(int count1, int count2, string[] args)
     {

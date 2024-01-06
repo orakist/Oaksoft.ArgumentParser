@@ -10,7 +10,7 @@ public class AllowedValuesParsingTests
 {
     private readonly string[] _allowedValues = new[] { "Cat", "Puppy", "Pussy", "Dog" };
 
-    private readonly int[] _allowedIntValues = new[] { 1,2,3,4,5,6,7,8,9 };
+    private readonly int[] _allowedIntValues = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
     [Theory]
     [InlineData("-a", "Cat;dog", "-v", "Cat", "Dog", "Dog|cat|Pussy")]

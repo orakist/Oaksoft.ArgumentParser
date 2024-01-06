@@ -1,4 +1,5 @@
 ﻿using System;
+using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Extensions;
 
 namespace Oaksoft.ArgumentParser.Console;
@@ -8,7 +9,7 @@ internal static class Program
     private static void Main(string[] args)
     {
         var parser = CommandLine.CreateParser<ApplicationOptions>()
-            .ConfigureOptions(AddCustomOptions)
+            .ConfigureOptions()
             .Build();
 
         try
@@ -17,13 +18,13 @@ internal static class Program
             {
                 var result = parser.Parse(args);
 
-                System.Console.WriteLine("Type the commands and press enter. Type 'q' to quit.");
+                System.Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
                 System.Console.Write("./> ");
-                var commands = System.Console.In.ReadLine();
-                if (commands is "q" or "Q")
+                var options = System.Console.In.ReadLine();
+                if (options is "q" or "Q")
                     break;
 
-                var arguments = commands?.Split(" ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 args = arguments ?? Array.Empty<string>();
             }
         }
@@ -34,65 +35,67 @@ internal static class Program
         }
     }
 
-    private static void AddCustomOptions(ApplicationOptions options)
+    private static IArgumentParserBuilder<ApplicationOptions> ConfigureOptions(this IArgumentParserBuilder<ApplicationOptions> builder)
     {
-        options.AddSwitchOption(o => o.AddSwitch)
-            .WithDescription("Enables the addition operator.");
+        return builder
+            .AddSwitchOption(p => p.AddSwitch,
+                o => o.WithDescription("Enables the addition operator."))
 
-        options.AddSwitchOption(o => o.SubtractSwitch)
-            .WithDescription("Enables the subtraction operator.");
+            .AddSwitchOption(p => p.SubtractSwitch,
+                o => o.WithDescription("Enables the subtraction operator."))
 
-        options.AddCountOption(o => o.MultiplySwitch)
-            .WithOptionArity(0, 5)
-            .WithDescription("Enables the multiplication operator.");
+            .AddCounterOption(o => o.MultiplySwitch,
+                o => o.WithOptionArity(0, 5)
+                    .WithDescription("Enables the multiplication operator."))
 
-        options.AddCountOption(o => o.DivideSwitch)
-            .WithDescription("Enables the division operator.");
+            .AddCounterOption(o => o.DivideSwitch,
+                o => o.WithDescription("Enables the division operator."))
 
-        options.AddScalarOption(o => o.AddCount, mustHaveOneValue: false)
-            .WithDefaultValue(1)
-            .WithConstraints(1, 20)
-            .WithDescription("Sets addition count. If no option value is given, a random value is generated. Value must be between 1 and 20.");
+            .AddNamedOption(o => o.AddCount,
+                o => o.WithDefaultValue(1)
+                    .AddPredicate(v => v is > 0 and < 21)
+                    .WithDescription(
+                        "Sets addition count. If no option value is given, a random value is generated. Value must be between 1 and 20."))
 
-        options.AddScalarOption(o => o.SubtractCount)
-            .WithDefaultValue("2")
-            .WithDescription("Sets subtraction count.");
+            .AddNamedOption(o => o.SubtractCount,
+                o => o.WithDefaultValue("2")
+                    .WithDescription("Sets subtraction count."))
 
-        options.AddScalarOption(o => o.StartTime)
-            .WithDefaultValue(DateTime.Now)
-            .WithDescription("Sets the start time.");
+            .AddNamedOption(o => o.StartTime,
+                o => o.WithDefaultValue(DateTime.Now)
+                    .WithDescription("Sets the start time."))
 
-        options.AddScalarOption(o => o.MultiplyCount)
-            .WithDefaultValue(0F)
-            .WithDescription("Sets multiplication count.");
+            .AddNamedOption(o => o.MultiplyCount,
+                o => o.WithDefaultValue(0F)
+                    .WithDescription("Sets multiplication count."))
 
-        options.AddScalarOption(o => o.DivideCount)
-            .WithDefaultValue(0L)
-            .WithDescription("Sets division count.");
+            .AddNamedOption(o => o.DivideCount,
+                o => o.WithDefaultValue(0L)
+                    .WithDescription("Sets division count."))
 
-        options.AddScalarOption(o => o.AddNumbers)
-            .WithOptionArity(0, 2)
-            .WithValueArity(0, 20)
-            .WithDescription("Defines numbers for addition.");
+            .AddNamedOption(o => o.AddNumbers,
+                o => o.WithOptionArity(0, 2)
+                    .WithValueArity(0, 20)
+                    .WithDescription("Defines numbers for addition."))
 
-        options.AddScalarOption(o => o.SubtractNumbers)
-            .WithDescription("Defines numbers for subtraction.");
+            .AddNamedOption(o => o.SubtractNumbers,
+                o => o.WithDescription("Defines numbers for subtraction."))
 
-        options.AddScalarOption(o => o.MultiplyNumbers)
-            .WithDescription("Defines numbers for multiplication.");
+            .AddNamedOption(o => o.MultiplyNumbers,
+                o => o.WithDescription("Defines numbers for multiplication."))
 
-        options.AddScalarOption(o => o.DivideNumbers)
-            .WithDescription("Defines numbers for division.");
+            .AddNamedOption(o => o.DivideNumbers,
+                o => o.WithDescription("Defines numbers for division."))
 
-        options.AddScalarOption(o => o.FormulaSign, o => o.FormulaEnabled)
-            .WithDefaultValue("=")
-            .WithDescription("Sets formula sign.");
+            .AddNamedOption(o => o.FormulaSign, o => o.FormulaEnabled,
+                o => o.WithDefaultValue("=")
+                    .WithDescription("Sets formula sign."))
 
-        options.AddScalarOption(o => o.FormulaResults, o => o.FormulaCount)
-            .WithDescription("Defines formula expressions.");
+            .AddNamedOption(o => o.FormulaResults, o => o.FormulaCount,
+                o => o.WithDescription("Defines formula expressions."))
 
-        options.AddValueOption(o => o.Variables)
-            .WithUsage("variable-names")
-            .WithDescription("Defines variables to use them in formulas.");
+            .AddValueOption(o => o.Variables,
+                o => o.WithUsage("variable-names")
+                    .WithDescription("Defines variables to use them in formulas."));
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Console;
 
-internal class ApplicationOptions : BaseApplicationOptions
+internal class ApplicationOptions
 {
     public bool AddSwitch { get; set; }
     public bool? SubtractSwitch { get; set; }
@@ -18,7 +17,7 @@ internal class ApplicationOptions : BaseApplicationOptions
     public DateTime? StartTime { get; set; }
 
     public IEnumerable<int>? AddNumbers { get; set; }
-    public ICollection<string>? SubtractNumbers { get; set; }
+    public ICollection<string?>? SubtractNumbers { get; set; }
     public List<double?>? MultiplyNumbers { get; set; }
     public long[]? DivideNumbers { get; set; }
 

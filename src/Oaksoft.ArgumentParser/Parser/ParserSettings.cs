@@ -21,4 +21,8 @@ internal class ParserSettings : IParserSettings
     public string? Title { get; set; }
 
     public string? Description { get; set; }
+
+    public int? MaxAliasLength { get; set; }
+
+    public int? MaxSuggestedAliasWordCount { get; set; }
 }

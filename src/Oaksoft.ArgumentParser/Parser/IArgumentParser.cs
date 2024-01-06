@@ -1,42 +1,44 @@
-﻿using System;
+﻿using Oaksoft.ArgumentParser.Definitions;
 using System.Collections.Generic;
+using Oaksoft.ArgumentParser.Errors;
+using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
 
 public interface IArgumentParser
 {
-    string CommandPrefix { get; }
-
-    string ValueSeparator { get; }
-
-    string TokenSeparator { get; }
-
     bool CaseSensitive { get; }
 
-    bool IsValid { get; }
+    OptionPrefixRules OptionPrefix { get; }
 
-    List<string> Errors { get; }
+    AliasDelimiterRules AliasDelimiter { get; }
+
+    ValueDelimiterRules ValueDelimiter { get; }
 
     IParserSettings Settings { get; }
 
+    bool IsValid { get; }
+
+    List<IErrorMessage> Errors { get; }
+    
     string GetHeaderText();
 
     string GetHelpText(bool? enableColoring = default);
 
     string GetErrorText(bool? enableColoring = default);
+
+    List<IBaseOption> GetOptions();
+
+    IBaseOption? GetOptionByName(string name);
+
+    INamedOption? GetOptionByAlias(string alias);
 }
 
 public interface IArgumentParser<out TOptions> : IArgumentParser
-    where TOptions : IApplicationOptions
 {
+    IBuiltInOptions GetBuiltInOptions();
+
     TOptions GetApplicationOptions();
-
-    IArgumentParser<TOptions> ConfigureOptions(Action<TOptions> action);
-
-    IArgumentParser<TOptions> ConfigureParser(Action<IParserSettings> action);
-
-    IArgumentParser<TOptions> Build();
 
     TOptions Parse(string[] args);
 }
-

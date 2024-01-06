@@ -3,37 +3,64 @@ using System.Collections.Generic;
 
 namespace Oaksoft.ArgumentParser.Options;
 
-public interface IValueOption : IBaseOption
+public interface IValueOption : IHaveValueOption, IBaseOption
+{
+}
+
+public interface IScalarValueOption : IValueOption
+{
+}
+
+public interface ISequentialValueOption : IValueOption
+{
+    bool EnableValueTokenSplitting { get; }
+}
+
+public interface IScalarValueOption<TValue>
+    : IScalarValueOption, IHaveResultValue<TValue>, IHaveAllowedValues<TValue>
+    where TValue : IComparable, IEquatable<TValue>
+{
+}
+
+public interface ISequentialValueOption<TValue>
+    : ISequentialValueOption, IHaveResultValues<TValue>, IHaveAllowedValues<TValue>
+    where TValue : IComparable, IEquatable<TValue>
+{
+}
+
+public interface IHaveValueOption
 {
     List<string> ValueTokens { get; }
 
     List<string> InputValues { get; }
-
-    bool EnableValueTokenSplitting { get; }
 }
 
-public interface IValueContext<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+public interface IHaveAllowedValues<TValue>
 {
-    List<string> InputValues { get; }
-
-    TValue? DefaultValue { get; }
-
-    List<TValue?> Constraints { get; }
-
     List<TValue> AllowedValues { get; }
 }
 
-public interface IValueOption<TValue> : IValueOption
-    where TValue : IComparable, IEquatable<TValue>
+public interface IHaveResultValues<TValue>
 {
-    TValue? DefaultValue { get; }
-
-    List<TValue?> Constraints { get; }
-
-    List<TValue> AllowedValues { get; }
-
     List<TValue> ResultValues { get; }
 }
 
+public interface IHaveResultValue<TValue>
+{
+    Ref<TValue>? ResultValue { get; }
+}
 
+public interface IHaveDefaultValue<TValue>
+{
+    Ref<TValue>? DefaultValue { get; }
+}
+
+public class Ref<TValue>
+{
+    public TValue Value { get; }
+
+    public Ref(TValue value)
+    {
+        Value = value;
+    }
+}

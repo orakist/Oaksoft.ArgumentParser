@@ -1,239 +1,213 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Oaksoft.ArgumentParser.Builder;
+using Oaksoft.ArgumentParser.Definitions;
+using Oaksoft.ArgumentParser.Errors;
+using Oaksoft.ArgumentParser.Errors.Builder;
 using Oaksoft.ArgumentParser.Options;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Base;
 
 internal static class OptionRegistrar
 {
-    public static ISwitchOption RegisterSwitchOption<TSource, TValue>(
-        this TSource source, Expression<Func<TSource, TValue>> keyPropExpr, bool mandatoryOption)
-        where TSource : BaseApplicationOptions
+    public static ISwitchOption RegisterSwitchOption<TSource>(
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, bool mandatoryOption)
     {
-        var keyProperty = source.ValidateExpression(keyPropExpr);
-
-        var optionLimits = (mandatoryOption ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
+        var optionLimits = mandatoryOption.GetLimits();
         var option = new SwitchOption(optionLimits.Min, optionLimits.Max);
 
-        source.RegisterOptionProperty(option, keyProperty);
+        builder.RegisterOptionProperty<TSource>(option, keyProperty);
 
         return option;
     }
 
-    public static ISwitchOption RegisterSwitchOption<TSource, TValue>(
-        this TSource source, Expression<Func<TSource, TValue>> keyPropExpr, ArityType optionArity)
-        where TSource : BaseApplicationOptions
+    public static ICounterOption RegisterCounterOption<TSource>(
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, ArityType optionArity)
     {
-        var keyProperty = source.ValidateExpression(keyPropExpr);
+        var optionLimits = optionArity.GetLimits().GetOrThrow(keyProperty.Name);
+        var option = new CounterOption(optionLimits.Min, optionLimits.Max);
 
-        var optionLimits = optionArity.GetLimits();
-        var option = new SwitchOption(optionLimits.Min, optionLimits.Max);
-
-        source.RegisterOptionProperty(option, keyProperty);
+        builder.RegisterOptionProperty<TSource>(option, keyProperty);
 
         return option;
     }
 
-    public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
-        this TSource source, PropertyInfo keyProperty, 
+    public static IScalarNamedOption<TValue> RegisterNamedOption<TSource, TValue>(
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, bool mustHaveOneValue, bool mandatoryOption)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        var optionLimits = mandatoryOption.GetLimits();
+        var valueLimits = mustHaveOneValue.GetLimits();
+        var option = new ScalarNamedOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max);
+
+        builder.RegisterOptionProperty<TSource>(option, keyProperty);
+
+        return option;
+    }
+
+    public static ISequentialNamedOption<TValue> RegisterNamedOption<TSource, TValue>(
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, ArityType valueArity, ArityType optionArity)
+        where TValue : IComparable, IEquatable<TValue>
+    {
+        var optionLimits = optionArity.GetLimits().GetOrThrow(keyProperty.Name);
+        var valueLimits = valueArity.GetLimits().GetOrThrow(keyProperty.Name);
+        var option = new SequentialNamedOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max);
+
+        builder.RegisterOptionProperty<TSource>(option, keyProperty);
+
+        return option;
+    }
+
+    public static IScalarNamedOption<TValue> RegisterNamedOption<TSource, TValue>(
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, PropertyInfo flagProperty,
         bool mustHaveOneValue, bool mandatoryOption)
-        where TSource : BaseApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var optionLimits = (mandatoryOption ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
-        var valueLimits = (mustHaveOneValue ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
-        var option = new ScalarOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max);
+        var optionLimits = mandatoryOption.GetLimits();
+        var valueLimits = mustHaveOneValue.GetLimits();
+        var option = new ScalarNamedOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max);
 
-        source.RegisterOptionProperty(option, keyProperty);
+        builder.RegisterOptionProperty<TSource>(option, keyProperty, flagProperty);
 
         return option;
     }
 
-    public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
-        this TSource source, PropertyInfo keyProperty, 
-        bool enableValueTokenSplitting, bool allowSequentialValues,
+    public static ISequentialNamedOption<TValue> RegisterNamedOption<TSource, TValue>(
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, PropertyInfo countProperty,
         ArityType valueArity, ArityType optionArity)
-        where TSource : BaseApplicationOptions
         where TValue : IComparable, IEquatable<TValue>
     {
-        var optionLimits = optionArity.GetLimits();
-        var valueLimits = valueArity.GetLimits();
-        var option = new ScalarOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max)
-        {
-            EnableValueTokenSplitting = enableValueTokenSplitting,
-            AllowSequentialValues = allowSequentialValues
-        };
+        var optionLimits = optionArity.GetLimits().GetOrThrow(keyProperty.Name);
+        var valueLimits = valueArity.GetLimits().GetOrThrow(keyProperty.Name);
+        var option = new SequentialNamedOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max);
 
-        source.RegisterOptionProperty(option, keyProperty);
+        builder.RegisterOptionProperty<TSource>(option, keyProperty, countProperty);
 
         return option;
     }
 
-    public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
-        this TSource source, PropertyInfo keyProperty, PropertyInfo flagProperty,
-        bool mustHaveOneValue, bool mandatoryOption)
-        where TSource : BaseApplicationOptions
+    public static IScalarValueOption<TValue> RegisterValueOption<TSource, TValue>(
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, bool mustHaveOneValue)
         where TValue : IComparable, IEquatable<TValue>
     {
-        var optionLimits = (mandatoryOption ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
-        var valueLimits = (mustHaveOneValue ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
-        var option = new ScalarOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max);
+        var valueLimits = mustHaveOneValue.GetLimits();
+        var option = new ScalarValueOption<TValue>(valueLimits.Min, valueLimits.Max);
 
-        source.RegisterOptionProperty(option, keyProperty, flagProperty);
+        builder.RegisterOptionProperty<TSource>(option, keyProperty);
 
         return option;
     }
 
-    public static IScalarOption<TValue> RegisterScalarOption<TSource, TValue>(
-        this TSource source, PropertyInfo keyProperty, PropertyInfo countProperty,
-        bool enableValueTokenSplitting, bool allowSequentialValues, 
-        ArityType valueArity, ArityType optionArity)
-        where TSource : BaseApplicationOptions
+    public static ISequentialValueOption<TValue> RegisterValueOption<TSource, TValue>(
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, ArityType valueArity)
         where TValue : IComparable, IEquatable<TValue>
     {
+        var valueLimits = valueArity.GetLimits().GetOrThrow(keyProperty.Name);
+        var option = new SequentialValueOption<TValue>(valueLimits.Min, valueLimits.Max);
 
-        var optionLimits = optionArity.GetLimits();
-        var valueLimits = valueArity.GetLimits();
-        var option = new ScalarOption<TValue>(optionLimits.Min, optionLimits.Max, valueLimits.Min, valueLimits.Max)
-        {
-            EnableValueTokenSplitting = enableValueTokenSplitting,
-            AllowSequentialValues = allowSequentialValues
-        };
-
-        source.RegisterOptionProperty(option, keyProperty, countProperty);
+        builder.RegisterOptionProperty<TSource>(option, keyProperty);
 
         return option;
     }
 
-    public static IValueOption<string> RegisterValueOption<TSource>(
-        this TSource source, Expression<Func<TSource, string?>> keyPropExpr, bool mustHaveOneValue)
-        where TSource : BaseApplicationOptions
+    public static IScalarValueOption<TValue> RegisterValueOption<TSource, TValue>(
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, PropertyInfo flagProperty, bool mustHaveOneValue)
+        where TValue : IComparable, IEquatable<TValue>
     {
-        var keyProperty = source.ValidateExpression(keyPropExpr);
+        var valueLimits = mustHaveOneValue.GetLimits();
+        var option = new ScalarValueOption<TValue>(valueLimits.Min, valueLimits.Max);
 
-        var valueLimits = (mustHaveOneValue ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
-        var option = new ValueOption(valueLimits.Min, valueLimits.Max);
-
-        source.RegisterOptionProperty(option, keyProperty);
+        builder.RegisterOptionProperty<TSource>(option, keyProperty, flagProperty);
 
         return option;
     }
 
-    public static IValueOption<string> RegisterValueOption<TSource>(
-        this TSource source, Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
-        bool enableValueTokenSplitting, ArityType valueArity)
-        where TSource : BaseApplicationOptions
+    public static ISequentialValueOption<TValue> RegisterValueOption<TSource, TValue>(
+        this IArgumentParserBuilder builder,
+        PropertyInfo keyProperty, PropertyInfo countProperty, ArityType valueArity)
+        where TValue : IComparable, IEquatable<TValue>
     {
-        var keyProperty = source.ValidateExpression(keyPropExpr);
+        var valueLimits = valueArity.GetLimits().GetOrThrow(keyProperty.Name);
+        var option = new SequentialValueOption<TValue>(valueLimits.Min, valueLimits.Max);
 
-        var valueLimits = valueArity.GetLimits();
-        var option = new ValueOption(valueLimits.Min, valueLimits.Max)
-        {
-            EnableValueTokenSplitting = enableValueTokenSplitting
-        };
-
-        source.RegisterOptionProperty(option, keyProperty);
-
-        return option;
-    }
-
-    public static IValueOption<string> RegisterValueOption<TSource>(
-        this TSource source, 
-        Expression<Func<TSource, string?>> keyPropExpr,
-        Expression<Func<TSource, bool>> flagPropExpr, 
-        bool mustHaveOneValue)
-        where TSource : BaseApplicationOptions
-    {
-        var keyProperty = source.ValidateExpression(keyPropExpr);
-        var flagProperty = source.ValidateExpression(flagPropExpr);
-
-        var valueLimits = (mustHaveOneValue ? ArityType.ExactlyOne : ArityType.ZeroOrOne).GetLimits();
-        var option = new ValueOption(valueLimits.Min, valueLimits.Max);
-
-        source.RegisterOptionProperty(option, keyProperty, flagProperty);
-
-        return option;
-    }
-
-    public static IValueOption<string> RegisterValueOption<TSource>(
-        this TSource source,
-        Expression<Func<TSource, IEnumerable<string>?>> keyPropExpr,
-        Expression<Func<TSource, int>> countPropExpr,
-        bool enableValueTokenSplitting, ArityType valueArity)
-        where TSource : BaseApplicationOptions
-    {
-        var keyProperty = source.ValidateExpression(keyPropExpr);
-        var countProperty = source.ValidateExpression(countPropExpr);
-
-        var valueLimits = valueArity.GetLimits();
-        var option = new ValueOption(valueLimits.Min, valueLimits.Max)
-        {
-            EnableValueTokenSplitting = enableValueTokenSplitting
-        };
-
-        source.RegisterOptionProperty(option, keyProperty, countProperty);
+        builder.RegisterOptionProperty<TSource>(option, keyProperty, countProperty);
 
         return option;
     }
 
     public static PropertyInfo ValidateExpression<TSource, TValue>(
-        this TSource source, Expression<Func<TSource, TValue>>? expression)
-        where TSource : BaseApplicationOptions
+        this IArgumentParserBuilder builder, Expression<Func<TSource, TValue>>? expression, string type)
     {
         if (expression?.Body == null)
-            throw new ArgumentNullException(nameof(expression));
+        {
+            throw BuilderErrors.NullValue.ToException(nameof(expression));
+        }
 
         if (expression.NodeType != ExpressionType.Lambda ||
             expression.Body is not MemberExpression member ||
             member.Member.MemberType != MemberTypes.Property)
-            throw new ArgumentException("Invalid lambda expression, please select a property!");
+        {
+            throw BuilderErrors.InvalidPropertyExpression.ToException(type);
+        }
 
-        var properties = source.GetType().GetProperties();
-        var property = properties.FirstOrDefault(p => p.Name == member.Member.Name);
-        if (property == null)
-            throw new ArgumentException("Unknown property, please select a property!");
+        var parserBuilder = (ArgumentParserBuilder<TSource>)builder;
+        var properties = parserBuilder.GetApplicationOptions()!.GetType().GetProperties();
+        var property = properties.First(p => p.Name == member.Member.Name);
+
+        if (member.Type == typeof(string) && type == typeof(char).ToString())
+        {
+            throw BuilderErrors.InvalidStringPropertyUsage.ToException(property.Name);
+        }
 
         return property;
     }
 
     private static void RegisterOptionProperty<TSource>(
-        this TSource source, BaseOption option, 
+        this IArgumentParserBuilder builder, BaseOption option,
         PropertyInfo keyProperty, PropertyInfo? countProperty = null)
-        where TSource : BaseApplicationOptions
     {
-        var options = source.GetType().BaseType?
-            .GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-            .Select(f => f.GetValue(source))
-            .OfType<Dictionary<string, IBaseOption>>()
-            .FirstOrDefault();
+        var parserBuilder = (ArgumentParserBuilder<TSource>)builder;
 
-        var propertyNames = options!.Values
-            .Select(a => ((BaseOption)a).CountProperty?.Name)
-            .Where(p => !string.IsNullOrWhiteSpace(p))
-            .ToList();
-
-        propertyNames.AddRange(options.Keys);
+        var propertyNames = parserBuilder.GetRegisteredPropertyNames();
 
         if (keyProperty.Name == countProperty?.Name)
-            throw new ArgumentException($"Selected Key and Count property cannot be same. Properties: {keyProperty.Name}, {countProperty.Name}");
+        {
+            throw BuilderErrors.SamePropertyUsage.ToException(keyProperty.Name, countProperty.Name);
+        }
 
         if (propertyNames.Contains(keyProperty.Name))
-            throw new ArgumentException($"Property '{keyProperty.Name}' already registered with an option!");
+        {
+            throw BuilderErrors.PropertyAlreadyInUse.ToException(keyProperty.Name);
+        }
 
         if (countProperty != null && propertyNames.Contains(countProperty.Name))
-            throw new ArgumentException($"Property '{countProperty.Name}' already registered with an option!");
+        {
+            throw BuilderErrors.PropertyAlreadyInUse.ToException(countProperty.Name);
+        }
 
         option.SetKeyProperty(keyProperty);
         option.SetCountProperty(countProperty);
 
-        options[keyProperty.Name] = option;
+        parserBuilder.RegisterOption(option);
     }
 
-    public static (int Min, int Max) GetLimits(this ArityType arityType)
+    private static (int Min, int Max) GetLimits(this bool arityType)
+    {
+        return arityType ? (1, 1) : (0, 1);
+    }
+
+    public static Result<(int Min, int Max)> GetLimits(this ArityType arityType)
     {
         return arityType switch
         {
@@ -242,7 +216,7 @@ internal static class OptionRegistrar
             ArityType.ExactlyOne => (1, 1),
             ArityType.ZeroOrMore => (0, int.MaxValue),
             ArityType.OneOrMore => (1, int.MaxValue),
-            _ => throw new ArgumentOutOfRangeException(nameof(ArityType), arityType, "Invalid ArityType enum value.")
+            _ => BuilderErrors.InvalidEnum.With(nameof(ArityType), arityType)
         };
     }
 }

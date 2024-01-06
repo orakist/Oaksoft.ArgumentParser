@@ -9,7 +9,7 @@ namespace Oaksoft.ArgumentParser.Base;
 /// <summary>
 /// Controls colored console output by extension methods.
 /// </summary>
-public static partial class TextColoring
+internal static partial class TextColoring
 {
     private static bool _enabled;
 

@@ -7,3 +7,5 @@
 /src/Oaksoft.ArgumentParser/bin
 /test/Oaksoft.ArgumentParser.Console/bin
 /test/Oaksoft.ArgumentParser.Console/obj
+/test/Oaksoft.ArgumentParser.Tests/bin
+/test/Oaksoft.ArgumentParser.Tests/obj

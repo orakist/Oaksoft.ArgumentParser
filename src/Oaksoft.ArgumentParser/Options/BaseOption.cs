@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
+using Oaksoft.ArgumentParser.Base;
+using Oaksoft.ArgumentParser.Errors;
+using Oaksoft.ArgumentParser.Errors.Builder;
+using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Options;
@@ -18,6 +23,8 @@ internal abstract class BaseOption : IBaseOption
 
     public bool IsValid { get; protected set; }
 
+    public bool IsParsed => IsValid && OptionCount + ValueCount > 0;
+
     public abstract int OptionCount { get; }
 
     public abstract int ValueCount { get; }
@@ -25,6 +32,8 @@ internal abstract class BaseOption : IBaseOption
     public PropertyInfo KeyProperty { get; private set; } = default!;
 
     public PropertyInfo? CountProperty { get; private set; }
+
+    protected IArgumentParser? _parser;
 
     public void SetKeyProperty(PropertyInfo property)
     {
@@ -36,77 +45,89 @@ internal abstract class BaseOption : IBaseOption
         CountProperty = property;
     }
 
-    public void SetName(string name)
+    public void SetParser(IArgumentParser parser)
     {
-        if (!string.IsNullOrWhiteSpace(name))
-            Name = name.Trim();
+        _parser = parser;
+    }
+
+    public void SetName(string name, bool validate = true)
+    {
+        ParserInitializedGuard();
+
+        Name = validate 
+            ? name.ValidateName().GetOrThrow(KeyProperty.Name)
+            : name;
     }
 
     public void SetUsage(string usage)
     {
-        if (!string.IsNullOrWhiteSpace(usage))
-            Usage = usage.Trim();
+        ParserInitializedGuard();
+
+        if (string.IsNullOrWhiteSpace(usage))
+        {
+            throw BuilderErrors.EmptyValue.WithName(KeyProperty.Name).ToException(nameof(usage));
+        }
+
+        Usage = string.Join(' ', usage.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
     }
 
-    public void SetDescription(string? description)
+    public void SetDescription(string description)
     {
-        Description = string.IsNullOrWhiteSpace(description) 
-            ? null : description.Trim();
+        ParserInitializedGuard();
+
+        if (string.IsNullOrWhiteSpace(description))
+            return;
+
+        Description = description.Trim();
     }
 
-    public virtual void Initialize(IArgumentParser parser)
+    public virtual List<string> GetAliases()
+    {
+        return default!;
+    }
+
+    public virtual void SetValidAliases(IEnumerable<string> aliases)
+    {
+    }
+
+    public virtual void Initialize()
     {
         if (ValueArity.Min < 0 || ValueArity.Max < ValueArity.Min)
         {
-            throw new ArgumentException(
-                nameof(ValueArity),
-                $"Invalid value arity. Do not use negative or inconsistent values. Arity: {ValueArity}");
+            throw BuilderErrors.InvalidArity.WithName(Name).ToException(nameof(ValueArity), ValueArity);
         }
 
         if (OptionArity.Min < 0 || OptionArity.Max < OptionArity.Min)
         {
-            throw new ArgumentException(
-                nameof(OptionArity),
-                $"Invalid option arity. Do not use negative or inconsistent values. Arity: {OptionArity}");
-        }
-
-        if (string.IsNullOrWhiteSpace(Name))
-        {
-            Name = KeyProperty.Name;
-        }
-
-        if (string.IsNullOrWhiteSpace(Description))
-        {
-            Description = $"Performs '{Name}' option.";
+            throw BuilderErrors.InvalidArity.WithName(Name).ToException(nameof(OptionArity), OptionArity);
         }
     }
 
-    public abstract void Parse(string[] arguments, IArgumentParser parser);
+    public abstract void Parse(TokenItem[] tokens);
 
-    public virtual void Validate(IArgumentParser parser)
+    public virtual void Validate()
     {
         if (OptionCount < OptionArity.Min)
         {
-            throw new Exception(
-                $"At least '{OptionArity.Min}' option{S(OptionArity.Min)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
+            throw ParserErrors.VeryFewOption.ToException(OptionArity.Min, OptionCount);
         }
 
         if (OptionCount > OptionArity.Max)
         {
-            throw new Exception(
-                $"At most '{OptionArity.Max}' option{S(OptionArity.Max)} expected but '{OptionCount}' option{S(OptionCount)} provided.");
+            throw ParserErrors.TooManyOption.ToException(OptionArity.Max, OptionCount);
         }
+
+        if (OptionArity.Max >= 1 && OptionCount <= 0) 
+            return;
 
         if (ValueCount < ValueArity.Min)
         {
-            throw new Exception(
-                $"At least '{ValueArity.Min}' value{S(ValueArity.Min)} expected but '{ValueCount}' value{S(ValueCount)} provided.");
+            throw ParserErrors.VeryFewValue.ToException(ValueArity.Min, ValueCount);
         }
 
         if (ValueCount > ValueArity.Max)
         {
-            throw new Exception(
-                $"At most '{ValueArity.Max}' value{S(ValueArity.Max)} expected but '{ValueCount}' value{S(ValueCount)} provided.");
+            throw ParserErrors.TooManyValue.ToException(ValueArity.Max, ValueCount);
         }
     }
 
@@ -115,8 +136,11 @@ internal abstract class BaseOption : IBaseOption
         IsValid = false;
     }
 
-    protected static string S(int value)
+    protected void ParserInitializedGuard()
     {
-        return value < 2 ? " was" : "s were";
+        if (_parser == null)
+            return;
+
+        throw BuilderErrors.CannotBeModified.WithName(KeyProperty.Name).ToException();
     }
 }

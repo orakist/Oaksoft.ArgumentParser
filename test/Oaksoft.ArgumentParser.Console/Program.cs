@@ -1,6 +1,7 @@
 ﻿using System;
 using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Extensions;
+using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Console;
 
@@ -8,30 +9,33 @@ internal static class Program
 {
     private static void Main(string[] args)
     {
-        var parser = CommandLine.CreateParser<ApplicationOptions>()
-            .ConfigureOptions()
-            .Build();
-
         try
         {
-            while (true)
-            {
-                var result = parser.Parse(args);
+            var parser = CommandLine.CreateParser<ApplicationOptions>()
+                .ConfigureOptions()
+                .Build();
 
-                System.Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
-                System.Console.Write("./> ");
-                var options = System.Console.In.ReadLine();
-                if (options is "q" or "Q")
-                    break;
-
-                var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                args = arguments ?? Array.Empty<string>();
-            }
+            parser.Run(args, EvaluateOption);
         }
         catch (Exception ex)
         {
             System.Console.WriteLine("Fatal error occurred.");
             System.Console.WriteLine(ex.Message);
+        }
+    }
+
+    private static void EvaluateOption(IArgumentParser<ApplicationOptions> parser, ApplicationOptions option)
+    {
+        if (parser.IsValid)
+        {
+            System.Console.WriteLine("Valid options.");
+
+            if (option.AddSwitch)
+                System.Console.WriteLine("Addition enabled.");
+        }
+        else
+        {
+            System.Console.WriteLine("Invalid options!");
         }
     }
 

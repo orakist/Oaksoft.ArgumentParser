@@ -15,8 +15,10 @@ internal static class AliasExtensions
 
     private static readonly char[] _suggestionTrimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
     private static readonly char[] _allowedAliasSymbols = { '?', '.', '-' };
-    private static readonly string[] _reservedAliases = { "?", ".", "h", "help", "version" };
+    private static readonly string[] _reservedAliases = { "?", "h", "help", "version" };
 
+    private static bool IsAsciiDigit(char c) => (uint)(c - '0') <= '9' - '0';
+    private static bool IsAsciiLetter(char c) => (uint)((c | 0x20) - 'a') <= 'z' - 'a';
 
     public static Result<string> ValidateName(this string name)
     {
@@ -26,7 +28,7 @@ internal static class AliasExtensions
             return BuilderErrors.EmptyValue.With(nameof(name));
         }
 
-        if (!name.All(c => char.IsAsciiDigit(c) || char.IsAsciiLetter(c) || c is '_' or '-'))
+        if (!name.All(c => IsAsciiDigit(c) || IsAsciiLetter(c) || c is '_' or '-'))
         {
             return BuilderErrors.InvalidName.With(name);
         }
@@ -116,7 +118,7 @@ internal static class AliasExtensions
             var candidateFound = false;
             foreach (var word in words.Take(maxAliasWordCount).Where(w => i < w.Length))
             {
-                if (char.IsAsciiDigit(word[i]))
+                if (IsAsciiDigit(word[i]))
                     continue;
 
                 var candidate = word.Substring(i, 1);
@@ -268,7 +270,7 @@ internal static class AliasExtensions
         if (token.Length < 2)
             throw ParserErrors.InvalidToken.ToException(token);
 
-        if (token[1] == '-' || (!char.IsAsciiLetter(token[1]) && !_allowedAliasSymbols.Contains(token[1])))
+        if (token[1] == '-' || (!IsAsciiLetter(token[1]) && !_allowedAliasSymbols.Contains(token[1])))
             return null;
 
         foreach (var alias in aliases)
@@ -430,7 +432,7 @@ internal static class AliasExtensions
     private static IEnumerable<string> GetNormalizedWords(string input, params char[] allowedSymbols)
     {
         var validChars = input.Replace('_', ' ').Replace('-', ' ')
-            .Where(c => char.IsAsciiDigit(c) || char.IsAsciiLetter(c) || c == ' ' || allowedSymbols.Contains(c));
+            .Where(c => IsAsciiDigit(c) || IsAsciiLetter(c) || c == ' ' || allowedSymbols.Contains(c));
 
         return string.Join("", validChars)
             .TrimStart(_suggestionTrimChars)

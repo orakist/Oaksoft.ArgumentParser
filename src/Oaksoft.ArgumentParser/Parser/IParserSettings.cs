@@ -8,6 +8,8 @@ public interface IParserSettings
 
     bool? AutoPrintHelp { get; }
 
+    bool? AutoPrintVersion { get; }
+
     int? HelpDisplayWidth { get; }
 
     bool? NewLineAfterOption { get; }

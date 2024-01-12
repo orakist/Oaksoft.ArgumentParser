@@ -1,11 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <AssemblyName>Oaksoft.ArgumentParser</AssemblyName>
+    <RootNamespace>Oaksoft.ArgumentParser</RootNamespace>
     <Nullable>enable</Nullable>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Version>$(VersionPrefix)</Version>
+    <Authors>orakist</Authors>
+    <Title>Oaksoft.ArgumentParser</Title>
     <Product>Oaksoft Command Line Arguments Parser</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Company>$(AssemblyName)</Company>
+    <Description>Command Line Argument Parser Library offers to clean and simple API for manipulating command line arguments and related tasks.</Description>
+    <Copyright>Copyright (c) 2023 - 2024</Copyright>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>command line;commandline;argument;option;parser;parsing;cli;commandlineparser;shell</PackageTags>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="..\..\LICENSE.md" Pack="true" PackagePath="$(PackageLicenseFile)" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="$(PackageReadmeFile)" />
+  </ItemGroup>
+  
   <ItemGroup>
     <AssemblyAttribute Include="Oaksoft.ArgumentParser.Base.BuildDateTimeAttribute">
       <_Parameter1>$([System.DateTime]::Now.ToString("yyyy-MM-dd HH:mm:ss"))</_Parameter1>

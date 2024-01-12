@@ -10,7 +10,7 @@ namespace Oaksoft.ArgumentParser.Options;
 
 internal class CounterOption : BaseValueOption, ICounterOption
 {
-    public string ShortAlias => _prefixAliases.MinBy(k => k.Length)!;
+    public string Alias => _prefixAliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length).First();
 
     public List<string> Aliases => _prefixAliases.ToList();
 
@@ -76,7 +76,7 @@ internal class CounterOption : BaseValueOption, ICounterOption
         _prefixAliases.AddRange(prefixedAliases);
 
         if (string.IsNullOrWhiteSpace(Usage))
-            Usage = ShortAlias;
+            Usage = Alias;
 
         if (string.IsNullOrWhiteSpace(Description))
             Description = $"Performs '{Name}' option.";

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+#if !NET7_0_OR_GREATER
+    using System.Linq;
+#endif
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -9,7 +12,11 @@ namespace Oaksoft.ArgumentParser.Base;
 /// <summary>
 /// Controls colored console output by extension methods.
 /// </summary>
+#if NET7_0_OR_GREATER
 internal static partial class TextColoring
+#else
+internal static class TextColoring
+#endif
 {
     private static bool _enabled;
 
@@ -44,7 +51,8 @@ internal static partial class TextColoring
         [ColorPlane.Foreground] = "38",
         [ColorPlane.Background] = "48"
     };
-        
+
+#if NET7_0_OR_GREATER
     [GeneratedRegex("(?:\u001b\\[0m)+")]
     private static partial Regex CloseNestedPastelStringRegex1();
 
@@ -62,6 +70,34 @@ internal static partial class TextColoring
         [ColorPlane.Foreground] = CloseNestedPastelStringRegex3Foreground(),
         [ColorPlane.Background] = CloseNestedPastelStringRegex3Background()
     };
+#else
+    private static readonly Regex _closeNestedPastelStringRegex1
+        = new($"({FormatStringEnd.Replace("[", @"\[")})+", RegexOptions.Compiled);
+
+    private static readonly Regex _closeNestedPastelStringRegex2 
+        = new(InitializeCloseNestedPastelString2(), RegexOptions.Compiled);
+
+    private static Regex CloseNestedPastelStringRegex1() => _closeNestedPastelStringRegex1;
+    private static Regex CloseNestedPastelStringRegex2() => _closeNestedPastelStringRegex2;
+
+    private static string InitializeCloseNestedPastelString2()
+    {
+        var formatPart = $"(?:{_planeFormatModifiers[ColorPlane.Foreground]}|{_planeFormatModifiers[ColorPlane.Background]})";
+        var arguments = new[] { formatPart }.Concat(Enumerable.Repeat(@"\d{1,3}", 3)).Cast<object>().ToArray();
+
+        return $"(?<!^)(?<!{FormatStringEnd.Replace("[", @"\[")})" +
+            $"(?<!{string.Format($"{FormatStringStart.Replace("[", @"\[")}{FormatStringColor}", arguments)})" +
+            $"(?:{string.Format(FormatStringStart.Replace("[", @"\["), formatPart)})";
+    }
+
+
+    private static readonly string _closeNestedPastelStringRegex3FormatString = $"(?:{FormatStringEnd.Replace("[", @"\[")})(?!{FormatStringStart.Replace("[", @"\[")})(?!$)";
+    private static readonly Dictionary<ColorPlane, Regex> _closeNestedPastelStringRegex3 = new()
+    {
+        [ColorPlane.Foreground] = new Regex(string.Format(_closeNestedPastelStringRegex3FormatString, _planeFormatModifiers[ColorPlane.Foreground])),
+        [ColorPlane.Background] = new Regex(string.Format(_closeNestedPastelStringRegex3FormatString, _planeFormatModifiers[ColorPlane.Background]))
+    };
+#endif
 
     private const string FormatStringStart = "\u001b[{0};2;";
     private const string FormatStringColor = "{1};{2};{3}m";
@@ -142,7 +178,7 @@ internal static partial class TextColoring
         var closedString = CloseNestedPastelStringRegex1().Replace(input, FormatStringEnd);
 
         closedString = CloseNestedPastelStringRegex2().Replace(closedString, $"{FormatStringEnd}$0");
-        closedString = _closeNestedPastelStringRegex3[colorPlane].Replace(closedString, 
+        closedString = _closeNestedPastelStringRegex3[colorPlane].Replace(closedString,
             $"$0{string.Format(FormatStringPartial, _planeFormatModifiers[colorPlane], color.R, color.G, color.B)}");
 
         return closedString;

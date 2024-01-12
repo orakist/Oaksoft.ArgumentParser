@@ -11,7 +11,7 @@ namespace Oaksoft.ArgumentParser.Options;
 
 internal abstract class BaseOption : IBaseOption
 {
-    public string Name { get; protected set; } = default!;
+    public string Name { get; private set; } = default!;
 
     public string Usage { get; protected set; } = default!;
 

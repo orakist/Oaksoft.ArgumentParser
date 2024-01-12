@@ -127,12 +127,16 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
             AutoPrintHelpText();
 
-            AutoPrintErrorText();
+            AutoPrintVersion();
         }
         catch (Exception ex)
         {
             var error = new ErrorInfo($"{ParserErrors.Name}.UnexpectedError", ex.Message);
             _errors.Add(error.With());
+        }
+        finally
+        {
+            AutoPrintErrorText();
         }
     }
 
@@ -253,7 +257,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        ValidateHelpToken();
+        ValidateBuiltInTokens();
 
         foreach (var token in tokens.Where(s => s is { IsParsed: false, Invalid: false }))
             _errors.Add(ParserErrors.UnknownToken.With(token.Token));
@@ -301,6 +305,21 @@ internal abstract class BaseArgumentParser : IArgumentParser
         Console.WriteLine();
     }
 
+    private void AutoPrintVersion()
+    {
+        if (Settings.AutoPrintVersion != true || _errors.Count > 0)
+            return;
+
+        var versionOption = _baseOptions.OfType<SwitchOption>().
+            First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
+
+        if (!IsOnlyOption(versionOption))
+            return;
+
+        Console.Write(AssemblyHelper.GetAssemblyVersion());
+        Console.WriteLine();
+    }
+
     private void AutoPrintErrorText()
     {
         if (Settings.AutoPrintErrors != true || _errors.Count < 1)
@@ -333,7 +352,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         foreach (var option in _baseOptions)
         {
             var namedOption = option as INamedOption;
-            var shortAlias = namedOption?.ShortAlias ?? string.Empty;
+            var shortAlias = namedOption?.Alias ?? string.Empty;
             sb.Pastel($"[{shortAlias,-4}] ", ConsoleColor.DarkGreen);
             sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
             sb.AppendLine(option.Usage);
@@ -386,7 +405,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         return sb;
     }
 
-    private void ValidateHelpToken()
+    private void ValidateBuiltInTokens()
     {
         var help = _baseOptions.OfType<SwitchOption>().
             First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help));
@@ -394,10 +413,27 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (IsOnlyOption(help))
         {
             _errors.Clear();
+            return;
         }
-        else if (help.OptionTokens.Count > 0)
+
+        if (help.OptionTokens.Count > 0)
         {
-            _errors.Add(ParserErrors.InvalidHelpUsage.With(help.ShortAlias).WithName(help.Name));
+            _errors.Add(ParserErrors.InvalidSingleOptionUsage.With(help.Alias).WithName(help.Name));
+            return;
+        }
+
+        var version = _baseOptions.OfType<SwitchOption>().
+            First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
+
+        if (IsOnlyOption(version))
+        {
+            _errors.Clear();
+            return;
+        }
+
+        if (version.OptionTokens.Count > 0)
+        {
+            _errors.Add(ParserErrors.InvalidSingleOptionUsage.With(version.Alias).WithName(version.Name));
         }
     }
 

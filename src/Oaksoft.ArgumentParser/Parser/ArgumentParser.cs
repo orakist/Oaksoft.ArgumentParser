@@ -6,7 +6,7 @@ using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
 
-internal sealed class ArgumentParser<TOptions> 
+internal sealed class ArgumentParser<TOptions>
     : BaseArgumentParser, IArgumentParser<TOptions>
 {
     public override IParserSettings Settings { get; }
@@ -48,6 +48,93 @@ internal sealed class ArgumentParser<TOptions>
         ParseTokens(arguments);
 
         return _appOptions;
+    }
+
+    public void Run(Action<TOptions> callback)
+    {
+        while (true)
+        {
+            Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+            Console.Write("./> ");
+
+            var options = Console.In.ReadLine();
+            if (options is "q" or "Q")
+                break;
+
+            var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (!(arguments?.Length > 0))
+                continue;
+
+            var result = Parse(arguments);
+            if (!IsValid)
+                continue;
+
+            callback.Invoke(result);
+        }
+    }
+
+    public void Run(Action<IArgumentParser<TOptions>, TOptions> callback)
+    {
+        while (true)
+        {
+            Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+            Console.Write("./> ");
+
+            var options = Console.In.ReadLine();
+            if (options is "q" or "Q")
+                break;
+
+            var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (!(arguments?.Length > 0))
+                continue;
+
+            callback.Invoke(this, Parse(arguments));
+        }
+    }
+
+    public void Run(string[] args, Action<TOptions> callback)
+    {
+        while (true)
+        {
+            if (args.Length > 0)
+            {
+                var result = Parse(args);
+
+                if (IsValid)
+                {
+                    callback.Invoke(result);
+                }
+            }
+
+            Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+            Console.Write("./> ");
+            var options = Console.In.ReadLine();
+            if (options is "q" or "Q")
+                break;
+
+            var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            args = arguments ?? Array.Empty<string>();
+        }
+    }
+
+    public void Run(string[] args, Action<IArgumentParser<TOptions>, TOptions> callback)
+    {
+        while (true)
+        {
+            if (args.Length > 0)
+            {
+                callback.Invoke(this, Parse(args));
+            }
+
+            Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+            Console.Write("./> ");
+            var options = Console.In.ReadLine();
+            if (options is "q" or "Q")
+                break;
+
+            var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            args = arguments ?? Array.Empty<string>();
+        }
     }
 
     private void InitializePropertyInfos()

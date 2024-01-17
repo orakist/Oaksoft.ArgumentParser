@@ -165,4 +165,9 @@ internal class ScalarNamedOption<TValue>
         base.Clear();
         _optionTokens.Clear();
     }
+
+    public string? GetDefaultValue()
+    {
+        return DefaultValue?.Value.ToString();
+    }
 }

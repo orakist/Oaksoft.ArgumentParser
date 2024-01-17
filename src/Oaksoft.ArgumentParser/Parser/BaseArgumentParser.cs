@@ -349,18 +349,49 @@ internal abstract class BaseArgumentParser : IArgumentParser
         sb.AppendLine("These are command line options of this application.");
         sb.AppendLine();
 
+        var padLength = _baseOptions.OfType<INamedOption>().Select(n => n.Alias.Length).Max();
+        if (padLength < 8)
+            padLength = 8;
+        if (padLength > 16)
+            padLength = 16;
+
+        var paddingString = string.Empty.PadRight(padLength, ' ');
+
         foreach (var option in _baseOptions)
         {
             var namedOption = option as INamedOption;
             var shortAlias = namedOption?.Alias ?? string.Empty;
-            sb.Pastel($"[{shortAlias,-4}] ", ConsoleColor.DarkGreen);
+            sb.Pastel($"{shortAlias.PadRight(padLength, ' ')} ", ConsoleColor.DarkGreen);
             sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
-            sb.AppendLine(option.Usage);
+            sb.Append(option.Usage);
+
+            if (option is IHaveDefaultValue defaultValueOption)
+            {
+                var defaultValue = defaultValueOption.GetDefaultValue();
+                if (!string.IsNullOrEmpty(defaultValue))
+                {
+                    sb.Append(", ");
+                    sb.Pastel("Default Value:", ConsoleColor.DarkYellow);
+                    sb.Append($" '{defaultValue}'");
+                }
+            }
+
+            sb.AppendLine();
+
+            if (option is IHaveAllowedValues allowedValueOption)
+            {
+                var allowedValues = allowedValueOption.GetAllowedValues();
+                if (allowedValues.Count > 0)
+                {
+                    sb.Pastel($"{paddingString} Allowed Values:", ConsoleColor.DarkYellow);
+                    sb.AppendLine($" {string.Join(" | ", allowedValues)}");
+                }
+            }
 
             if (namedOption is not null)
             {
-                sb.Pastel("       Aliases:", ConsoleColor.DarkYellow);
-                sb.AppendLine($" {string.Join(", ", namedOption.Aliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length))} ");
+                sb.Pastel($"{paddingString} Aliases:", ConsoleColor.DarkYellow);
+                sb.AppendLine($" {string.Join(", ", namedOption.Aliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length))}");
             }
 
             if (option.Description is not null)
@@ -368,7 +399,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 var descriptionWords = option.Description.Split(' ');
                 var descriptionLines = CreateLinesByWidth(descriptionWords);
                 foreach (var description in descriptionLines)
-                    sb.AppendLine($"       {description}");
+                    sb.AppendLine($"{paddingString} {description}");
             }
 
             if (Settings.NewLineAfterOption is true)

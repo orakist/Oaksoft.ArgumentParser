@@ -35,7 +35,12 @@ public interface IHaveValueOption
     List<string> InputValues { get; }
 }
 
-public interface IHaveAllowedValues<TValue>
+public interface IHaveAllowedValues
+{
+    List<string> GetAllowedValues();
+}
+
+public interface IHaveAllowedValues<TValue> : IHaveAllowedValues
 {
     List<TValue> AllowedValues { get; }
 }
@@ -50,7 +55,12 @@ public interface IHaveResultValue<TValue>
     Ref<TValue>? ResultValue { get; }
 }
 
-public interface IHaveDefaultValue<TValue>
+public interface IHaveDefaultValue
+{
+    string? GetDefaultValue();
+}
+
+public interface IHaveDefaultValue<TValue> : IHaveDefaultValue
 {
     Ref<TValue>? DefaultValue { get; }
 }

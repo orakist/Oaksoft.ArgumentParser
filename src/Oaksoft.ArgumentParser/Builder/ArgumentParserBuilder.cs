@@ -189,7 +189,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         keyProperty = properties.First(p => p.Name == nameof(IBuiltInOptions.Version));
         this.RegisterSwitchOption<TOptions>(keyProperty, false);
 
-        aliases = new[] { "Version" };
+        aliases = new[] { "Ver", "Version" };
         option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
 
         validAliases = aliases

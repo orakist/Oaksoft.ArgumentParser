@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Oaksoft.ArgumentParser.Builder;
+using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Parser;
 
@@ -11,7 +14,7 @@ internal static class Program
     {
         try
         {
-            var parser = CommandLine.CreateParser<ApplicationOptions>()
+            var parser = CommandLine.CreateParser<CalculatorOptions>()
                 .ConfigureOptions()
                 .Build();
 
@@ -24,82 +27,76 @@ internal static class Program
         }
     }
 
-    private static void EvaluateOption(IArgumentParser<ApplicationOptions> parser, ApplicationOptions option)
+    private static void EvaluateOption(IArgumentParser<CalculatorOptions> parser, CalculatorOptions option)
     {
-        if (parser.IsValid)
-        {
-            System.Console.WriteLine("Valid options.");
+        if (!parser.IsValid || string.IsNullOrEmpty(option.Operator))
+            return;
 
-            if (option.AddSwitch)
-                System.Console.WriteLine("Addition enabled.");
-        }
-        else
+        var numbers = new List<double>();
+        if (option.LeftOperand.HasValue || option.RightOperand.HasValue)
         {
-            System.Console.WriteLine("Invalid options!");
+            if (option.LeftOperand.HasValue)
+                numbers.Add(option.LeftOperand.Value);
+            if (option.RightOperand.HasValue)
+                numbers.Add(option.RightOperand.Value);
         }
+        else if (option.Numbers?.Any() == true)
+        {
+            numbers.AddRange(option.Numbers);
+        }
+        else if (option.Integers?.Any() == true)
+        {
+            numbers.AddRange(option.Integers.Select(i => (double)i));
+        }
+
+        if (numbers.Count < 1)
+        {
+            System.Console.WriteLine("Provide at least one number.");
+            return;
+        }
+
+        var result = option.Operator.ToUpperInvariant() switch
+        {
+            "ADD" => numbers.Sum(),
+            "SUB" => numbers.First() - numbers.Skip(1).Sum(),
+            "MUL" => numbers.Aggregate<double, double>(1, (current, number) => current * number),
+            "DIV" => numbers.Skip(1).Aggregate(numbers.First(), (current, number) => current / number),
+            _ => 0
+        };
+
+        var equation = option.Operator.ToUpperInvariant() switch
+        {
+            "ADD" => $"{string.Join(" + ", numbers)} = {result}",
+            "SUB" => $"{string.Join(" - ", numbers)} = {result}",
+            "MUL" => $"{string.Join(" * ", numbers)} = {result}",
+            "DIV" => $"{string.Join(" / ", numbers)} = {result}",
+            _ => "Invalid Argument!"
+        };
+
+        System.Console.WriteLine($"Result: {equation}");
+        System.Console.WriteLine();
     }
 
-    private static IArgumentParserBuilder<ApplicationOptions> ConfigureOptions(this IArgumentParserBuilder<ApplicationOptions> builder)
+    private static IArgumentParserBuilder<CalculatorOptions> ConfigureOptions(this IArgumentParserBuilder<CalculatorOptions> builder)
     {
         return builder
-            .AddSwitchOption(p => p.AddSwitch,
-                o => o.WithDescription("Enables the addition operator."))
+            .AddNamedOption(p => p.LeftOperand,
+                o => o.WithDescription("Left operand of the operation."))
 
-            .AddSwitchOption(p => p.SubtractSwitch,
-                o => o.WithDescription("Enables the subtraction operator."))
+            .AddNamedOption(p => p.RightOperand,
+                o => o.WithDescription("Right operand of the operation."))
 
-            .AddCounterOption(o => o.MultiplySwitch,
-                o => o.WithOptionArity(0, 5)
-                    .WithDescription("Enables the multiplication operator."))
+            .AddNamedOption(p => p.Numbers,
+                o => o.WithDescription("Defines numbers for the operation."),
+                ArityType.OneOrMore)
 
-            .AddCounterOption(o => o.DivideSwitch,
-                o => o.WithDescription("Enables the division operator."))
+            .AddNamedOption(p => p.Integers,
+                o => o.WithDescription("Defines integers for the operation."),
+                ArityType.OneOrMore)
 
-            .AddNamedOption(o => o.AddCount,
-                o => o.WithDefaultValue(1)
-                    .AddPredicate(v => v is > 0 and < 21)
-                    .WithDescription(
-                        "Sets addition count. If no option value is given, a random value is generated. Value must be between 1 and 20."))
-
-            .AddNamedOption(o => o.SubtractCount,
-                o => o.WithDefaultValue("2")
-                    .WithDescription("Sets subtraction count."))
-
-            .AddNamedOption(o => o.StartTime,
-                o => o.WithDefaultValue(DateTime.Now)
-                    .WithDescription("Sets the start time."))
-
-            .AddNamedOption(o => o.MultiplyCount,
-                o => o.WithDefaultValue(0F)
-                    .WithDescription("Sets multiplication count."))
-
-            .AddNamedOption(o => o.DivideCount,
-                o => o.WithDefaultValue(0L)
-                    .WithDescription("Sets division count."))
-
-            .AddNamedOption(o => o.AddNumbers,
-                o => o.WithOptionArity(0, 2)
-                    .WithValueArity(0, 20)
-                    .WithDescription("Defines numbers for addition."))
-
-            .AddNamedOption(o => o.SubtractNumbers,
-                o => o.WithDescription("Defines numbers for subtraction."))
-
-            .AddNamedOption(o => o.MultiplyNumbers,
-                o => o.WithDescription("Defines numbers for multiplication."))
-
-            .AddNamedOption(o => o.DivideNumbers,
-                o => o.WithDescription("Defines numbers for division."))
-
-            .AddNamedOption(o => o.FormulaSign, o => o.FormulaEnabled,
-                o => o.WithDefaultValue("=")
-                    .WithDescription("Sets formula sign."))
-
-            .AddNamedOption(o => o.FormulaResults, o => o.FormulaCount,
-                o => o.WithDescription("Defines formula expressions."))
-
-            .AddValueOption(o => o.Variables,
-                o => o.WithUsage("variable-names")
-                    .WithDescription("Defines variables to use them in formulas."));
+            .AddNamedOption(o => o.Operator,
+                o => o.WithDescription("Defines operator type of the operation.")
+                    .WithAllowedValues("ADD", "SUB", "MUL", "DIV"),
+                mandatoryOption: true);
     }
 }

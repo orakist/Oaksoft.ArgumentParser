@@ -278,6 +278,11 @@ internal abstract class BaseAllowedValuesOption<TValue>
             }
         }
     }
+
+    public List<string> GetAllowedValues()
+    {
+        return AllowedValues.Select(a => a.ToString()!).ToList();
+    }
 }
 
 internal abstract class BaseValueOption<TValue> : BaseValueOption

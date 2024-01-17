@@ -38,19 +38,19 @@ public static class ParserErrors
 
     public static readonly ErrorInfo TooManyOption = new(
         $"{Name}.{nameof(TooManyOption)}",
-        "At least '{0}' option(s) expected but '{1}' option(s) provided.");
+        "At most '{0}' option(s) expected but '{1}' option(s) provided.");
 
     public static readonly ErrorInfo VeryFewOption = new(
         $"{Name}.{nameof(VeryFewOption)}",
-        "At most '{0}' option(s) expected but '{1}' option(s) provided.");
+        "At least '{0}' option(s) expected but '{1}' option(s) provided.");
 
     public static readonly ErrorInfo TooManyValue = new(
         $"{Name}.{nameof(TooManyValue)}",
-        "At least '{0}' value(s) expected but '{1}' value(s) provided.");
+        "At most '{0}' value(s) expected but '{1}' value(s) provided.");
 
     public static readonly ErrorInfo VeryFewValue = new(
         $"{Name}.{nameof(VeryFewValue)}",
-        "At most '{0}' value(s) expected but '{1}' value(s) provided.");
+        "At least '{0}' value(s) expected but '{1}' value(s) provided.");
 
     public static readonly ErrorInfo InvalidOptionValue = new(
         $"{Name}.{nameof(InvalidOptionValue)}",

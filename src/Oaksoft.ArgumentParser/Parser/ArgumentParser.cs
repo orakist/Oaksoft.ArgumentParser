@@ -52,9 +52,10 @@ internal sealed class ArgumentParser<TOptions>
 
     public void Run(Action<TOptions> callback)
     {
+        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+
         while (true)
         {
-            Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
             Console.Write("./> ");
 
             var options = Console.In.ReadLine();
@@ -75,9 +76,10 @@ internal sealed class ArgumentParser<TOptions>
 
     public void Run(Action<IArgumentParser<TOptions>, TOptions> callback)
     {
+        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+
         while (true)
         {
-            Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
             Console.Write("./> ");
 
             var options = Console.In.ReadLine();
@@ -94,6 +96,7 @@ internal sealed class ArgumentParser<TOptions>
 
     public void Run(string[] args, Action<TOptions> callback)
     {
+        var loopCount = 0;
         while (true)
         {
             if (args.Length > 0)
@@ -106,7 +109,11 @@ internal sealed class ArgumentParser<TOptions>
                 }
             }
 
-            Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+            if (loopCount < 1)
+            {
+                Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+            }
+
             Console.Write("./> ");
             var options = Console.In.ReadLine();
             if (options is "q" or "Q")
@@ -114,11 +121,14 @@ internal sealed class ArgumentParser<TOptions>
 
             var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             args = arguments ?? Array.Empty<string>();
+            ++loopCount;
         }
     }
 
     public void Run(string[] args, Action<IArgumentParser<TOptions>, TOptions> callback)
     {
+        var loopCount = 0;
+
         while (true)
         {
             if (args.Length > 0)
@@ -126,7 +136,11 @@ internal sealed class ArgumentParser<TOptions>
                 callback.Invoke(this, Parse(args));
             }
 
-            Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+            if (loopCount < 1)
+            {
+                Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+            }
+
             Console.Write("./> ");
             var options = Console.In.ReadLine();
             if (options is "q" or "Q")
@@ -134,6 +148,7 @@ internal sealed class ArgumentParser<TOptions>
 
             var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             args = arguments ?? Array.Empty<string>();
+            ++loopCount;
         }
     }
 

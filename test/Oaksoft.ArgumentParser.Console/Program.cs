@@ -55,19 +55,25 @@ internal static class Program
             return;
         }
 
-        var equation = string.Join($" {option.Operator} ", numbers.Select(a => a.ToString("0.##")));
-
-        var result = option.Operator switch
+        var result = option.Operator.ToUpperInvariant() switch
         {
-            "+" => numbers.Sum(),
-            "-" => numbers.First() - numbers.Skip(1).Sum(),
-            "*" => numbers.Aggregate<double, double>(1, (current, number) => current * number),
-            "/" => numbers.Skip(1).Aggregate(numbers.First(), (current, number) => current / number),
+            "ADD" => numbers.Sum(),
+            "SUB" => numbers.First() - numbers.Skip(1).Sum(),
+            "MUL" => numbers.Aggregate<double, double>(1, (current, number) => current * number),
+            "DIV" => numbers.Skip(1).Aggregate(numbers.First(), (current, number) => current / number),
             _ => 0
         };
 
-        System.Console.Write("Result: ");
-        System.Console.WriteLine(equation + " = " + result.ToString("0.##"));
+        var equation = option.Operator.ToUpperInvariant() switch
+        {
+            "ADD" => $"{string.Join(" + ", numbers)} = {result}",
+            "SUB" => $"{string.Join(" - ", numbers)} = {result}",
+            "MUL" => $"{string.Join(" * ", numbers)} = {result}",
+            "DIV" => $"{string.Join(" / ", numbers)} = {result}",
+            _ => "Invalid Argument!"
+        };
+
+        System.Console.WriteLine($"Result: {equation}");
         System.Console.WriteLine();
     }
 
@@ -90,8 +96,7 @@ internal static class Program
 
             .AddNamedOption(o => o.Operator,
                 o => o.WithDescription("Defines operator type of the operation.")
-                    .WithAllowedValues("+", "-", "*", "/")
-                    .WithDefaultValue("+"),
-                mustHaveOneValue: false, mandatoryOption: true);
+                    .WithAllowedValues("ADD", "SUB", "MUL", "DIV"),
+                mandatoryOption: true);
     }
 }

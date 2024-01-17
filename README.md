@@ -3,7 +3,7 @@
 
 # Command Line Arguments Parser Library for .Net
 
-**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently in under development and this documentation is for version v1.0.0.
+**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently in under development and this documentation is for version v1.0.1.
 
 ## Quick Start Example
 
@@ -85,5 +85,42 @@ In this documentation, you learn how to:
 - Configure option and value counts.
 - Configure sequential values.
 - Configure option usage and decription texts.
+
+### Command-line syntax 
+
+There are two kinds of option: Named options and Value options
+
+### 1. Named options
+
+If an option has an alias, it is called a named option. An alias prefix 
+CLIs typically prefix the option name with two hyphens (--) or two hyphen (-) or slash (/). 
+These prefixes are configurable. There are 5 types of alias prefix configuration.
+
+1. Allow single dash (-) for all aliases</br>
+   Valid alias: -o, -start
+2. Allow single dash (-) for only short aliases</br>
+   Valid alias: -o
+3. Allow double dash (--) for all aliases</br>
+   Valid alias: --o, --start
+4. Allow double dash (--) for only long aliases</br>
+   Valid alias: --start
+5. Allow forvard slash (/)  for all aliases</br>
+   Valid alias: /o /start
+
+If you want to allow only short aliases with single dash. You can configure your parser with the code below. Then parser allows only -v and -c aliases.
+```
+var parser = CommandLine.CreateParser<MyOptions>(OptionPrefixRules.AllowSingleDashShortAlias)
+    .AddNamedOption(s => s.Value)
+    .AddNamedOption(s => s.Count)
+    .Build();
+```
+
+Default alias prefix rules of the ArgumentParser are 2, 4 and 5. The following example shows valid options for the default rule:
+```
+./> myapp --open file.txt -r 10 /verbosity quiet
+```
+
+This input is parsed by the library into options (--open file.txt), (-r 10), (/verbosity quiet). 
+
 
 Soon, i will add detailed documentation and describe the topics above!

@@ -21,8 +21,8 @@ namespace QuickStart;
 
 internal class CalculatorOptions
 {
-    public double LeftOperand { get; set; }
-    public double RightOperand { get; set; }
+    public double Left { get; set; }
+    public double Right { get; set; }
     public string? Operator { get; set; }
 }
 
@@ -33,12 +33,12 @@ internal static class Program
         try
         {
             var parser = CommandLine.CreateParser<CalculatorOptions>()
-                .AddNamedOption(p => p.LeftOperand)
-                .AddNamedOption(p => p.RightOperand)
+                .AddNamedOption(p => p.Left)
+                .AddNamedOption(p => p.Right)
                 .AddNamedOption(o => o.Operator)
                 .Build();
 
-            parser.Run(args, EvaluateOption);
+            parser.Run(args, EvaluateOptions);
         }
         catch (System.Exception ex)
         {
@@ -46,17 +46,17 @@ internal static class Program
         }
     }
 
-    private static void EvaluateOption(IArgumentParser<CalculatorOptions> parser, CalculatorOptions option)
+    private static void EvaluateOptions(IArgumentParser<CalculatorOptions> parser, CalculatorOptions options)
     {
-        if (!parser.IsValid || string.IsNullOrWhiteSpace(option.Operator))
+        if (!parser.IsValid || string.IsNullOrWhiteSpace(options.Operator))
             return;
 
-        var result = option.Operator.ToUpperInvariant() switch
+        var result = options.Operator.ToUpperInvariant() switch
         {
-            "ADD" => $"{option.LeftOperand} + {option.RightOperand} = {option.LeftOperand + option.RightOperand}",
-            "SUB" => $"{option.LeftOperand} - {option.RightOperand} = {option.LeftOperand - option.RightOperand}",
-            "MUL" => $"{option.LeftOperand} * {option.RightOperand} = {option.LeftOperand * option.RightOperand}",
-            "DIV" => $"{option.LeftOperand} / {option.RightOperand} = {option.LeftOperand / option.RightOperand}",
+            "ADD" => $"{options.Left} + {options.Right} = {options.Left + options.Right}",
+            "SUB" => $"{options.Left} - {options.Right} = {options.Left - options.Right}",
+            "MUL" => $"{options.Left} * {options.Right} = {options.Left * options.Right}",
+            "DIV" => $"{options.Left} / {options.Right} = {options.Left / options.Right}",
             _ => "Invalid argument!"
         };
 

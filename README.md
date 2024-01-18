@@ -76,7 +76,7 @@ This documentation shows how to create a .NET command-line app that uses the Oak
 
 In this documentation, you learn how to:
 
-- Create switch, counter, named and value options.
+- Create named and value options.
 - Specify default value for options.
 - Specify allowed values for options.
 - Create aliases for named options.
@@ -84,7 +84,8 @@ In this documentation, you learn how to:
 - Use custom code for parsing and validating options.
 - Configure option and value counts.
 - Configure sequential values.
-- Configure option usage and decription texts.
+- Configure option usage and description texts.
+- Use built-in ***help*** and ***version*** options.
 
 ### Command-line syntax 
 
@@ -92,35 +93,33 @@ There are two kinds of option: Named options and Value options
 
 ### 1. Named options
 
-If an option has an alias, it is called a named option. An alias prefix 
-CLIs typically prefix the option name with two hyphens (--) or two hyphen (-) or slash (/). 
-These prefixes are configurable. There are 5 types of alias prefix configuration.
+If an option has an alias, it is called a named option. Prefix of an alias can be two hyphens (--), one hyphen (-) or forward slash (/). 
+These are some valid commands according to the default alias prefix rules.
 
-1. Allow single dash (-) for all aliases</br>
-   Valid alias: -o, -start
-2. Allow single dash (-) for only short aliases</br>
-   Valid alias: -o
-3. Allow double dash (--) for all aliases</br>
-   Valid alias: --o, --start
-4. Allow double dash (--) for only long aliases</br>
-   Valid alias: --start
-5. Allow forvard slash (/)  for all aliases</br>
-   Valid alias: /o /start
-
-If you want to allow only short aliases with single dash. You can configure your parser with the code below. Then parser allows only -v and -c aliases.
 ```
-var parser = CommandLine.CreateParser<MyOptions>(OptionPrefixRules.AllowSingleDashShortAlias)
-    .AddNamedOption(s => s.Value)
-    .AddNamedOption(s => s.Count)
-    .Build();
+./> myapp --open file.txt --read 100 --verbosity quiet
+./> myapp /open file.txt /read 100 /verbosity quiet
+./> myapp -o file.txt -r 100 -v quiet
 ```
 
-Default alias prefix rules of the ArgumentParser are 2, 4 and 5. The following example shows valid options for the default rule:
-```
-./> myapp --open file.txt -r 10 /verbosity quiet
-```
+First command is parsed by the library into these options: (--open file.txt), (--read 10), (--verbosity quiet). 
+Please see [Parsing Rules](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/ParsingRules.md) for detailed parsing settings.
 
-This input is parsed by the library into options (--open file.txt), (-r 10), (/verbosity quiet). 
+There are 4 types of named option.
 
+1. Scalar Named Option
+   Scalar named option requires zero or one argument value. Option name may be repeated more than one time. Scalar named option grabs only last value.</br>
+   Example: --number 123 --number 456 (number: 456)
+2. Sequential Named Option
+   Sequential named option requires one or more argument values. Option name may be repeated more than one time. A sequential named option grabs all values.
+   Example: --numbers 123 --numbers 456 (numbers: {123,456})
+3. Switch Option
+   Switch option is a boolean type. If it is passed in the command-line, it default value will be true.
+   Example: --start (start: true)
+4. Counter Option
+   Counter option counts occurences of the option in the command-line.
+   Example: --next --next -n -n /n /next (next: 6)
+
+Please see [Named Options](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/NamedOptions.md) for detailed named option usages and settings.
 
 Soon, i will add detailed documentation and describe the topics above!

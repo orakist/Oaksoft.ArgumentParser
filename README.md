@@ -134,7 +134,7 @@ Please see [Named Options](https://github.com/orakist/Oaksoft.ArgumentParser/blo
 - See following examples.
 
 ```cs
-internal class ExampleOptions
+class ExampleOptions
 {
     public int Count { get; set; }
     public double Total { get; set; }

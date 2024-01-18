@@ -22,7 +22,6 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine("Fatal error occurred.");
             System.Console.WriteLine(ex.Message);
         }
     }

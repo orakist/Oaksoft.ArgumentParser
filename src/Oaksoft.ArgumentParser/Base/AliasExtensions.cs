@@ -39,7 +39,7 @@ internal static class AliasExtensions
             return BuilderErrors.ReservedOptionName.With(name, names);
         }
 
-        return string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        return string.Join(' ', name.Split(' ').Select(n => n.Trim()).Where(s => s.Length > 0));
     }
 
     public static Result<string> ValidateAlias(this string alias)
@@ -436,7 +436,9 @@ internal static class AliasExtensions
 
         return string.Join("", validChars)
             .TrimStart(_suggestionTrimChars)
-            .Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            .Split(' ')
+            .Select(n => n.Trim())
+            .Where(s => s.Length > 0);
     }
 
     private static string TrimStartPrefixes(string input)
@@ -445,6 +447,6 @@ internal static class AliasExtensions
             input = input[1..];
 
         input = input.Replace('_', ' ').Replace('-', ' ');
-        return string.Join('-', input.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+        return string.Join('-', input.Split(' ').Select(n => n.Trim()).Where(s => s.Length > 0));
     }
 }

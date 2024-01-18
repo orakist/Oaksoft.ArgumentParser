@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Oaksoft.ArgumentParser.Console": {
+      "commandName": "Project",
+      "commandLineArgs": "--left-operand:12 --operator:mul --right-operand:15"
+    }
+  }
+}

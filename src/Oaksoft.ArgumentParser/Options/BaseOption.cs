@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Errors;
@@ -68,7 +68,7 @@ internal abstract class BaseOption : IBaseOption
             throw BuilderErrors.EmptyValue.WithName(KeyProperty.Name).ToException(nameof(usage));
         }
 
-        Usage = string.Join(' ', usage.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        Usage = string.Join(' ', usage.Split(' ').Select(n => n.Trim()).Where(s => s.Length > 0));
     }
 
     public void SetDescription(string description)

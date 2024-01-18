@@ -13,7 +13,7 @@ internal sealed class SequentialNamedOption<TValue>
 {
     public bool AllowSequentialValues { get; private set; }
 
-    public string Alias => _prefixAliases.MinBy(k => k.Length)!;
+    public string Alias => _prefixAliases.OrderBy(k => k.Length).First();
 
     public List<string> Aliases => _prefixAliases.ToList();
 

@@ -19,6 +19,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{BFDDA916-877A-4132-8688-3B32970A98BB}"
 	ProjectSection(SolutionItems) = preProject
 		docs\NamedOptions.md = docs\NamedOptions.md
+		docs\ParsingRules.md = docs\ParsingRules.md
+		docs\Tutorial.md = docs\Tutorial.md
 	EndProjectSection
 EndProject
 Global

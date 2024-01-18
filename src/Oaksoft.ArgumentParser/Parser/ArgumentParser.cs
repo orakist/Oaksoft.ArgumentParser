@@ -56,17 +56,14 @@ internal sealed class ArgumentParser<TOptions>
 
         while (true)
         {
-            Console.Write("./> ");
-
-            var options = Console.In.ReadLine();
-            if (options is "q" or "Q")
+            var args = GetInputArguments();
+            if (args.Length == 1 && args[0] is "q" or "Q")
                 break;
 
-            var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            if (!(arguments?.Length > 0))
+            if (args.Length < 1)
                 continue;
 
-            var result = Parse(arguments);
+            var result = Parse(args);
             if (!IsValid)
                 continue;
 
@@ -80,24 +77,31 @@ internal sealed class ArgumentParser<TOptions>
 
         while (true)
         {
-            Console.Write("./> ");
-
-            var options = Console.In.ReadLine();
-            if (options is "q" or "Q")
+            var args = GetInputArguments();
+            if (args.Length == 1 && args[0] is "q" or "Q")
                 break;
 
-            var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            if (!(arguments?.Length > 0))
+            if (args.Length < 1)
                 continue;
 
-            callback.Invoke(this, Parse(arguments));
+            callback.Invoke(this, Parse(args));
         }
     }
 
     public void Run(string[] args, Action<TOptions> callback)
     {
-        var loopCount = 0;
-        while (true)
+        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+
+        if (args.Length < 1)
+        {
+            args = GetInputArguments();
+        }
+        else
+        {
+            Console.WriteLine($"./> {string.Join(' ', args)}");
+        }
+
+        while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
         {
             if (args.Length > 0)
             {
@@ -109,47 +113,41 @@ internal sealed class ArgumentParser<TOptions>
                 }
             }
 
-            if (loopCount < 1)
-            {
-                Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
-            }
-
-            Console.Write("./> ");
-            var options = Console.In.ReadLine();
-            if (options is "q" or "Q")
-                break;
-
-            var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            args = arguments ?? Array.Empty<string>();
-            ++loopCount;
+            args = GetInputArguments();
         }
     }
 
     public void Run(string[] args, Action<IArgumentParser<TOptions>, TOptions> callback)
     {
-        var loopCount = 0;
+        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
 
-        while (true)
+        if (args.Length < 1)
+        {
+            args = GetInputArguments();
+        }
+        else
+        {
+            Console.WriteLine($"./> {string.Join(' ', args)}");
+        }
+
+        while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
         {
             if (args.Length > 0)
             {
                 callback.Invoke(this, Parse(args));
             }
 
-            if (loopCount < 1)
-            {
-                Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
-            }
-
-            Console.Write("./> ");
-            var options = Console.In.ReadLine();
-            if (options is "q" or "Q")
-                break;
-
-            var arguments = options?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            args = arguments ?? Array.Empty<string>();
-            ++loopCount;
+            args = GetInputArguments();
         }
+    }
+
+    private static string[] GetInputArguments()
+    {
+        Console.Write("./> ");
+        var commandLine = Console.In.ReadLine();
+
+        return commandLine?.SplitToArguments().ToArray() ??
+               Array.Empty<string>();
     }
 
     private void InitializePropertyInfos()

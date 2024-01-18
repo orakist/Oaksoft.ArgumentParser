@@ -5,7 +5,7 @@ internal class TokenItem
     /// <summary>
     /// Represents a command line argument element
     /// </summary>
-    public string Token { get; init; } = default!;
+    public string Token { get; set; } = default!;
 
     /// <summary>
     /// If exists, represents alias part of the token

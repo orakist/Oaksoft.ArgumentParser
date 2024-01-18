@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;netstandard2.1</TargetFrameworks>
     <AssemblyName>Oaksoft.ArgumentParser</AssemblyName>
     <RootNamespace>Oaksoft.ArgumentParser</RootNamespace>
     <Nullable>enable</Nullable>
-    <VersionPrefix>1.0.1</VersionPrefix>
+    <VersionPrefix>1.1.0</VersionPrefix>
     <Version>$(VersionPrefix)</Version>
     <Authors>orakist</Authors>
     <Title>Oaksoft.ArgumentParser</Title>
@@ -16,6 +16,7 @@
     <Company>$(AssemblyName)</Company>
     <Description>Command Line Argument Parser Library offers to clean and simple API for manipulating command line arguments and related tasks.</Description>
     <Copyright>Copyright (c) 2023 - 2024</Copyright>
+    <LangVersion>10.0</LangVersion>
     <PackageProjectUrl>https://github.com/orakist/Oaksoft.ArgumentParser</PackageProjectUrl>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -27,12 +28,6 @@
   <ItemGroup>
     <None Include="..\..\LICENSE.md" Pack="true" PackagePath="$(PackageLicenseFile)" />
     <None Include="..\..\README.md" Pack="true" PackagePath="$(PackageReadmeFile)" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <AssemblyAttribute Include="Oaksoft.ArgumentParser.Base.BuildDateTimeAttribute">
-      <_Parameter1>$([System.DateTime]::Now.ToString("yyyy-MM-dd HH:mm:ss"))</_Parameter1>
-    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>

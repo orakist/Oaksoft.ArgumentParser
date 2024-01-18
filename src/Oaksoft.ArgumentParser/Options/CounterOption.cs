@@ -105,7 +105,7 @@ internal class CounterOption : BaseValueOption, ICounterOption
 
                 // parse --option (optional value)
                 // parse --option val (single value)
-                if (token.Value is null)
+                if (token.Value is null && ValueArity.Max > 0)
                 {
                     if (i + 1 < tokens.Length && tokens[i + 1].IsOnlyValue)
                     {
@@ -113,7 +113,7 @@ internal class CounterOption : BaseValueOption, ICounterOption
                         _valueTokens[^1] = tokens[i + 1].Value!;
                     }
                 }
-                else
+                else if (token.Value is not null)
                 {
                     // parse --option=val or -o=val or -oval
                     // parse --option:val or -o:val

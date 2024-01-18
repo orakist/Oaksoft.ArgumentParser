@@ -13,7 +13,7 @@ internal sealed class SequentialNamedOption<TValue>
 {
     public bool AllowSequentialValues { get; private set; }
 
-    public string Alias => _prefixAliases.MinBy(k => k.Length)!;
+    public string Alias => _prefixAliases.OrderBy(k => k.Length).First();
 
     public List<string> Aliases => _prefixAliases.ToList();
 
@@ -117,7 +117,7 @@ internal sealed class SequentialNamedOption<TValue>
                 // parse --option (optional value)
                 // parse --option val (single value)
                 // parse --option val1 val2 val3 (sequential values)
-                if (token.Value is null)
+                if (token.Value is null && ValueArity.Max > 0)
                 {
                     for (; i + 1 < tokens.Length; ++i)
                     {
@@ -132,7 +132,7 @@ internal sealed class SequentialNamedOption<TValue>
                             break;
                     }
                 }
-                else
+                else if (token.Value is not null)
                 {                
                     // parse --option=val or -o=val or -oval
                     // parse --option:val or -o:val

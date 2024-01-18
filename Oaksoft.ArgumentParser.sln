@@ -16,6 +16,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oaksoft.ArgumentParser.Tests", "test\Oaksoft.ArgumentParser.Tests\Oaksoft.ArgumentParser.Tests.csproj", "{3BE2C797-5704-4610-9AA4-6D719FDE78E2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{BFDDA916-877A-4132-8688-3B32970A98BB}"
+	ProjectSection(SolutionItems) = preProject
+		docs\NamedOptions.md = docs\NamedOptions.md
+		docs\ParsingRules.md = docs\ParsingRules.md
+		docs\Tutorial.md = docs\Tutorial.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

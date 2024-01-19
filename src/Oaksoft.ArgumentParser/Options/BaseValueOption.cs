@@ -90,10 +90,10 @@ internal abstract class BaseSequentialValueOption<TValue>
 
         var resultValues = GetValidatedValues();
 
-        if (_listPredicates.Any(predicate => !predicate.Invoke(resultValues)))
+        if (_listPredicates.Any(p => !p.Invoke(resultValues)))
         {
             var values = string.Join(", ", _inputValues);
-            throw ParserErrors.PredicateFailure.ToException(values);
+            throw ParserErrors.ListPredicateFailure.ToException(values);
         }
 
         _resultValues.AddRange(resultValues);
@@ -231,18 +231,17 @@ internal abstract class BaseAllowedValuesOption<TValue>
 
         ValidateByAllowedValues(resultValues);
 
-        foreach (var predicate in _predicates)
-        {
-            for (var i = 0; i < resultValues.Count; ++i)
-            {
-                if (predicate(resultValues[i]))
-                    continue;
+        var invalidValues = resultValues
+            .Select((v, i) => (Value: v, Index: i))
+            .Where(n => _predicates.Any(p => !p.Invoke(n.Value)))
+            .Select(n => _inputValues[n.Index])
+            .ToList();
 
-                throw ParserErrors.PredicateFailure.ToException(_inputValues[i]);
-            }
-        }
+        if (invalidValues.Count < 1) 
+            return resultValues;
 
-        return resultValues;
+        var values = string.Join(", ", invalidValues);
+        throw ParserErrors.PredicateFailure.ToException(values);
     }
 
     private void ValidateByAllowedValues(IReadOnlyList<TValue> inputValues)

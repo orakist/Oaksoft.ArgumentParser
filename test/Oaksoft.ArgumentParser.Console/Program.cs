@@ -18,7 +18,7 @@ internal static class Program
                 .ConfigureOptions()
                 .Build();
 
-            parser.Run(args, EvaluateOption);
+            parser.Run(args, EvaluateOptions);
         }
         catch (Exception ex)
         {
@@ -26,26 +26,26 @@ internal static class Program
         }
     }
 
-    private static void EvaluateOption(IArgumentParser<CalculatorOptions> parser, CalculatorOptions option)
+    private static void EvaluateOptions(IArgumentParser<CalculatorOptions> parser, CalculatorOptions options)
     {
-        if (!parser.IsValid || string.IsNullOrEmpty(option.Operator))
+        if (!parser.IsValid || string.IsNullOrEmpty(options.Operator))
             return;
 
         var numbers = new List<double>();
-        if (option.LeftOperand.HasValue || option.RightOperand.HasValue)
+        if (options.LeftOperand.HasValue || options.RightOperand.HasValue)
         {
-            if (option.LeftOperand.HasValue)
-                numbers.Add(option.LeftOperand.Value);
-            if (option.RightOperand.HasValue)
-                numbers.Add(option.RightOperand.Value);
+            if (options.LeftOperand.HasValue)
+                numbers.Add(options.LeftOperand.Value);
+            if (options.RightOperand.HasValue)
+                numbers.Add(options.RightOperand.Value);
         }
-        else if (option.Numbers?.Any() == true)
+        else if (options.Numbers?.Any() == true)
         {
-            numbers.AddRange(option.Numbers);
+            numbers.AddRange(options.Numbers);
         }
-        else if (option.Integers?.Any() == true)
+        else if (options.Integers?.Any() == true)
         {
-            numbers.AddRange(option.Integers.Select(i => (double)i));
+            numbers.AddRange(options.Integers.Select(i => (double)i));
         }
 
         if (numbers.Count < 1)
@@ -54,7 +54,7 @@ internal static class Program
             return;
         }
 
-        var result = option.Operator.ToUpperInvariant() switch
+        var result = options.Operator.ToUpperInvariant() switch
         {
             "ADD" => numbers.Sum(),
             "SUB" => numbers.First() - numbers.Skip(1).Sum(),
@@ -63,7 +63,7 @@ internal static class Program
             _ => 0
         };
 
-        var equation = option.Operator.ToUpperInvariant() switch
+        var equation = options.Operator.ToUpperInvariant() switch
         {
             "ADD" => $"{string.Join(" + ", numbers)} = {result}",
             "SUB" => $"{string.Join(" - ", numbers)} = {result}",

@@ -60,11 +60,8 @@ internal sealed class ArgumentParser<TOptions>
             if (args.Length == 1 && args[0] is "q" or "Q")
                 break;
 
-            if (args.Length < 1)
-                continue;
-
             var result = Parse(args);
-            if (!IsValid)
+            if (!IsValid || IsEmpty || IsVersionOption || IsHelpOption)
                 continue;
 
             callback.Invoke(result);
@@ -81,10 +78,11 @@ internal sealed class ArgumentParser<TOptions>
             if (args.Length == 1 && args[0] is "q" or "Q")
                 break;
 
-            if (args.Length < 1)
+            var result = Parse(args);
+            if (IsEmpty)
                 continue;
 
-            callback.Invoke(this, Parse(args));
+            callback.Invoke(this, result);
         }
     }
 
@@ -103,14 +101,11 @@ internal sealed class ArgumentParser<TOptions>
 
         while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
         {
-            if (args.Length > 0)
-            {
-                var result = Parse(args);
+            var result = Parse(args);
 
-                if (IsValid)
-                {
-                    callback.Invoke(result);
-                }
+            if (IsValid && !IsEmpty && !IsHelpOption && !IsVersionOption)
+            {
+                callback.Invoke(result);
             }
 
             args = GetInputArguments();
@@ -132,9 +127,11 @@ internal sealed class ArgumentParser<TOptions>
 
         while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
         {
-            if (args.Length > 0)
+            var result = Parse(args);
+
+            if (!IsEmpty)
             {
-                callback.Invoke(this, Parse(args));
+                callback.Invoke(this, result);
             }
 
             args = GetInputArguments();

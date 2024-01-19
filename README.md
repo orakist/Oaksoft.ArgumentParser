@@ -4,7 +4,8 @@
 
 # Command Line Arguments Parser Library for .Net
 
-**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently in under development and this documentation is for version v1.0.1.
+**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently under development but latest version is stable. And this documentation is for version **v1.2.0.**</br>
+This library is compatible with **.Net 6.0+**, **.Net Standard 2.1**
 
 ## Quick Start Example
 

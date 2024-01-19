@@ -155,7 +155,7 @@ public class OptionValuePredicateTests
         option.ResultValues.ShouldBeEmpty();
 
         sut.Errors.ShouldNotBeEmpty();
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.PredicateFailure.Code);
+        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.ListPredicateFailure.Code);
         sut.Errors[0].Message.ShouldStartWith(string.Format(sut.Errors[0].Error.Format, option.InputValues[0]));
     }
 

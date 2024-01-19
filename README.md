@@ -61,7 +61,7 @@ internal static class Program
             _ => "Invalid argument!"
         };
 
-     System.Console.WriteLine($"Result: {result}");
+        System.Console.WriteLine($"Result: {result}");
     }
 }
 ```

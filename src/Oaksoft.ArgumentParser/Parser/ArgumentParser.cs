@@ -2,6 +2,8 @@
 using System.Linq;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Builder;
+using Oaksoft.ArgumentParser.Errors;
+using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
@@ -47,6 +49,8 @@ internal sealed class ArgumentParser<TOptions>
     {
         ParseTokens(arguments);
 
+        AutoPrintErrorText();
+
         return _appOptions;
     }
 
@@ -60,11 +64,22 @@ internal sealed class ArgumentParser<TOptions>
             if (args.Length == 1 && args[0] is "q" or "Q")
                 break;
 
-            var result = Parse(args);
-            if (!IsValid || IsEmpty || IsVersionOption || IsHelpOption)
-                continue;
+            ParseTokens(args);
 
-            callback.Invoke(result);
+            try
+            {
+                if (IsValid && !IsEmpty && !IsHelpOption && !IsVersionOption)
+                {
+                    callback.Invoke(_appOptions);
+                }
+            }
+            catch (Exception ex)
+            {
+                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
+                _errors.Add(error.With());
+            }
+
+            AutoPrintErrorText();
         }
     }
 
@@ -78,11 +93,22 @@ internal sealed class ArgumentParser<TOptions>
             if (args.Length == 1 && args[0] is "q" or "Q")
                 break;
 
-            var result = Parse(args);
-            if (IsEmpty)
-                continue;
+            ParseTokens(args);
 
-            callback.Invoke(this, result);
+            try
+            {
+                if (!IsEmpty)
+                {
+                    callback.Invoke(this, _appOptions);
+                }
+            }
+            catch (Exception ex)
+            {
+                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
+                _errors.Add(error.With());
+            }
+
+            AutoPrintErrorText();
         }
     }
 
@@ -101,12 +127,22 @@ internal sealed class ArgumentParser<TOptions>
 
         while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
         {
-            var result = Parse(args);
+            ParseTokens(args);
 
-            if (IsValid && !IsEmpty && !IsHelpOption && !IsVersionOption)
+            try
             {
-                callback.Invoke(result);
+                if (IsValid && !IsEmpty && !IsHelpOption && !IsVersionOption)
+                {
+                    callback.Invoke(_appOptions);
+                }
             }
+            catch (Exception ex)
+            {
+                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
+                _errors.Add(error.With());
+            }
+
+            AutoPrintErrorText();
 
             args = GetInputArguments();
         }
@@ -127,12 +163,21 @@ internal sealed class ArgumentParser<TOptions>
 
         while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
         {
-            var result = Parse(args);
-
-            if (!IsEmpty)
+            ParseTokens(args);
+            try
             {
-                callback.Invoke(this, result);
+                if (!IsEmpty)
+                {
+                    callback.Invoke(this, _appOptions);
+                }
             }
+            catch (Exception ex)
+            {
+                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
+                _errors.Add(error.With());
+            }
+
+            AutoPrintErrorText();
 
             args = GetInputArguments();
         }

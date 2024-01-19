@@ -36,8 +36,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected readonly List<BaseOption> _baseOptions;
     protected readonly List<PropertyInfo> _propertyInfos;
-
-    private readonly List<IErrorMessage> _errors;
+    protected readonly List<IErrorMessage> _errors;
     private readonly List<string> _allAliases;
 
     protected BaseArgumentParser(
@@ -144,10 +143,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             var error = new ErrorInfo($"{ParserErrors.Name}.UnexpectedError", ex.Message);
             _errors.Add(error.With());
-        }
-        finally
-        {
-            AutoPrintErrorText();
         }
     }
 
@@ -343,7 +338,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         Console.WriteLine();
     }
 
-    private void AutoPrintErrorText()
+    protected void AutoPrintErrorText()
     {
         if (Settings.AutoPrintErrors != true || _errors.Count < 1)
             return;

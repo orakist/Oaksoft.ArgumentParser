@@ -12,7 +12,6 @@ This library is compatible with **.Net 6.0+**, **.Net Standard 2.1**
 1. Create a class to define your options.
 2. Register your options and build the parser.
 3. See following example for a quick start.
-4. Please see [Tutorial Example](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/Tutorial.md) for a detailed example.
 
 ```cs
 using Oaksoft.ArgumentParser;
@@ -48,9 +47,9 @@ internal static class Program
         }
     }
 
-    private static void EvaluateOptions(IArgumentParser<CalculatorOptions> parser, CalculatorOptions options)
+    private static void EvaluateOptions(CalculatorOptions options)
     {
-        if (!parser.IsValid || string.IsNullOrWhiteSpace(options.Operator))
+        if (string.IsNullOrWhiteSpace(options.Operator))
             return;
 
         var result = options.Operator.ToUpperInvariant() switch
@@ -62,8 +61,7 @@ internal static class Program
             _ => "Invalid argument!"
         };
 
-        System.Console.WriteLine($"Result: {result}");
-        System.Console.WriteLine();
+     System.Console.WriteLine($"Result: {result}");
     }
 }
 ```
@@ -77,7 +75,9 @@ Result: 13 * 8 = 104
 ```
 
 ## Library Features & Overview
-This documentation shows how to create a .NET command-line app that uses the Oaksoft.ArgumentParser library. You'll begin by creating a simple option. Then you'll add to that base, creating a more complex app that contains multiple options.
+This documentation shows how to create a .NET command-line app that uses the Oaksoft.ArgumentParser library.
+
+Please see [Tutorial with Examples](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/Tutorial.md) for a detailed tutorial. In this tutorial, you'll begin by creating a simple example. Then you'll add to that base, creating a more complex app that contains advanced scenarios.
 
 In this documentation, you learn how to:
 

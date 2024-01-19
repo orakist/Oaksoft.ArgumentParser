@@ -428,7 +428,7 @@ public static void Parse(IArgumentParser<CalculatorOptions> parser, string[] arg
 }
 ```
 
-We updated the parser to calculate more than two numbers. ArgumentParser can parse many types of sequential inputs. Some of the these cases are:
+We updated the parser to calculate more than two numbers. ArgumentParser can parse many types of sequential inputs. Some of the supported sequential value input cases are:
 - Multiple options with values, e.g: -n 5 -n 3 -n 2 => means -n=5,3,2
 - Options with different aliases, e.g: --numbers 5 /numbers 7 -n 3 /n 6  => means -n=5,7,3,6
 - Options with sequential values, e.g: -n 5,7 -n 3,6  => means -n=5,7,3,6

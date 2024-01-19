@@ -4,7 +4,7 @@
 
 # Command Line Arguments Parser Library for .Net
 
-**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently under development but latest version is stable. And this documentation is for version **v1.2.0.**</br>
+**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently under development but latest version is stable. And this documentation is for version **v1.2.0.**\
 This library is compatible with **.Net 6.0+**, **.Net Standard 2.1**
 
 ## Quick Start Example
@@ -107,22 +107,22 @@ These are some valid commands according to the default alias prefix rules.
 ./> myapp -o file.txt -r 100 -v quiet
 ```
 
-First command is parsed by the library into these options: (--open file.txt), (--read 10), (--verbosity quiet).</br>
+First command is parsed by the library into these options: (--open file.txt), (--read 10), (--verbosity quiet).\
 Please see [Parsing Rules](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/ParsingRules.md) for detailed parsing settings.
 
 There are 4 types of named options.
 
 1. Scalar Named Option
-   Scalar named option requires zero or one argument value. Option name may be repeated more than one time. Scalar named option grabs only last value.</br>
+   Scalar named option requires zero or one argument value. Option name may be repeated more than one time. Scalar named option grabs only last value.\
    Example: --number 123 --number 456 (number: 456)
 2. Sequential Named Option
-   Sequential named option requires one or more argument values. Option name may be repeated more than one time. A sequential named option grabs all values.
+   Sequential named option requires one or more argument values. Option name may be repeated more than one time. A sequential named option grabs all values.\
    Example: --numbers 123 321 --numbers 456|789 (numbers: {123, 321, 456, 789})
 3. Switch Option
-   Switch option is a boolean type. If it is passed in the command-line, it default value will be true.
+   Switch option is a boolean type. If it is passed in the command-line, it default value will be true.\
    Example: --start (start: true)
 4. Counter Option
-   Counter option counts occurences of the option in the command-line.
+   Counter option counts occurences of the option in the command-line.\
    Example: --next --next -n -n /n /next (next: 6)
 
 Please see [Named Options](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/NamedOptions.md) for detailed named option usages and settings.

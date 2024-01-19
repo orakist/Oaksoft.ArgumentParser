@@ -209,7 +209,7 @@ We can customize option registration to satisfy following cases.
 - Allow only add, sub, mul, div and pow values for calculate option.
 - Make add value default for calculate option.
 
-Before updating the application this is the parsing output for these cases.
+Before updating the application, this is the parsing output for these cases.
 
 ```
 >>> Missing Numbers Case: This should not be allowed.
@@ -224,7 +224,7 @@ Inputs: -l 5 -r 3 -c
 01 - At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
 ```
 
-We can cover the all cases in the output above this simple changes. See the sample code below. To satisfy these case;
+We can cover the all cases in the output above with simple changes. See the sample code below. To satisfy these case;
 - Add custom description to options.
 - Set allowed values of calculate option.
 - Set default value of calculate option.
@@ -295,4 +295,71 @@ These are command line options of this application.
          Shows version information.
 
 Usage: [-l <value>] [-r <value>] [-c (value)] [-h] [--ver]
+```
+
+### Tutorial Step 5
+
+We can customize option registration to satisfy following cases.
+- Don't allow negative numbers.
+- Parse the numbers in parentheses.
+  
+Before updating the application, this is the parsing output for these cases.
+
+```
+>>> Negative Number Arguments Case: Negative numbers should not allowed.
+Inputs: -l -5 -r -1 -c add
+Result: -5 + -1 = -6
+>>> Parentheses Number Arguments Case : It should parse numbers in parentheses.
+Inputs: -l (5.1) -r (2.4) -c add
+     Error(s)!
+01 - Invalid option value '(5.1)' found!, Option: Left
+02 - Invalid option value '(2.4)' found!, Option: Right
+```
+
+We can cover the all cases in the output above with simple changes. See the sample code below. To satisfy these case;
+- Add predicates to left and right options. You can add multiple predicates to an option.
+- Set try parse callbacks of left and right options.
+
+```cs
+private static bool TryParseCustom(string value, out double result)
+{
+    if (value.StartsWith('(') && value.EndsWith(')'))
+        value = value.Substring(1, value.Length - 2);
+
+    return double.TryParse(value, out result);
+}
+
+public static IArgumentParser<CalculatorOptions> Build()
+{
+    return CommandLine.CreateParser<CalculatorOptions>()
+        .AddNamedOption(p => p.Left,
+            o => o.WithDescription("Left operand of the operation.")
+                .AddPredicate(v => v >= 0)
+                .WithTryParseCallback(TryParseCustom),
+            mandatoryOption: true)
+        .AddNamedOption(p => p.Right,
+            o => o.WithDescription("Right operand of the operation.")
+                .AddPredicate(v => v >= 0)
+                .WithTryParseCallback(TryParseCustom),
+            mandatoryOption: true)
+        .AddNamedOption(o => o.Calculate,
+            o => o.WithDescription("Defines operator type of the calculation.")
+                .WithAllowedValues("add", "sub", "mul", "div", "pow")
+                .WithDefaultValue("add"),
+            mandatoryOption: true, mustHaveOneValue: false)
+        .Build();
+}
+```
+
+As you can see it is very simple. Now it covers new parsing and validation cases. Compare the output.
+
+```
+>>> Negative Number Arguments Case
+Inputs: -l -5 -r -1 -c add
+     Error(s)!
+01 - Option value(s) validation failed. Value(s): -5, Option: Left
+02 - Option value(s) validation failed. Value(s): -1, Option: Right
+>>> Parentheses Number Arguments Case
+Inputs: -l (5.1) -r (2.4) -c add
+Result: 5.1 + 2.4 = 7.5
 ```

@@ -2,29 +2,29 @@
 
 public interface IParserSettings
 {
-    bool? AutoPrintHeader { get; }
+    bool AutoPrintHeader { get; }
 
-    bool? AutoPrintErrors { get; }
+    bool AutoPrintErrors { get; }
 
-    bool? AutoPrintHelp { get; }
+    bool AutoPrintHelp { get; }
 
-    bool? AutoPrintVersion { get; }
+    bool AutoPrintVersion { get; }
 
-    int? HelpDisplayWidth { get; }
+    int HelpDisplayWidth { get; }
 
-    bool? NewLineAfterOption { get; }
+    bool NewLineAfterOption { get; }
 
-    bool? ShowTitle { get; }
+    bool ShowTitle { get; }
 
-    bool? ShowDescription { get; }
+    bool ShowDescription { get; }
 
-    bool? EnableColoring { get; }
+    bool EnableColoring { get; }
 
     string? Title { get; }
 
     string? Description { get; }
 
-    int? MaxAliasLength { get; }
+    int MaxAliasLength { get; }
 
-    int? MaxSuggestedAliasWordCount { get; }
+    int MaxSuggestedAliasWordCount { get; }
 }

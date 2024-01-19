@@ -81,13 +81,13 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public string GetHelpText(bool? enableColoring = default)
     {
-        var coloring = enableColoring ?? Settings.EnableColoring ?? true;
+        var coloring = enableColoring ?? Settings.EnableColoring;
         return BuildHelpText(coloring).ToString();
     }
 
     public string GetErrorText(bool? enableColoring = default)
     {
-        var coloring = enableColoring ?? Settings.EnableColoring ?? true;
+        var coloring = enableColoring ?? Settings.EnableColoring;
         return BuildErrorText(coloring).ToString();
     }
 
@@ -168,7 +168,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 continue;
 
             var validAliases = option.GetAliases()
-                .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength!.Value, true)
+                .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength, true)
                 .GetOrThrow(option.KeyProperty.Name)
                 .Distinct().ToList();
 
@@ -301,7 +301,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (!IsOnlyOption(helpOption))
             return;
 
-        Console.Write(BuildHelpText(Settings.EnableColoring ?? true).ToString());
+        Console.Write(BuildHelpText(Settings.EnableColoring).ToString());
         Console.WriteLine();
     }
 
@@ -325,7 +325,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (Settings.AutoPrintErrors != true || _errors.Count < 1)
             return;
 
-        Console.Write(BuildErrorText(Settings.EnableColoring ?? true).ToString());
+        Console.Write(BuildErrorText(Settings.EnableColoring).ToString());
         Console.WriteLine();
     }
 
@@ -345,7 +345,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         TextColoring.SetEnabled(enableColoring);
 
-        var sb = BuildHeaderText(Settings.ShowTitle ?? true, Settings.ShowDescription ?? true);
+        var sb = BuildHeaderText(Settings.ShowTitle, Settings.ShowDescription);
         sb.AppendLine("These are command line options of this application.");
         sb.AppendLine();
 
@@ -402,7 +402,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
                     sb.AppendLine($"{paddingString} {description}");
             }
 
-            if (Settings.NewLineAfterOption is true)
+            if (Settings.NewLineAfterOption)
                 sb.AppendLine();
         }
 
@@ -492,12 +492,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private List<string> CreateLinesByWidth(IEnumerable<string> textWords, bool addBrackets = false)
     {
-        var displayWidth = Settings.HelpDisplayWidth!.Value;
         var textLines = new List<string> { string.Empty };
 
         foreach (var word in textWords)
         {
-            if (textLines[^1].Length > displayWidth)
+            if (textLines[^1].Length > Settings.HelpDisplayWidth)
                 textLines.Add(string.Empty);
 
             var space = textLines[^1].Length > 0 ? " " : string.Empty;
@@ -534,13 +533,13 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         // suggest aliases for option by using the registered property name
         var suggestedAliases = option.KeyProperty.Name.SuggestAliasesHeuristically(
-            aliases, CaseSensitive, Settings.MaxAliasLength!.Value, Settings.MaxSuggestedAliasWordCount!.Value);
+            aliases, CaseSensitive, Settings.MaxAliasLength, Settings.MaxSuggestedAliasWordCount);
 
         if (!CaseSensitive)
             suggestedAliases = suggestedAliases.Select(a => a.ToLowerInvariant());
 
         var validAliases = suggestedAliases
-            .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength!.Value, false)
+            .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength, false)
             .GetOrThrow(option.Name);
 
         // Can't suggest alias because all alias possible names have already been used 

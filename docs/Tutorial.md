@@ -178,3 +178,25 @@ Inputs: -l 5 -r 3 -c
 Inputs: --version
 1.0.0
 ```
+
+### Tutorial Step 3
+
+In the previous examples, it can not calculate floating point numbers. To calculate floating point numbers simply change type of your options. 
+
+```cs
+class CalculatorOptions
+{
+    public double Left { get; set; }
+    public double Right { get; set; }
+    public string? Calculate { get; set; }
+}
+```
+
+Now it can parse and calculate floating point numbers.
+
+```
+Inputs: -l 35.2 -r 1.2 -c div
+Result: 35.2 / 1.2 = 29.333333333333336
+Inputs: /left 5.1 /right 3.1 /calculate add
+Result: 5.1 + 3.1 = 8.2
+```

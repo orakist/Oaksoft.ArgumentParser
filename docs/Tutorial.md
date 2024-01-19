@@ -363,3 +363,112 @@ Inputs: -l -5 -r -1 -c add
 Inputs: -l (5.1) -r (2.4) -c add
 Result: 5.1 + 2.4 = 7.5
 ```
+
+### Tutorial Step 6
+
+Previous examples calculates only 2 numbers. But if we want to calculate more than 2 numbers. We need to apply these simple changes.
+- Create a double type sequential option.
+- Update parser builder.
+- Update result calculation
+
+```cs
+public class CalculatorOptions
+{
+    public IEnumerable<double>? Numbers { get; set; }
+
+    public string? Calculate { get; set; }
+}
+
+private static bool TryParseCustom(string value, out double result)
+{
+    if (value.StartsWith('(') && value.EndsWith(')'))
+        value = value.Substring(1, value.Length - 2);
+
+    return double.TryParse(value, out result);
+}
+
+public static IArgumentParser<CalculatorOptions> Build()
+{
+    return CommandLine.CreateParser<CalculatorOptions>()
+        .AddNamedOption(p => p.Numbers,
+            o => o.WithDescription("Defines the numbers to be calculated.")
+                .AddPredicate(v => v >= 0) // Check for negative numbers.
+                .WithTryParseCallback(TryParseCustom) // Parse numbers in parentheses.
+                .WithOptionArity(ArityType.OneOrMore) // At least one option required.
+                .WithValueArity(2, int.MaxValue)) // At least two numbers required.
+        .AddNamedOption(o => o.Calculate,
+            o => o.WithDescription("Defines operator type of the calculation.")
+                .WithAllowedValues("add", "sub", "mul", "div", "pow")
+                .WithDefaultValue("add"),
+            mandatoryOption: true, mustHaveOneValue: false)
+        .Build();
+}
+
+public static void Parse(IArgumentParser<CalculatorOptions> parser, string[] args)
+{
+    Console.WriteLine($"Inputs: {string.Join(' ', args)}");
+
+    var options = parser.Parse(args);
+
+    if (!parser.IsValid || parser.IsEmpty || parser.IsHelpOption || parser.IsVersionOption)
+        return;
+
+    var numbers = options.Numbers!.ToList();
+    var result = options.Calculate?.ToUpperInvariant() switch
+    {
+        "ADD" => $"{string.Join(" + ", numbers)} = {numbers.Sum()}",
+        "SUB" => $"{string.Join(" - ", numbers)} = {numbers.First() - numbers.Skip(1).Sum()}",
+        "MUL" => $"{string.Join(" * ", numbers)} = {numbers.Aggregate<double, double>(1, (x, y) => x * y)}",
+        "DIV" => $"{string.Join(" / ", numbers)} = {numbers.Skip(1).Aggregate(numbers.First(), (x, y) => x / y)}",
+        "POW" => $"{string.Join(" ^ ", numbers)} = {numbers.Skip(1).Aggregate(numbers.First(), Math.Pow)}",
+        _ => "Invalid Argument!"
+    };
+
+    Console.WriteLine($"Result: {result}");
+}
+```
+
+We updated the parser to calculate more than two numbers. ArgumentParser can parse many types of sequential inputs. Some of the these cases are:
+- Multiple options with values, e.g: -n 5 -n 3 -n 2 => means -n=5,3,2
+- Options with different aliases, e.g: --numbers 5 /numbers 7 -n 3 /n 6  => means -n=5,7,3,6
+- Options with sequential values, e.g: -n 5,7 -n 3,6  => means -n=5,7,3,6
+- Options with different value delimiters. Valid delimiters are (','), (';'), ('|'). e.g: -n 5;7;2|1 -n 3|6  => means -n=5,7,2,1,3,6
+- Options with different alias delimiters. Valid delimiters are ('='), (':'), (' '). e.g: -n=5;7 -n:3|6  => means -n=5,7,3,6
+- Option with omitted alias delimiter. Only single dash alias supports this. e.g: -n5;7;3;6  => means -n=5,7,3,6
+
+Check out the output below from the above code for some example sequential inputs.
+
+```
+Inputs: --numbers 5 --numbers 3 --numbers 2 --calculate pow
+Result: 5 ^ 3 ^ 2 = 15625
+Inputs: --numbers 5 /numbers 7 -n 3 /n 6 --calculate add
+Result: 5 + 7 + 3 + 6 = 21
+Inputs: --numbers 5 7 3 6 --calculate mul
+Result: 5 * 7 * 3 * 6 = 630
+Inputs: -n 5;7 (3)|6 --calculate add
+Result: 5 + 7 + 3 + 6 = 21
+Inputs: -n 28;7;3|6 -n1,2,4 --calculate
+Result: 28 + 7 + 3 + 6 + 1 + 2 + 4 = 51
+Inputs: -n 28|7|3|6 -c
+Result: 28 + 7 + 3 + 6 = 44
+Inputs: /n=(28),(7),3,(6),1.5,1.2 -c mul
+Result: 28 * 7 * 3 * 6 * 1.5 * 1.2 = 6350.4
+Inputs: /n:(28)|(7)|(3)|6 -c sub
+Result: 28 - 7 - 3 - 6 = 12
+Inputs: -n4.1;7.5;3.2;6.7 -c mul
+Result: 4.1 * 7.5 * 3.2 * 6.7 = 659.28
+```
+
+And this is the output for some exceptional cases. 
+
+```
+Inputs: -n 4 -c mul
+     Error(s)!
+01 - At least '2' value(s) expected but '1' value(s) provided. Option: Numbers
+
+Inputs: -n 4|-5|-2|6|8 -c mul
+     Error(s)!
+01 - Option value validation failed. Value(s): -5, -2, Option: Numbers
+```
+
+#### to be continued ...

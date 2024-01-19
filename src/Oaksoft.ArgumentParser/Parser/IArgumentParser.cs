@@ -18,7 +18,25 @@ public interface IArgumentParser
 
     IParserSettings Settings { get; }
 
+    /// <summary>
+    /// Indicates that the argument parsing result is valid. 
+    /// </summary>
     bool IsValid { get; }
+
+    /// <summary>
+    /// Indicates that the arguments array was empty. 
+    /// </summary>
+    bool IsEmpty { get; }
+
+    /// <summary>
+    /// Indicates that the parser found a valid help option usage. 
+    /// </summary>
+    bool IsHelpOption { get; }
+
+    /// <summary>
+    /// Indicates that the parser found a valid version option usage. 
+    /// </summary>
+    bool IsVersionOption { get; }
 
     List<IErrorMessage> Errors { get; }
     

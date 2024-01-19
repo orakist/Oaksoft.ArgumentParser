@@ -26,6 +26,12 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public bool IsValid => _errors.Count < 1;
 
+    public bool IsEmpty { get; private set; }
+
+    public bool IsHelpOption { get; private set; }
+
+    public bool IsVersionOption { get; private set; }
+
     public List<IErrorMessage> Errors => _errors.ToList();
 
     protected readonly List<BaseOption> _baseOptions;
@@ -118,6 +124,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
             ClearOptions();
 
             var tokens = PrepareTokens(arguments);
+            if (tokens.Length < 1)
+            {
+                IsEmpty = true;
+                return;
+            }
 
             ParseOptions(tokens);
 
@@ -189,6 +200,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private void ClearOptions()
     {
         _errors.Clear();
+        IsEmpty = false;
+        IsHelpOption = false;
+        IsVersionOption = false;
 
         foreach (var option in _baseOptions)
         {
@@ -201,6 +215,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private TokenItem[] PrepareTokens(string[] arguments)
     {
         var tokens = arguments
+            .Where(a => !string.IsNullOrEmpty(a))
             .Select(a => new TokenItem { Token = a })
             .ToArray();
 
@@ -292,7 +307,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void AutoPrintHelpText()
     {
-        if (Settings.AutoPrintHelp != true || _errors.Count > 0)
+        if (_errors.Count > 0)
             return;
 
         var helpOption = _baseOptions.OfType<SwitchOption>().
@@ -301,19 +316,27 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (!IsOnlyOption(helpOption))
             return;
 
+        IsHelpOption = true;
+        if (Settings.AutoPrintHelp != true)
+            return;
+
         Console.Write(BuildHelpText(Settings.EnableColoring).ToString());
         Console.WriteLine();
     }
 
     private void AutoPrintVersion()
     {
-        if (Settings.AutoPrintVersion != true || _errors.Count > 0)
+        if (_errors.Count > 0)
             return;
 
         var versionOption = _baseOptions.OfType<SwitchOption>().
             First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
 
         if (!IsOnlyOption(versionOption))
+            return;
+
+        IsVersionOption = true;
+        if (Settings.AutoPrintVersion != true)
             return;
 
         Console.Write(AssemblyHelper.GetAssemblyVersion());

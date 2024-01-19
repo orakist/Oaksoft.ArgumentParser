@@ -62,5 +62,9 @@ public static class ParserErrors
 
     public static readonly ErrorInfo PredicateFailure = new(
         $"{Name}.{nameof(PredicateFailure)}",
-        "At least one value is not validated by the predicate callback. Value(s): {0}");
+        "Option value validation failed. Value(s): {0}");
+
+    public static readonly ErrorInfo ListPredicateFailure = new(
+        $"{Name}.{nameof(ListPredicateFailure)}",
+        "Option value list validation failed. Value(s): {0}");
 }

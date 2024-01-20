@@ -77,7 +77,7 @@ Result: 13 * 8 = 104
 ## Library Features & Overview
 This documentation shows how to create a .NET command-line app that uses the Oaksoft.ArgumentParser library.
 
-Please see [Tutorial with Examples](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/Tutorial.md) for a detailed tutorial. In this tutorial, you'll begin by creating a simple example. Then you'll add to that base, creating a more complex app that contains advanced scenarios.
+Please see [Tutorial with Examples](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/Tutorial.md) for a detailed tutorial.
 
 In this documentation, you learn how to:
 

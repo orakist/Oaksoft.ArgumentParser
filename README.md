@@ -133,28 +133,28 @@ class ExampleOptions
 }
 ```
 
-See, how the following parser configuration parses the command-line inputs.
+See, how the value option registration affects the parser result for the below command-line inputs.
 
 ```
 var parser = CommandLine.CreateParser<ExampleOptions>()
-    .AddValueOption(p => p.Count) // firstly register count value
-    .AddValueOption(p => p.Total) // secondly register total value
-    .AddValueOption(o => o.Names) // thirdly register name list
+    .AddValueOption(p => p.Count) // Firstly, bind first integer token
+    .AddValueOption(p => p.Total) // Secondly, bind first double token from unbinded tokens 
+    .AddValueOption(o => o.Names) // Thirdly, bind all remaining tokens
     .Build();
 
-./> frodo 10.5 sam 30 gandalf|pippin => count: 30, total: 10.5, names: {frodo, sam, gandalf, pippin}
-./> frodo 10 sam 30.5 gandalf|pippin => count: 10, total: 30.5, names: {frodo, sam, gandalf, pippin}
+./> frodo 10.5 sam 30 gandalf => count: 30, total: 10.5, names: {frodo, sam, gandalf}
+./> frodo 10 sam 30.5 gandalf => count: 10, total: 30.5, names: {frodo, sam, gandalf}
 ```
 
 ```
 var parser = CommandLine.CreateParser<ExampleOptions>()
-    .AddValueOption(p => p.Count) // firstly register count value
-    .AddValueOption(p => p.Names) // secondly register name list
-    .AddValueOption(o => o.Total) // thirdly register total value
+    .AddValueOption(p => p.Count) // firstly, bind first integer token
+    .AddValueOption(p => p.Names) // Secondly, bind all remaining tokens
+    .AddValueOption(o => o.Total) // Thirdly, bind first double token from unbinded tokens
     .Build();
 
-./> frodo 10.5 sam 30 gandalf|pippin => count: 30, total: 0, names: {frodo, 10.5, sam, gandalf, pippin}
-./> frodo 10 sam 30.5 gandalf|pippin => count: 10, total: 0, names: {frodo, sam, 30.5, gandalf, pippin}
+./> frodo 10.5 sam 30 gandalf => count: 30, total: 0, names: {frodo, 10.5, sam, gandalf}
+./> frodo 10 sam 30.5 gandalf => count: 10, total: 0, names: {frodo, sam, 30.5, gandalf}
 ```
 
 ## 2. Default Value

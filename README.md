@@ -135,24 +135,26 @@ class ExampleOptions
 
 See, how the value option registration affects the parser result for the below command-line inputs.
 
-```
+```cs
 var parser = CommandLine.CreateParser<ExampleOptions>()
     .AddValueOption(p => p.Count) // Firstly, bind first integer token
     .AddValueOption(p => p.Total) // Secondly, bind first double token from unbinded tokens 
     .AddValueOption(o => o.Names) // Thirdly, bind all remaining tokens
     .Build();
-
+```
+```
 ./> frodo 10.5 sam 30 gandalf => count: 30, total: 10.5, names: {frodo, sam, gandalf}
 ./> frodo 10 sam 30.5 gandalf => count: 10, total: 30.5, names: {frodo, sam, gandalf}
 ```
 
-```
+```cs
 var parser = CommandLine.CreateParser<ExampleOptions>()
     .AddValueOption(p => p.Count) // firstly, bind first integer token
     .AddValueOption(p => p.Names) // Secondly, bind all remaining tokens
     .AddValueOption(o => o.Total) // Thirdly, bind first double token from unbinded tokens
     .Build();
-
+```
+```
 ./> frodo 10.5 sam 30 gandalf => count: 30, total: 0, names: {frodo, 10.5, sam, gandalf}
 ./> frodo 10 sam 30.5 gandalf => count: 10, total: 0, names: {frodo, sam, 30.5, gandalf}
 ```

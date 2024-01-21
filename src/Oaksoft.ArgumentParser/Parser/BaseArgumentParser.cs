@@ -142,7 +142,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         catch (Exception ex)
         {
             var error = new ErrorInfo($"{ParserErrors.Name}.UnexpectedError", ex.Message);
-            _errors.Add(error.With());
+            _errors.Add(error.WithException(ex));
         }
     }
 
@@ -442,13 +442,19 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         TextColoring.SetEnabled(enableColoring);
 
-        sb.Pastel("     Error(s)!", ConsoleColor.Red);
-        sb.AppendLine();
+        sb.Append("###  ");
+        sb.Pastel("Error(s)!", ConsoleColor.Red);
+        sb.AppendLine("  ###");
 
         for (var i = 0; i < _errors.Count; ++i)
         {
             sb.Pastel($"{(i + 1):00} - ", ConsoleColor.DarkYellow);
             sb.AppendLine(_errors[i].Message);
+
+            if (_errors[i].Exception is not null)
+            {
+                sb.AppendLine(_errors[i].Exception!.ToString());
+            }
         }
 
         return sb;

@@ -61,11 +61,7 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
 
     TOptions Parse(string[] args);
 
-    void Run(Action<TOptions> callback);
+    void Run(Action<TOptions> callback, params string[] args);
 
-    void Run(Action<IArgumentParser<TOptions>, TOptions> callback);
-
-    void Run(string[] args, Action<TOptions> callback);
-
-    void Run(string[] args, Action<IArgumentParser<TOptions>, TOptions> callback);
+    void Run(Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args);
 }

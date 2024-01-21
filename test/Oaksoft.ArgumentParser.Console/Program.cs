@@ -18,11 +18,11 @@ internal static class Program
                 .ConfigureOptions()
                 .Build();
 
-            parser.Run(args, EvaluateOptions);
+            parser.Run(EvaluateOptions, args);
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine(ex.Message);
+            System.Console.WriteLine(ex);
         }
     }
 

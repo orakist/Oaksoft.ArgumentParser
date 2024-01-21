@@ -18,7 +18,7 @@ public interface IScalarNamedOption : INamedOption, IScalarValueOption
 
 public interface ISequentialNamedOption : INamedOption, ISequentialValueOption
 {
-    bool AllowSequentialValues { get; }
+    bool EnableSequentialValues { get; }
 }
 
 public interface ICounterOption : INamedOption, IValueOption

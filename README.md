@@ -4,7 +4,7 @@
 
 # Command Line Arguments Parser Library for .Net
 
-**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently under development but latest version is stable. And this documentation is for version **v1.2.0.**\
+**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently under development but latest version is stable. And this documentation is for version **v1.3.0.**\
 This library is compatible with **.Net 6.0+**, **.Net Standard 2.1**
 
 ## Quick Start Example
@@ -16,7 +16,6 @@ This library is compatible with **.Net 6.0+**, **.Net Standard 2.1**
 ```cs
 using Oaksoft.ArgumentParser;
 using Oaksoft.ArgumentParser.Extensions;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace QuickStart;
 
@@ -31,28 +30,18 @@ internal static class Program
 {
     private static void Main(string[] args)
     {
-        try
-        {
-            var parser = CommandLine.CreateParser<CalculatorOptions>()
-                .AddNamedOption(p => p.Left)
-                .AddNamedOption(p => p.Right)
-                .AddNamedOption(o => o.Operator)
-                .Build();
+        var parser = CommandLine.CreateParser<CalculatorOptions>()
+            .AddNamedOption(p => p.Left)
+            .AddNamedOption(p => p.Right)
+            .AddNamedOption(o => o.Operator)
+            .Build();
 
-            parser.Run(args, EvaluateOptions);
-        }
-        catch (System.Exception ex)
-        {
-            System.Console.WriteLine(ex.Message);
-        }
+        parser.Run(EvaluateOptions, args);
     }
 
     private static void EvaluateOptions(CalculatorOptions options)
     {
-        if (string.IsNullOrWhiteSpace(options.Operator))
-            return;
-
-        var result = options.Operator.ToUpperInvariant() switch
+        var result = options.Operator?.ToUpperInvariant() switch
         {
             "ADD" => $"{options.Left} + {options.Right} = {options.Left + options.Right}",
             "SUB" => $"{options.Left} - {options.Right} = {options.Left - options.Right}",
@@ -122,7 +111,7 @@ There are 4 types of named options.
    Switch option is a boolean type. If it is passed in the command-line, it default value will be true.\
    Example: --start (start: true)
 4. Counter Option
-   Counter option counts occurences of the option in the command-line.\
+   Counter option counts occurrences of the option in the command-line.\
    Example: --next --next -n -n /n /next (next: 6)
 
 Please see [Named Options](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/NamedOptions.md) for detailed named option usages and settings.
@@ -144,7 +133,7 @@ class ExampleOptions
 }
 ```
 
-See, how the following parser configuration parses the commandline inputs.
+See, how the following parser configuration parses the command-line inputs.
 
 ```
 var parser = CommandLine.CreateParser<ExampleOptions>()

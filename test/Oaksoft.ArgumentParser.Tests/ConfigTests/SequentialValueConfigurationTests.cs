@@ -13,8 +13,8 @@ public class SequentialValueConfigurationTests
     {
         // Arrange
         var sut = CommandLine.CreateParser<StringAppOptions>()
-            .AddNamedOption(s => s.Values, o => o.WithAllowSequentialValues(true))
-            .AddNamedOption(s => s.NullValues, o => o.WithAllowSequentialValues(false));
+            .AddNamedOption(s => s.Values, o => o.WithEnableSequentialValues(true))
+            .AddNamedOption(s => s.NullValues, o => o.WithEnableSequentialValues(false));
 
         // Act
         var parser = sut.Build();
@@ -24,12 +24,12 @@ public class SequentialValueConfigurationTests
         var option = parser.GetOptionByName(nameof(StringAppOptions.Values));
         var namedOption = option as ISequentialNamedOption<string>;
         namedOption.ShouldNotBeNull();
-        namedOption.AllowSequentialValues.ShouldBeTrue();
+        namedOption.EnableSequentialValues.ShouldBeTrue();
 
         option = parser.GetOptionByName(nameof(StringAppOptions.NullValues));
         namedOption = option as ISequentialNamedOption<string>;
         namedOption.ShouldNotBeNull();
-        namedOption.AllowSequentialValues.ShouldBeFalse();
+        namedOption.EnableSequentialValues.ShouldBeFalse();
     }
 
     [Fact]
@@ -48,12 +48,12 @@ public class SequentialValueConfigurationTests
         var option = parser.GetOptionByName(nameof(StringAppOptions.Values));
         var namedOption = option as ISequentialNamedOption<string>;
         namedOption.ShouldNotBeNull();
-        namedOption.AllowSequentialValues.ShouldBeTrue();
+        namedOption.EnableSequentialValues.ShouldBeTrue();
 
         option = parser.GetOptionByName(nameof(StringAppOptions.NullValues));
         namedOption = option as ISequentialNamedOption<string>;
         namedOption.ShouldNotBeNull();
-        namedOption.AllowSequentialValues.ShouldBeTrue();
+        namedOption.EnableSequentialValues.ShouldBeTrue();
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class SequentialValueConfigurationTests
         option1.ShouldNotBeNull();
         option2.ShouldNotBeNull();
 
-        var exception = Should.Throw<OptionBuilderException>(() => option1.WithAllowSequentialValues(true));
+        var exception = Should.Throw<OptionBuilderException>(() => option1.WithEnableSequentialValues(true));
         var info = exception.Error;
         info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
         info.Values.ShouldBeNull();

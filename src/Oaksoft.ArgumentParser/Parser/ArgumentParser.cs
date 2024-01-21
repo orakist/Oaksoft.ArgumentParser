@@ -54,75 +54,36 @@ internal sealed class ArgumentParser<TOptions>
         return _appOptions;
     }
 
-    public void Run(Action<TOptions> callback)
+    public void Run(Action<TOptions> callback, params string[] args)
     {
-        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
-
-        while (true)
+        RunInner(args, () =>
         {
-            var args = GetInputArguments();
-            if (args.Length == 1 && args[0] is "q" or "Q")
-                break;
-
-            ParseTokens(args);
-
-            try
+            if (IsValid && !IsHelpOption && !IsVersionOption)
             {
-                if (IsValid && !IsEmpty && !IsHelpOption && !IsVersionOption)
-                {
-                    callback.Invoke(_appOptions);
-                }
+                callback.Invoke(_appOptions);
             }
-            catch (Exception ex)
-            {
-                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
-                _errors.Add(error.With());
-            }
-
-            AutoPrintErrorText();
-        }
+        });
     }
 
-    public void Run(Action<IArgumentParser<TOptions>, TOptions> callback)
+    public void Run(Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args)
     {
-        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
-
-        while (true)
+        RunInner(args, () =>
         {
-            var args = GetInputArguments();
-            if (args.Length == 1 && args[0] is "q" or "Q")
-                break;
-
-            ParseTokens(args);
-
-            try
-            {
-                if (!IsEmpty)
-                {
-                    callback.Invoke(this, _appOptions);
-                }
-            }
-            catch (Exception ex)
-            {
-                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
-                _errors.Add(error.With());
-            }
-
-            AutoPrintErrorText();
-        }
+            callback.Invoke(this, _appOptions);
+        });
     }
 
-    public void Run(string[] args, Action<TOptions> callback)
+    private void RunInner(string[]? args, Action callback)
     {
         Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
 
-        if (args.Length < 1)
+        if (args?.Length > 0)
         {
-            args = GetInputArguments();
+            Console.WriteLine($"./> {string.Join(' ', args)}");
         }
         else
         {
-            Console.WriteLine($"./> {string.Join(' ', args)}");
+            args = GetInputArguments();
         }
 
         while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
@@ -131,50 +92,18 @@ internal sealed class ArgumentParser<TOptions>
 
             try
             {
-                if (IsValid && !IsEmpty && !IsHelpOption && !IsVersionOption)
-                {
-                    callback.Invoke(_appOptions);
-                }
-            }
-            catch (Exception ex)
-            {
-                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
-                _errors.Add(error.With());
-            }
-
-            AutoPrintErrorText();
-
-            args = GetInputArguments();
-        }
-    }
-
-    public void Run(string[] args, Action<IArgumentParser<TOptions>, TOptions> callback)
-    {
-        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
-
-        if (args.Length < 1)
-        {
-            args = GetInputArguments();
-        }
-        else
-        {
-            Console.WriteLine($"./> {string.Join(' ', args)}");
-        }
-
-        while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
-        {
-            ParseTokens(args);
-            try
-            {
                 if (!IsEmpty)
                 {
-                    callback.Invoke(this, _appOptions);
+                    callback.Invoke();
                 }
             }
             catch (Exception ex)
             {
+                if (!Settings.AutoPrintErrors)
+                    throw;
+
                 var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
-                _errors.Add(error.With());
+                _errors.Add(error.WithException(ex));
             }
 
             AutoPrintErrorText();

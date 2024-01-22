@@ -2,6 +2,8 @@
 using System.Linq;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Builder;
+using Oaksoft.ArgumentParser.Errors;
+using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Options;
 
 namespace Oaksoft.ArgumentParser.Parser;
@@ -47,92 +49,64 @@ internal sealed class ArgumentParser<TOptions>
     {
         ParseTokens(arguments);
 
+        AutoPrintErrorText();
+
         return _appOptions;
     }
 
-    public void Run(Action<TOptions> callback)
+    public void Run(Action<TOptions> callback, params string[] args)
     {
-        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
-
-        while (true)
+        RunInner(args, () =>
         {
-            var args = GetInputArguments();
-            if (args.Length == 1 && args[0] is "q" or "Q")
-                break;
-
-            var result = Parse(args);
-            if (!IsValid || IsEmpty || IsVersionOption || IsHelpOption)
-                continue;
-
-            callback.Invoke(result);
-        }
+            if (IsValid && !IsHelpOption && !IsVersionOption)
+            {
+                callback.Invoke(_appOptions);
+            }
+        });
     }
 
-    public void Run(Action<IArgumentParser<TOptions>, TOptions> callback)
+    public void Run(Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args)
     {
-        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
-
-        while (true)
+        RunInner(args, () =>
         {
-            var args = GetInputArguments();
-            if (args.Length == 1 && args[0] is "q" or "Q")
-                break;
-
-            var result = Parse(args);
-            if (IsEmpty)
-                continue;
-
-            callback.Invoke(this, result);
-        }
+            callback.Invoke(this, _appOptions);
+        });
     }
 
-    public void Run(string[] args, Action<TOptions> callback)
+    private void RunInner(string[]? args, Action callback)
     {
         Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
 
-        if (args.Length < 1)
+        if (args?.Length > 0)
         {
-            args = GetInputArguments();
+            Console.WriteLine($"./> {string.Join(' ', args)}");
         }
         else
         {
-            Console.WriteLine($"./> {string.Join(' ', args)}");
+            args = GetInputArguments();
         }
 
         while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
         {
-            var result = Parse(args);
+            ParseTokens(args);
 
-            if (IsValid && !IsEmpty && !IsHelpOption && !IsVersionOption)
+            try
             {
-                callback.Invoke(result);
+                if (!IsEmpty)
+                {
+                    callback.Invoke();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!Settings.AutoPrintErrors)
+                    throw;
+
+                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
+                _errors.Add(error.WithException(ex));
             }
 
-            args = GetInputArguments();
-        }
-    }
-
-    public void Run(string[] args, Action<IArgumentParser<TOptions>, TOptions> callback)
-    {
-        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
-
-        if (args.Length < 1)
-        {
-            args = GetInputArguments();
-        }
-        else
-        {
-            Console.WriteLine($"./> {string.Join(' ', args)}");
-        }
-
-        while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
-        {
-            var result = Parse(args);
-
-            if (!IsEmpty)
-            {
-                callback.Invoke(this, result);
-            }
+            AutoPrintErrorText();
 
             args = GetInputArguments();
         }

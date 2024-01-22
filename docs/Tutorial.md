@@ -1,4 +1,7 @@
-## How to Use Tutorial
+## How to Use Oaksoft.ArgumentParser
+
+In this tutorial, you'll begin by creating a simple example. Then you'll add to that base, creating a more complex app that contains advanced scenarios.
+Please see [here (source code)](https://github.com/orakist/Oaksoft.ArgumentParser/tree/dev/test/Oaksoft.ArgumentParser.Tutorial) for the source code of this tutorial.
 
 1. Create a class to define your options.
 2. Register and configure your options.
@@ -136,7 +139,7 @@ Result: Invalid argument!
 ```
 
 ### Tutorial Step 2
-In the previous example, it prints "Result: Invalid argument!" output unnecessarily. To prevent this we can simply identify error cases, empty arguments cases and build-in option cases with following code. 
+In the previous example, it prints "Result: Invalid argument!" output unnecessarily. To prevent this we can simply identify error cases, empty arguments cases and build-in option cases with following code. See the updated sample code below.
 
 ```cs
 public static void Parse(IArgumentParser<CalculatorOptions> parser, string[] args)
@@ -204,7 +207,7 @@ Result: 5.1 + 3.1 = 8.2
 ### Tutorial Step 4
 
 We can customize option registration to satisfy following cases.
-- Make mandotary all options.
+- Make mandatory all options.
 - Customize help description of options.
 - Allow only add, sub, mul, div and pow values for calculate option.
 - Make add value default for calculate option.
@@ -224,11 +227,11 @@ Inputs: -l 5 -r 3 -c
 01 - At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
 ```
 
-We can cover the all cases in the output above with simple changes. See the sample code below. To satisfy these case;
+We can cover the all cases in the output above with simple changes. See the updated sample code below. To satisfy these case;
 - Add custom description to options.
 - Set allowed values of calculate option.
 - Set default value of calculate option.
-- Make all options mandotary.
+- Make all options mandatory.
 - Make value of the calculate option optional.
 
 ```cs
@@ -250,7 +253,7 @@ public static IArgumentParser<CalculatorOptions> Build()
 }
 ```
 
-As you can see it is very simple. Now it covers all the cases. Compare the output.
+Now it covers all the cases. Compare the next output with previous.
 
 ```
 >>> Missing Numbers Case
@@ -266,7 +269,7 @@ Inputs: -l 5 -r 3 -c
 Result: 5 + 3 = 8
 ```
 
-This is the new help output. You can see the customized descriptions, allowed values and default values.
+This is the new help output. See the customized descriptions, allowed values and default values.
 
 ```
 Inputs: --help
@@ -316,7 +319,7 @@ Inputs: -l (5.1) -r (2.4) -c add
 02 - Invalid option value '(2.4)' found!, Option: Right
 ```
 
-We can cover the all cases in the output above with simple changes. See the sample code below. To satisfy these case;
+We can cover the all cases in the output above with simple changes. See the updated sample code below. To satisfy these case;
 - Add predicates to left and right options. You can add multiple predicates to an option.
 - Set try parse callbacks of left and right options.
 
@@ -351,7 +354,7 @@ public static IArgumentParser<CalculatorOptions> Build()
 }
 ```
 
-As you can see it is very simple. Now it covers new parsing and validation cases. Compare the output.
+Now it covers new parsing and validation cases. Compare the next output with previous.
 
 ```
 >>> Negative Number Arguments Case
@@ -430,7 +433,7 @@ public static void Parse(IArgumentParser<CalculatorOptions> parser, string[] arg
 
 We updated the parser to calculate more than two numbers. ArgumentParser can parse many types of sequential inputs. Some of the supported sequential value input cases are:
 - Multiple options with values, e.g: -n 5 -n 3 -n 2 => means -n=5,3,2
-- Options with different aliases, e.g: --numbers 5 /numbers 7 -n 3 /n 6  => means -n=5,7,3,6
+- Options with different alias prefixes, e.g: --numbers 5 /numbers 7 -n 3 /n 6  => means -n=5,7,3,6
 - Options with sequential values, e.g: -n 5,7 -n 3,6  => means -n=5,7,3,6
 - Options with different value delimiters. Valid delimiters are (','), (';'), ('|'). e.g: -n 5;7;2|1 -n 3|6  => means -n=5,7,2,1,3,6
 - Options with different alias delimiters. Valid delimiters are ('='), (':'), (' '). e.g: -n=5;7 -n:3|6  => means -n=5,7,3,6
@@ -469,6 +472,88 @@ Inputs: -n 4 -c mul
 Inputs: -n 4|-5|-2|6|8 -c mul
      Error(s)!
 01 - Option value validation failed. Value(s): -5, -2, Option: Numbers
+```
+
+### Tutorial Step 7
+
+With the changes in the step 6 example application can calculate more than 2 numbers. But now it can not parse incoming inputs with "left" and "right" aliases.
+To be able to parse "left" and "right" aliases we simply add the "left" and "right" aliases to the numbers option.
+
+Before updating the application, this is the parsing output for these cases. As expected application can't parse the "left" and "right" aliases.
+
+```
+Inputs: -l 35.2 -r 1.2 -c div
+###  Error(s)!  ###
+01 - Unknown single dash alias token '-l' found!
+02 - Unknown single dash alias token '-r' found!
+03 - At least '1' option(s) expected but '0' option(s) provided. Option: Numbers
+04 - Unknown token '35.2' found!
+05 - Unknown token '1.2' found!
+
+Inputs: /left 5.1 /right 3.1 /calculate add
+###  Error(s)!  ###
+01 - Unknown forward slash alias token '/left' found!
+02 - Unknown forward slash alias token '/right' found!
+03 - At least '1' option(s) expected but '0' option(s) provided. Option: Numbers
+04 - Unknown token '5.1' found!
+05 - Unknown token '3.1' found!
+```
+
+See the updated ***Build()*** method below. Only this line *'.AddAliases("n", "numbers", "l", "left", "r", "right")'* added.
+
+```cs
+public static IArgumentParser<CalculatorOptions> Build()
+{
+    return CommandLine.CreateParser<CalculatorOptions>()
+        .AddNamedOption(p => p.Numbers,
+            o => o.WithDescription("Defines the numbers to be calculated.")
+                .AddAliases("n", "numbers", "l", "left", "r", "right")
+                .AddPredicate(v => v >= 0)
+                .WithTryParseCallback(TryParseCustom)
+                .WithOptionArity(ArityType.OneOrMore)
+                .WithValueArity(2, int.MaxValue))
+        .AddNamedOption(o => o.Calculate,
+            o => o.WithDescription("Defines operator type of the calculation.")
+                .WithAllowedValues("add", "sub", "mul", "div", "pow")
+                .WithDefaultValue("add"),
+            mandatoryOption: true, mustHaveOneValue: false)
+        .Build();
+}
+```
+
+Now it can parse "left" and "right" aliases. Compare the next output with previous.
+
+```
+Inputs: -l 35.2 -r 1.2 -c div
+Result: 35.2 / 1.2 = 29.333333333333336
+Inputs: /left 5.1 /right 3.1 /calculate add
+Result: 5.1 + 3.1 = 8.2
+```
+
+This is the new --help output. See the aliases of the "numbers" option.
+
+```
+Oaksoft.ArgumentParser.Tutorial v1.0.0
+These are command line options of this application.
+
+-n       Usage: -n <value>
+         Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
+         Defines the numbers to be calculated.
+
+-c       Usage: -c (value), Default Value: 'add'
+         Allowed Values: add | sub | mul | div | pow
+         Aliases: -c, --calculate, /c, /calculate
+         Defines operator type of the calculation.
+
+-h       Usage: -h
+         Aliases: -h, -?, --help, /h, /?, /help
+         Shows help and usage information.
+
+--ver    Usage: --ver
+         Aliases: --ver, --version, /ver, /version
+         Shows version information.
+
+Usage: [-n <value>] [-c (value)] [-h] [--ver]
 ```
 
 #### to be continued ...

@@ -4,7 +4,7 @@
 
 # Command Line Arguments Parser Library for .Net
 
-**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently under development but latest version is stable. And this documentation is for version **v1.2.0.**</br>
+**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently under development but latest version is stable. And this documentation is for version **v1.3.0.**\
 This library is compatible with **.Net 6.0+**, **.Net Standard 2.1**
 
 ## Quick Start Example
@@ -12,12 +12,10 @@ This library is compatible with **.Net 6.0+**, **.Net Standard 2.1**
 1. Create a class to define your options.
 2. Register your options and build the parser.
 3. See following example for a quick start.
-4. Please see [Tutorial Example](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/Tutorial.md) for a detailed example.
 
 ```cs
 using Oaksoft.ArgumentParser;
 using Oaksoft.ArgumentParser.Extensions;
-using Oaksoft.ArgumentParser.Parser;
 
 namespace QuickStart;
 
@@ -32,28 +30,18 @@ internal static class Program
 {
     private static void Main(string[] args)
     {
-        try
-        {
-            var parser = CommandLine.CreateParser<CalculatorOptions>()
-                .AddNamedOption(p => p.Left)
-                .AddNamedOption(p => p.Right)
-                .AddNamedOption(o => o.Operator)
-                .Build();
+        var parser = CommandLine.CreateParser<CalculatorOptions>()
+            .AddNamedOption(p => p.Left)
+            .AddNamedOption(p => p.Right)
+            .AddNamedOption(o => o.Operator)
+            .Build();
 
-            parser.Run(args, EvaluateOptions);
-        }
-        catch (System.Exception ex)
-        {
-            System.Console.WriteLine(ex.Message);
-        }
+        parser.Run(EvaluateOptions, args);
     }
 
-    private static void EvaluateOptions(IArgumentParser<CalculatorOptions> parser, CalculatorOptions options)
+    private static void EvaluateOptions(CalculatorOptions options)
     {
-        if (!parser.IsValid || string.IsNullOrWhiteSpace(options.Operator))
-            return;
-
-        var result = options.Operator.ToUpperInvariant() switch
+        var result = options.Operator?.ToUpperInvariant() switch
         {
             "ADD" => $"{options.Left} + {options.Right} = {options.Left + options.Right}",
             "SUB" => $"{options.Left} - {options.Right} = {options.Left - options.Right}",
@@ -63,7 +51,6 @@ internal static class Program
         };
 
         System.Console.WriteLine($"Result: {result}");
-        System.Console.WriteLine();
     }
 }
 ```
@@ -77,7 +64,9 @@ Result: 13 * 8 = 104
 ```
 
 ## Library Features & Overview
-This documentation shows how to create a .NET command-line app that uses the Oaksoft.ArgumentParser library. You'll begin by creating a simple option. Then you'll add to that base, creating a more complex app that contains multiple options.
+This documentation shows how to create a .NET command-line app that uses the Oaksoft.ArgumentParser library.
+
+Please see [Tutorial with Examples](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/Tutorial.md) for a detailed tutorial.
 
 In this documentation, you learn how to:
 
@@ -107,22 +96,22 @@ These are some valid commands according to the default alias prefix rules.
 ./> myapp -o file.txt -r 100 -v quiet
 ```
 
-First command is parsed by the library into these options: (--open file.txt), (--read 10), (--verbosity quiet).</br>
+First command is parsed by the library into these options: (--open file.txt), (--read 10), (--verbosity quiet).\
 Please see [Parsing Rules](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/ParsingRules.md) for detailed parsing settings.
 
 There are 4 types of named options.
 
 1. Scalar Named Option
-   Scalar named option requires zero or one argument value. Option name may be repeated more than one time. Scalar named option grabs only last value.</br>
+   Scalar named option requires zero or one argument value. Option name may be repeated more than one time. Scalar named option grabs only last value.\
    Example: --number 123 --number 456 (number: 456)
 2. Sequential Named Option
-   Sequential named option requires one or more argument values. Option name may be repeated more than one time. A sequential named option grabs all values.
+   Sequential named option requires one or more argument values. Option name may be repeated more than one time. A sequential named option grabs all values.\
    Example: --numbers 123 321 --numbers 456|789 (numbers: {123, 321, 456, 789})
 3. Switch Option
-   Switch option is a boolean type. If it is passed in the command-line, it default value will be true.
+   Switch option is a boolean type. If it is passed in the command-line, it default value will be true.\
    Example: --start (start: true)
 4. Counter Option
-   Counter option counts occurences of the option in the command-line.
+   Counter option counts occurrences of the option in the command-line.\
    Example: --next --next -n -n /n /next (next: 6)
 
 Please see [Named Options](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/docs/NamedOptions.md) for detailed named option usages and settings.
@@ -144,28 +133,30 @@ class ExampleOptions
 }
 ```
 
-See, how the following parser configuration parses the commandline inputs.
+See, how the value option registration affects the parser result for the below command-line inputs.
 
-```
+```cs
 var parser = CommandLine.CreateParser<ExampleOptions>()
-    .AddValueOption(p => p.Count) // firstly register count value
-    .AddValueOption(p => p.Total) // secondly register total value
-    .AddValueOption(o => o.Names) // thirdly register name list
+    .AddValueOption(p => p.Count) // Firstly, bind first integer token
+    .AddValueOption(p => p.Total) // Secondly, bind first double token from unbinded tokens 
+    .AddValueOption(o => o.Names) // Thirdly, bind all remaining tokens
     .Build();
-
-./> frodo 10.5 sam 30 gandalf|pippin => count: 30, total: 10.5, names: {frodo, sam, gandalf, pippin}
-./> frodo 10 sam 30.5 gandalf|pippin => count: 10, total: 30.5, names: {frodo, sam, gandalf, pippin}
+```
+```
+./> frodo 10.5 sam 30 gandalf => count: 30, total: 10.5, names: {frodo, sam, gandalf}
+./> frodo 10 sam 30.5 gandalf => count: 10, total: 30.5, names: {frodo, sam, gandalf}
 ```
 
-```
+```cs
 var parser = CommandLine.CreateParser<ExampleOptions>()
-    .AddValueOption(p => p.Count) // firstly register count value
-    .AddValueOption(p => p.Names) // secondly register name list
-    .AddValueOption(o => o.Total) // thirdly register total value
+    .AddValueOption(p => p.Count) // firstly, bind first integer token
+    .AddValueOption(p => p.Names) // Secondly, bind all remaining tokens
+    .AddValueOption(o => o.Total) // Thirdly, bind first double token from unbinded tokens
     .Build();
-
-./> frodo 10.5 sam 30 gandalf|pippin => count: 30, total: 0, names: {frodo, 10.5, sam, gandalf, pippin}
-./> frodo 10 sam 30.5 gandalf|pippin => count: 10, total: 0, names: {frodo, sam, 30.5, gandalf, pippin}
+```
+```
+./> frodo 10.5 sam 30 gandalf => count: 30, total: 0, names: {frodo, 10.5, sam, gandalf}
+./> frodo 10 sam 30.5 gandalf => count: 10, total: 0, names: {frodo, sam, 30.5, gandalf}
 ```
 
 ## 2. Default Value

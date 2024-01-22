@@ -21,6 +21,11 @@ internal static class ErrorExtensions
         throw new NotSupportedException();
     }
 
+    public static ErrorMessage WithException(this ErrorInfo error, Exception exception)
+    {
+        return error.With().WithException(exception);
+    }
+
     public static ErrorMessage WithName(this ErrorInfo error, string optionName)
     {
         return error.With().WithName(optionName);

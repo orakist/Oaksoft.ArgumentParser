@@ -5,7 +5,7 @@
 Prefix of an alias can be two hyphens (--), one hyphen (-) or forward slash (/). 
 These prefixes are configurable. There are 5 types of alias prefix configuration.
 
-This is the Option Alias Prefix Rules enumaration:
+This is the Option Alias Prefix Rules enumeration:
 
 ```cs
 [Flags]
@@ -29,7 +29,7 @@ public enum OptionPrefixRules
    Valid alias: --o, --start
 4. Allow double dash (--) for only long aliases</br>
    Valid alias: --start
-5. Allow forvard slash (/)  for all aliases</br>
+5. Allow forward slash (/)  for all aliases</br>
    Valid alias: /o /start
 
 If you want to allow only short aliases with single dash. You can configure your parser to allow only short aliases with the code below. Then parser allows only -v and -c aliases.

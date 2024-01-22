@@ -6,6 +6,8 @@ internal abstract class ErrorMessage : IErrorMessage
 {
     public ErrorInfo Error { get; }
 
+    public Exception? Exception { get; private set; }
+
     public string Message => _message ?? InitializeMessage();
 
     public object[]? Values { get; private set; }
@@ -33,6 +35,13 @@ internal abstract class ErrorMessage : IErrorMessage
     {
         _message = null;
         OptionName = optionName;
+        return this;
+    }
+
+    public ErrorMessage WithException(Exception exception)
+    {
+        _message = null;
+        Exception = exception;
         return this;
     }
 

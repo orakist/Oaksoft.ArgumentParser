@@ -4,7 +4,7 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Tutorial;
 
-internal static class Tutorial06
+internal static class Tutorial07
 {
     public class CalculatorOptions
     {
@@ -26,6 +26,7 @@ internal static class Tutorial06
         return CommandLine.CreateParser<CalculatorOptions>()
             .AddNamedOption(p => p.Numbers,
                 o => o.WithDescription("Defines the numbers to be calculated.")
+                    .AddAliases("n", "numbers", "l", "left", "r", "right")
                     .AddPredicate(v => v >= 0)
                     .WithTryParseCallback(TryParseCustom)
                     .WithOptionArity(ArityType.OneOrMore)

@@ -11,7 +11,7 @@ internal sealed class SequentialNamedOption<TValue>
     : BaseSequentialValueOption<TValue>, ISequentialNamedOption<TValue>
     where TValue : IComparable, IEquatable<TValue>
 {
-    public bool AllowSequentialValues { get; private set; }
+    public bool EnableSequentialValues { get; private set; }
 
     public string Alias => _prefixAliases.OrderBy(k => k.Length).First();
 
@@ -30,7 +30,7 @@ internal sealed class SequentialNamedOption<TValue>
         : base(requiredValueCount, maximumValueCount)
     {
         OptionArity = (requiredOptionCount, maximumOptionCount);
-        AllowSequentialValues = true;
+        EnableSequentialValues = true;
 
         _aliases = new List<string>();
         _optionTokens = new List<string>();
@@ -73,11 +73,11 @@ internal sealed class SequentialNamedOption<TValue>
         _aliases.AddRange(aliases);
     }
 
-    public void SetAllowSequentialValues(bool enabled)
+    public void SetEnableSequentialValues(bool enabled)
     {
         ParserInitializedGuard();
 
-        AllowSequentialValues = enabled;
+        EnableSequentialValues = enabled;
     }
 
     public override void Initialize()
@@ -128,7 +128,7 @@ internal sealed class SequentialNamedOption<TValue>
                         nextToken.IsParsed = true;
                         _valueTokens.Add(nextToken.Value!);
 
-                        if (!AllowSequentialValues)
+                        if (!EnableSequentialValues)
                             break;
                     }
                 }

@@ -302,10 +302,10 @@ public static partial class OptionExtensions
     #endregion
 
     #region Sequential Value Configuration
-    public static ISequentialNamedOption<TValue> WithAllowSequentialValues<TValue>(this ISequentialNamedOption<TValue> option, bool enabled)
+    public static ISequentialNamedOption<TValue> WithEnableSequentialValues<TValue>(this ISequentialNamedOption<TValue> option, bool enabled)
         where TValue : IComparable, IEquatable<TValue>
     {
-        ((SequentialNamedOption<TValue>)option).SetAllowSequentialValues(enabled);
+        ((SequentialNamedOption<TValue>)option).SetEnableSequentialValues(enabled);
         return option;
     }
 

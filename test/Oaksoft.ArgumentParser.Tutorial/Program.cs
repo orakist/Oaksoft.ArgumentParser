@@ -338,7 +338,7 @@ static IEnumerable<string[]> GetNumberArguments()
     yield return new[] { "--numbers", "5", "/numbers", "7", "-n", "3", "/n", "6", "--calculate", "add" };
     yield return new[] { "--numbers", "5", "7", "3", "6", "--calculate", "mul" };
     yield return new[] { "-n", "5;7", "(3)|6", "--calculate", "add" };
-    yield return new[] { "-n", "28;7;3|6", "-n1,2,4", "--calculate"};
+    yield return new[] { "-n", "28;7;3|6", "-n1,2,4", "--calculate" };
     yield return new[] { "-n 28|7|3|6", "-c" };
     yield return new[] { "/n=(28),(7),3,(6),1.5,1.2", "-c", "mul" };
     yield return new[] { "/n:(28)|(7)|(3)|6", "-c", "sub" };

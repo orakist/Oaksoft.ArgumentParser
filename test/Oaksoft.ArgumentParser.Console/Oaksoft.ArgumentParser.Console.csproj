@@ -10,6 +10,7 @@
     <Copyright>Copyright (C) 2023 All Rights Reserved</Copyright>
     <Description>This Console App tests Oaksoft.ArgumentParser library.</Description>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

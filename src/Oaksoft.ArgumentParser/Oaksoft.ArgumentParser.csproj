@@ -25,6 +25,10 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="..\..\LICENSE.md" Pack="true" PackagePath="$(PackageLicenseFile)" />
     <None Include="..\..\README.md" Pack="true" PackagePath="$(PackageReadmeFile)" />

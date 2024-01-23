@@ -121,16 +121,15 @@ internal abstract class BaseSequentialValueOption<TValue>
 
     private object? CreateNullableListOrArray(PropertyInfo keyProperty)
     {
-        Type itemType;
-        if (keyProperty.PropertyType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+        Type? itemType = null;
+        if (keyProperty.PropertyType.GetInterfaces()
+            .Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
         {
-            itemType = keyProperty.PropertyType.GetGenericArguments()[0];
-            if (!itemType.IsAssignableFrom(typeof(TValue)))
-            {
-                return null;
-            }
+            var type = typeof(TValue);
+            itemType = type.IsValueType ? typeof(Nullable<>).MakeGenericType(type) : type;
         }
-        else
+
+        if (itemType == null)
         {
             return null;
         }

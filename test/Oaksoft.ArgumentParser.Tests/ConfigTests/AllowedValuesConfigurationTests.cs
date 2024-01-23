@@ -96,13 +96,15 @@ public class AllowedValuesConfigurationTests
     [InlineData("Cat", null, "007")]
     [InlineData("  s", "  ", "x")]
     [InlineData("  ab ", "", "x")]
-    public void ShouldThrowException_WhenTryToUpdateEmptyAllowedValues(params string[] values)
+    public void ShouldThrowException_WhenTryToUpdateEmptyAllowedValues(params string?[] values)
     {
         // Arrange
         var sut = CommandLine.CreateParser<StringAppOptions>();
+        string[] valueStrings = values.ToArray()!;
 
         // Act & Assert
-        var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value, o => o.WithAllowedValues(values)));
+        var exception = Should.Throw<OptionBuilderException>(() => 
+            sut.AddNamedOption(s => s.Value, o => o.WithAllowedValues(valueStrings)));
         var info = exception.Error;
 
         info.Error.Code.ShouldBe(BuilderErrors.EmptyAllowedValue.Code);

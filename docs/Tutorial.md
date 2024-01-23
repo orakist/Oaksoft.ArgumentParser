@@ -88,14 +88,12 @@ Following is the output of the example application for invalid command-line inpu
 
 ```
 Inputs: /left 5.1 /right 3.1 /calculate add
-     Error(s)!
-01 - Invalid option value '5.1' found!, Option: Left
-02 - Invalid option value '3.1' found!, Option: Right
+Invalid option value '5.1' found!, Option: Left
+Invalid option value '3.1' found!, Option: Right
 Result: Invalid argument!
 
 Inputs: -l 5 -r 3 -c
-     Error(s)!
-01 - At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
+At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
 Result: Invalid argument!
 ```
 
@@ -170,13 +168,11 @@ Following is the output of the code above for those command-line inputs.
 
 ```
 Inputs: /left 5.1 /right 3.1 /calculate add
-     Error(s)!
-01 - Invalid option value '5.1' found!, Option: Left
-02 - Invalid option value '3.1' found!, Option: Right
+Invalid option value '5.1' found!, Option: Left
+Invalid option value '3.1' found!, Option: Right
 
 Inputs: -l 5 -r 3 -c
-     Error(s)!
-01 - At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
+At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
 
 Inputs: --version
 1.0.0
@@ -218,13 +214,14 @@ Before updating the application, this is the parsing output for these cases.
 >>> Missing Numbers Case: This should not be allowed.
 Inputs: -c add
 Result: 0 + 0 = 0
+
 >>> Unknown Calculation Type Case: Parser should catch unknown calculation type.
 Inputs: -l 5 -r 1 -c abc
 Result: Invalid argument!
+
 >>> Missing Operation Value Case: This should not cause an error. Default Calculation Type is add.
 Inputs: -l 5 -r 3 -c
-     Error(s)!
-01 - At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
+At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
 ```
 
 We can cover the all cases in the output above with simple changes. See the updated sample code below. To satisfy these case;
@@ -258,12 +255,13 @@ Now it covers all the cases. Compare the next output with previous.
 ```
 >>> Missing Numbers Case
 Inputs: -c add
-     Error(s)!
-01 - At least '1' option(s) expected but '0' option(s) provided. Option: Left
-02 - At least '1' option(s) expected but '0' option(s) provided. Option: Right
+At least '1' option(s) expected but '0' option(s) provided. Option: Left
+At least '1' option(s) expected but '0' option(s) provided. Option: Right
+
 >>> Unknown Calculation Type Case
 Inputs: -l 5 -r 1 -c abc
-     Error(s)!
+Option value 'abc' not recognized. Must be one of: [add, sub, mul, div, pow], Option: Operator
+
 >>> Missing Operation Value Case
 Inputs: -l 5 -r 3 -c
 Result: 5 + 3 = 8
@@ -312,11 +310,11 @@ Before updating the application, this is the parsing output for these cases.
 >>> Negative Number Arguments Case: Negative numbers should not allowed.
 Inputs: -l -5 -r -1 -c add
 Result: -5 + -1 = -6
+
 >>> Parentheses Number Arguments Case : It should parse numbers in parentheses.
 Inputs: -l (5.1) -r (2.4) -c add
-     Error(s)!
-01 - Invalid option value '(5.1)' found!, Option: Left
-02 - Invalid option value '(2.4)' found!, Option: Right
+Invalid option value '(5.1)' found!, Option: Left
+Invalid option value '(2.4)' found!, Option: Right
 ```
 
 We can cover the all cases in the output above with simple changes. See the updated sample code below. To satisfy these case;
@@ -359,9 +357,9 @@ Now it covers new parsing and validation cases. Compare the next output with pre
 ```
 >>> Negative Number Arguments Case
 Inputs: -l -5 -r -1 -c add
-     Error(s)!
-01 - Option value(s) validation failed. Value(s): -5, Option: Left
-02 - Option value(s) validation failed. Value(s): -1, Option: Right
+Option value(s) validation failed. Value(s): -5, Option: Left
+Option value(s) validation failed. Value(s): -1, Option: Right
+
 >>> Parentheses Number Arguments Case
 Inputs: -l (5.1) -r (2.4) -c add
 Result: 5.1 + 2.4 = 7.5
@@ -466,12 +464,10 @@ And this is the output for some exceptional cases.
 
 ```
 Inputs: -n 4 -c mul
-     Error(s)!
-01 - At least '2' value(s) expected but '1' value(s) provided. Option: Numbers
+At least '2' value(s) expected but '1' value(s) provided. Option: Numbers
 
 Inputs: -n 4|-5|-2|6|8 -c mul
-     Error(s)!
-01 - Option value validation failed. Value(s): -5, -2, Option: Numbers
+Option value validation failed. Value(s): -5, -2, Option: Numbers
 ```
 
 ### Tutorial Step 7
@@ -483,20 +479,18 @@ Before updating the application, this is the parsing output for these cases. As 
 
 ```
 Inputs: -l 35.2 -r 1.2 -c div
-###  Error(s)!  ###
-01 - Unknown single dash alias token '-l' found!
-02 - Unknown single dash alias token '-r' found!
-03 - At least '1' option(s) expected but '0' option(s) provided. Option: Numbers
-04 - Unknown token '35.2' found!
-05 - Unknown token '1.2' found!
+Unknown single dash alias token '-l' found!
+Unknown single dash alias token '-r' found!
+At least '1' option(s) expected but '0' option(s) provided. Option: Numbers
+Unknown token '35.2' found!
+Unknown token '1.2' found!
 
 Inputs: /left 5.1 /right 3.1 /calculate add
-###  Error(s)!  ###
-01 - Unknown forward slash alias token '/left' found!
-02 - Unknown forward slash alias token '/right' found!
-03 - At least '1' option(s) expected but '0' option(s) provided. Option: Numbers
-04 - Unknown token '5.1' found!
-05 - Unknown token '3.1' found!
+Unknown forward slash alias token '/left' found!
+Unknown forward slash alias token '/right' found!
+At least '1' option(s) expected but '0' option(s) provided. Option: Numbers
+Unknown token '5.1' found!
+Unknown token '3.1' found!
 ```
 
 See the updated ***Build()*** method below. Only this line *'.AddAliases("n", "numbers", "l", "left", "r", "right")'* added.

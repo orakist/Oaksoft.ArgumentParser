@@ -58,7 +58,7 @@ public static class ParserErrors
 
     public static readonly ErrorInfo ValueMustBeOneOf = new(
         $"{Name}.{nameof(ValueMustBeOneOf)}",
-        "Option value '{0}' not recognized. Must be one of: {1}");
+        "Option value '{0}' not recognized. Must be one of: [{1}]");
 
     public static readonly ErrorInfo PredicateFailure = new(
         $"{Name}.{nameof(PredicateFailure)}",

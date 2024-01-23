@@ -44,7 +44,7 @@ public interface IArgumentParser
 
     string GetHelpText(bool? enableColoring = default);
 
-    string GetErrorText(bool? enableColoring = default);
+    string GetErrorText(bool? enableColoring = default, bool showErrorTitle = false);
 
     List<IBaseOption> GetOptions();
 

@@ -89,10 +89,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
         return BuildHelpText(coloring).ToString();
     }
 
-    public string GetErrorText(bool? enableColoring = default)
+    public string GetErrorText(bool? enableColoring = default, bool showErrorTitle = false)
     {
         var coloring = enableColoring ?? Settings.EnableColoring;
-        return BuildErrorText(coloring).ToString();
+        return BuildErrorText(coloring, showErrorTitle).ToString();
     }
 
     protected void InitializeOptions()
@@ -342,7 +342,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (Settings.AutoPrintErrors != true || _errors.Count < 1)
             return;
 
-        Console.Write(BuildErrorText(Settings.EnableColoring).ToString());
+        Console.Write(BuildErrorText(Settings.EnableColoring, false).ToString());
         Console.WriteLine();
     }
 
@@ -433,7 +433,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         return sb;
     }
 
-    private StringBuilder BuildErrorText(bool enableColoring)
+    private StringBuilder BuildErrorText(bool enableColoring, bool showErrorTitle)
     {
         var sb = new StringBuilder();
         if (_errors.Count < 1)
@@ -441,13 +441,21 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         TextColoring.SetEnabled(enableColoring);
 
-        sb.Append("###  ");
-        sb.Pastel("Error(s)!", ConsoleColor.Red);
-        sb.AppendLine("  ###");
+        if (showErrorTitle)
+        {
+            sb.Append("###  ");
+            sb.Pastel("Error(s)!", ConsoleColor.Red);
+            sb.AppendLine("  ###");
+        }
 
         for (var i = 0; i < _errors.Count; ++i)
         {
-            sb.Pastel($"{(i + 1):00} - ", ConsoleColor.DarkYellow);
+            if (showErrorTitle)
+            {
+                sb.Pastel($"{(i + 1):00} - ", ConsoleColor.DarkYellow);
+                sb.Append($"Code: {_errors[i].Error.Code}, Message: ");
+            }
+
             sb.AppendLine(_errors[i].Message);
 
             if (_errors[i].Exception is not null)

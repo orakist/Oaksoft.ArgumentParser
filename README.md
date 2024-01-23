@@ -161,11 +161,48 @@ var parser = CommandLine.CreateParser<ExampleOptions>()
 
 ## 2. Default Value
 
-Description will be added!
+Options can have default values that apply if no value is explicitly provided. For example, switch options 
+are values with a default of true when the option name is in the command line. 
+The following command-line examples are equivalent:
+
+```
+./> myapp --enabled
+./> myapp --enabled true
+```
+
+An option that is defined with a default value, such as number option in the following example, value of the option is treated as optional. 
+*'.WithDefaultValue()'* extension method configures the default value of a switch option and scalar named option.
+
+```cs
+var parser = CommandLine.CreateParser<MyOptions>()
+    .AddNamedOption(p => p.Number, o => o.WithDefaultValue(12))
+    .Build();
+```
+
+According to the preceding code, values of the ***'--number'*** option in the following first two lines are equal. And value of the last line is 15.
+
+```
+./> myapp --number
+./> myapp --number 12
+./> myapp --number 15
+```
 
 ## 3. Allowed Option Values
 
-Description will be added!
+To specify a list of allowed values for an option, specify an enum as the option type or use ***.WithAllowedValues()***, as shown in the following example.
+
+```cs
+var parser = CommandLine.CreateParser<MyOptions>()
+        .AddNamedOption(o => o.Language, o.WithAllowedValues("C#", "C++", "Java", "PHP", "SQL"))
+        .Build();
+```
+
+Here's an example of command-line input and the resulting output for the preceding example code:
+
+```
+./> myapp --language my-language
+Option value 'my-language' not recognized. Must be one of: [C#, C++, Java, PHP, SQL], Option: Operator
+```
 
 ## 4. Option Aliases
 

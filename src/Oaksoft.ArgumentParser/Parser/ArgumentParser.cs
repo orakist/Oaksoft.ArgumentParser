@@ -56,7 +56,7 @@ internal sealed class ArgumentParser<TOptions>
 
     public void Run(Action<TOptions> callback, params string[] args)
     {
-        RunInner(args, () =>
+        RunInner("Type the options or type 'q' to quit; press enter.", args, () =>
         {
             if (IsValid && !IsHelpOption && !IsVersionOption)
             {
@@ -67,15 +67,37 @@ internal sealed class ArgumentParser<TOptions>
 
     public void Run(Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args)
     {
-        RunInner(args, () =>
+        RunInner("Type the options or type 'q' to quit; press enter.", args, () =>
         {
             callback.Invoke(this, _appOptions);
         });
     }
 
-    private void RunInner(string[]? args, Action callback)
+    public void Run(string? title, Action<TOptions> callback, params string[] args)
     {
-        Console.WriteLine("Type the options and press enter. Type 'q' to quit.");
+        RunInner(title, args, () =>
+        {
+            if (IsValid && !IsHelpOption && !IsVersionOption)
+            {
+                callback.Invoke(_appOptions);
+            }
+        });
+    }
+
+    public void Run(string? title, Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args)
+    {
+        RunInner(title, args, () =>
+        {
+            callback.Invoke(this, _appOptions);
+        });
+    }
+
+    private void RunInner(string? title, string[]? args, Action callback)
+    {
+        if (!string.IsNullOrWhiteSpace(title))
+        {
+            Console.WriteLine(title);
+        }
 
         if (args?.Length > 0)
         {
@@ -123,7 +145,6 @@ internal sealed class ArgumentParser<TOptions>
 
     private void InitializePropertyInfos()
     {
-        _propertyInfos.AddRange(_baseOptions.Where(o => o.CountProperty is not null).Select(a => a.CountProperty!));
         _propertyInfos.AddRange(_baseOptions.Select(o => o.KeyProperty));
     }
 
@@ -150,19 +171,6 @@ internal sealed class ArgumentParser<TOptions>
         if (!option.IsParsed)
             return;
 
-        if (option.CountProperty is not null)
-        {
-            var countProp = _propertyInfos.First(p => p.Name == option.CountProperty.Name);
-            if (countProp.PropertyType == typeof(bool))
-            {
-                countProp.SetValue(_appOptions, true);
-            }
-            else if (countProp.PropertyType == typeof(int))
-            {
-                countProp.SetValue(_appOptions, option is INamedOption ? option.OptionCount : option.ValueCount);
-            }
-        }
-
         var keyProp = _propertyInfos.First(p => p.Name == option.KeyProperty.Name);
 
         if (option is BaseValueOption valOption)
@@ -178,4 +186,3 @@ internal sealed class ArgumentParser<TOptions>
         }
     }
 }
-

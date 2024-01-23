@@ -83,14 +83,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
     public List<string> GetRegisteredPropertyNames()
     {
-        var propertyNames = _baseOptions
-            .Where(o => !string.IsNullOrWhiteSpace(o.CountProperty?.Name))
-            .Select(a => a.CountProperty!.Name)
-            .ToList();
-
-        propertyNames.AddRange(_baseOptions.Select(o => o.KeyProperty.Name));
-
-        return propertyNames;
+        return _baseOptions.Select(o => o.KeyProperty.Name).ToList();
     }
 
     public IArgumentParser<TOptions> Build()

@@ -31,18 +31,11 @@ internal abstract class BaseOption : IBaseOption
 
     public PropertyInfo KeyProperty { get; private set; } = default!;
 
-    public PropertyInfo? CountProperty { get; private set; }
-
     protected IArgumentParser? _parser;
 
     public void SetKeyProperty(PropertyInfo property)
     {
         KeyProperty = property;
-    }
-
-    public void SetCountProperty(PropertyInfo? property)
-    {
-        CountProperty = property;
     }
 
     public void SetParser(IArgumentParser parser)

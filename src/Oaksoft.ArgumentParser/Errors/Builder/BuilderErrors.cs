@@ -35,10 +35,6 @@ public static class BuilderErrors
         $"{Name}.{nameof(InvalidStringPropertyUsage)}",
         "Invalid lambda expression, string property '{0}' cannot be used as a collection!");
 
-    public static readonly ErrorInfo SamePropertyUsage = new(
-        $"{Name}.{nameof(SamePropertyUsage)}",
-        "Selected Key and Count property cannot be same! Properties: {0}, {1}");
-
     public static readonly ErrorInfo PropertyAlreadyInUse = new(
         $"{Name}.{nameof(PropertyAlreadyInUse)}",
         "Property '{0}' already registered with an option!");

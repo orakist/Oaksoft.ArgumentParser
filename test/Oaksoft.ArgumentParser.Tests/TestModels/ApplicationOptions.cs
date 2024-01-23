@@ -1,6 +1,5 @@
 ﻿namespace Oaksoft.ArgumentParser.Tests.TestModels;
 
-
 public abstract class BaseAppOptions
 {
     public bool ValueFlag { get; set; }

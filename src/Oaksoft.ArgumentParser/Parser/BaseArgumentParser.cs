@@ -67,8 +67,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         return _baseOptions.FirstOrDefault(
             o => o.Name.Equals(name, StringComparison.OrdinalIgnoreCase) ||
-                 o.KeyProperty.Name.Equals(name, StringComparison.OrdinalIgnoreCase) ||
-                 o.CountProperty != null && o.CountProperty.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                 o.KeyProperty.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 
     public INamedOption? GetOptionByAlias(string alias)

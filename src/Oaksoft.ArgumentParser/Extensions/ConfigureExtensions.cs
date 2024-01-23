@@ -22,28 +22,28 @@ public static partial class OptionExtensions
     }
 
     public static IScalarNamedOption<TValue> WithName<TValue>(this IScalarNamedOption<TValue> option, string name)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).SetName(name);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> WithName<TValue>(this ISequentialNamedOption<TValue> option, string name)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetName(name);
         return option;
     }
 
     public static IScalarValueOption<TValue> WithName<TValue>(this IScalarValueOption<TValue> option, string name)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarValueOption<TValue>)option).SetName(name);
         return option;
     }
 
     public static ISequentialValueOption<TValue> WithName<TValue>(this ISequentialValueOption<TValue> option, string name)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialValueOption<TValue>)option).SetName(name);
         return option;
@@ -64,28 +64,28 @@ public static partial class OptionExtensions
     }
 
     public static IScalarNamedOption<TValue> WithUsage<TValue>(this IScalarNamedOption<TValue> option, string usage)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).SetUsage(usage);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> WithUsage<TValue>(this ISequentialNamedOption<TValue> option, string usage)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetUsage(usage);
         return option;
     }
 
     public static IScalarValueOption<TValue> WithUsage<TValue>(this IScalarValueOption<TValue> option, string usage)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarValueOption<TValue>)option).SetUsage(usage);
         return option;
     }
 
     public static ISequentialValueOption<TValue> WithUsage<TValue>(this ISequentialValueOption<TValue> option, string usage)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialValueOption<TValue>)option).SetUsage(usage);
         return option;
@@ -106,28 +106,28 @@ public static partial class OptionExtensions
     }
 
     public static IScalarNamedOption<TValue> WithDescription<TValue>(this IScalarNamedOption<TValue> option, string description)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).SetDescription(description);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> WithDescription<TValue>(this ISequentialNamedOption<TValue> option, string description)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetDescription(description);
         return option;
     }
 
     public static IScalarValueOption<TValue> WithDescription<TValue>(this IScalarValueOption<TValue> option, string description)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarValueOption<TValue>)option).SetDescription(description);
         return option;
     }
 
     public static ISequentialValueOption<TValue> WithDescription<TValue>(this ISequentialValueOption<TValue> option, string description)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialValueOption<TValue>)option).SetDescription(description);
         return option;
@@ -148,14 +148,14 @@ public static partial class OptionExtensions
     }
 
     public static IScalarNamedOption<TValue> AddAliases<TValue>(this IScalarNamedOption<TValue> option, params string[] aliases)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).AddAliases(aliases);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> AddAliases<TValue>(this ISequentialNamedOption<TValue> option, params string[] aliases)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).AddAliases(aliases);
         return option;
@@ -176,56 +176,56 @@ public static partial class OptionExtensions
     }
 
     public static IScalarNamedOption<TValue> WithValueArity<TValue>(this IScalarNamedOption<TValue> option, ArityType valueArity)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).SetValueArity(valueArity);
         return option;
     }
 
     public static IScalarNamedOption<TValue> WithValueArity<TValue>(this IScalarNamedOption<TValue> option, int requiredValueCount, int maximumValueCount)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).SetValueArity(requiredValueCount, maximumValueCount);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> WithValueArity<TValue>(this ISequentialNamedOption<TValue> option, ArityType valueArity)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetValueArity(valueArity);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> WithValueArity<TValue>(this ISequentialNamedOption<TValue> option, int requiredValueCount, int maximumValueCount)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetValueArity(requiredValueCount, maximumValueCount);
         return option;
     }
 
     public static IScalarValueOption<TValue> WithValueArity<TValue>(this IScalarValueOption<TValue> option, ArityType valueArity)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarValueOption<TValue>)option).SetValueArity(valueArity);
         return option;
     }
 
     public static IScalarValueOption<TValue> WithValueArity<TValue>(this IScalarValueOption<TValue> option, int requiredValueCount, int maximumValueCount)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarValueOption<TValue>)option).SetValueArity(requiredValueCount, maximumValueCount);
         return option;
     }
 
     public static ISequentialValueOption<TValue> WithValueArity<TValue>(this ISequentialValueOption<TValue> option, ArityType valueArity)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialValueOption<TValue>)option).SetValueArity(valueArity);
         return option;
     }
 
     public static ISequentialValueOption<TValue> WithValueArity<TValue>(this ISequentialValueOption<TValue> option, int requiredValueCount, int maximumValueCount)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialValueOption<TValue>)option).SetValueArity(requiredValueCount, maximumValueCount);
         return option;
@@ -258,28 +258,28 @@ public static partial class OptionExtensions
     }
 
     public static IScalarNamedOption<TValue> WithOptionArity<TValue>(this IScalarNamedOption<TValue> option, ArityType optionArity)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).SetOptionArity(optionArity);
         return option;
     }
 
     public static IScalarNamedOption<TValue> WithOptionArity<TValue>(this IScalarNamedOption<TValue> option, int requiredOptionCount, int maximumOptionCount)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).SetOptionArity(requiredOptionCount, maximumOptionCount);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> WithOptionArity<TValue>(this ISequentialNamedOption<TValue> option, ArityType optionArity)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetOptionArity(optionArity);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> WithOptionArity<TValue>(this ISequentialNamedOption<TValue> option, int requiredOptionCount, int maximumOptionCount)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetOptionArity(requiredOptionCount, maximumOptionCount);
         return option;
@@ -294,7 +294,7 @@ public static partial class OptionExtensions
     }
 
     public static IScalarNamedOption<TValue> WithDefaultValue<TValue>(this IScalarNamedOption<TValue> option, TValue defaultValue)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).SetDefaultValue(defaultValue);
         return option;
@@ -303,21 +303,21 @@ public static partial class OptionExtensions
 
     #region Sequential Value Configuration
     public static ISequentialNamedOption<TValue> WithEnableSequentialValues<TValue>(this ISequentialNamedOption<TValue> option, bool enabled)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetEnableSequentialValues(enabled);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> WithEnableValueTokenSplitting<TValue>(this ISequentialNamedOption<TValue> option, bool enabled)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetEnableValueTokenSplitting(enabled);
         return option;
     }
 
     public static ISequentialValueOption<TValue> WithEnableValueTokenSplitting<TValue>(this ISequentialValueOption<TValue> option, bool enabled)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialValueOption<TValue>)option).SetEnableValueTokenSplitting(enabled);
         return option;
@@ -326,28 +326,28 @@ public static partial class OptionExtensions
 
     #region Allowed Values Configuration
     public static IScalarNamedOption<TValue> WithAllowedValues<TValue>(this IScalarNamedOption<TValue> option, params TValue[] allowedValues)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).SetAllowedValues(allowedValues);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> WithAllowedValues<TValue>(this ISequentialNamedOption<TValue> option, params TValue[] allowedValues)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetAllowedValues(allowedValues);
         return option;
     }
 
     public static IScalarValueOption<TValue> WithAllowedValues<TValue>(this IScalarValueOption<TValue> option, params TValue[] allowedValues)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarValueOption<TValue>)option).SetAllowedValues(allowedValues);
         return option;
     }
 
     public static ISequentialValueOption<TValue> WithAllowedValues<TValue>(this ISequentialValueOption<TValue> option, params TValue[] allowedValues)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialValueOption<TValue>)option).SetAllowedValues(allowedValues);
         return option;
@@ -356,42 +356,42 @@ public static partial class OptionExtensions
 
     #region Predicate Configuration
     public static IScalarNamedOption<TValue> AddPredicate<TValue>(this IScalarNamedOption<TValue> option, Predicate<TValue> predicate)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).AddPredicate(predicate);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> AddPredicate<TValue>(this ISequentialNamedOption<TValue> option, Predicate<TValue> predicate)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).AddPredicate(predicate);
         return option;
     }
 
     public static IScalarValueOption<TValue> AddPredicate<TValue>(this IScalarValueOption<TValue> option, Predicate<TValue> predicate)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarValueOption<TValue>)option).AddPredicate(predicate);
         return option;
     }
 
     public static ISequentialValueOption<TValue> AddPredicate<TValue>(this ISequentialValueOption<TValue> option, Predicate<TValue> predicate)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialValueOption<TValue>)option).AddPredicate(predicate);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> AddListPredicate<TValue>(this ISequentialNamedOption<TValue> option, Predicate<List<TValue>> predicate)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).AddListPredicate(predicate);
         return option;
     }
 
     public static ISequentialValueOption<TValue> AddListPredicate<TValue>(this ISequentialValueOption<TValue> option, Predicate<List<TValue>> predicate)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialValueOption<TValue>)option).AddListPredicate(predicate);
         return option;
@@ -400,28 +400,28 @@ public static partial class OptionExtensions
 
     #region Parsing Callbacks Configuration
     public static IScalarNamedOption<TValue> WithTryParseCallback<TValue>(this IScalarNamedOption<TValue> option, TryParse<TValue> callback)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarNamedOption<TValue>)option).SetTryParseCallback(callback);
         return option;
     }
 
     public static ISequentialNamedOption<TValue> WithTryParseCallback<TValue>(this ISequentialNamedOption<TValue> option, TryParse<TValue> callback)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialNamedOption<TValue>)option).SetTryParseCallback(callback);
         return option;
     }
 
     public static IScalarValueOption<TValue> WithTryParseCallback<TValue>(this IScalarValueOption<TValue> option, TryParse<TValue> callback)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((ScalarValueOption<TValue>)option).SetTryParseCallback(callback);
         return option;
     }
 
     public static ISequentialValueOption<TValue> WithTryParseCallback<TValue>(this ISequentialValueOption<TValue> option, TryParse<TValue> callback)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         ((SequentialValueOption<TValue>)option).SetTryParseCallback(callback);
         return option;

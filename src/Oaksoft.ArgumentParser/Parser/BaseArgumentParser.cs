@@ -154,7 +154,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
         foreach (var option in _baseOptions)
         {
             if (string.IsNullOrEmpty(option.Name))
+            {
                 continue;
+            }
 
             if (names.Contains(option.Name))
             {
@@ -167,10 +169,14 @@ internal abstract class BaseArgumentParser : IArgumentParser
         foreach (var option in _baseOptions)
         {
             if (option is not INamedOption)
+            {
                 continue;
+            }
 
             if (option.GetAliases().Count < 1)
+            {
                 continue;
+            }
 
             var validAliases = option.GetAliases()
                 .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength, true)
@@ -269,13 +275,17 @@ internal abstract class BaseArgumentParser : IArgumentParser
         ValidateBuiltInTokens();
 
         foreach (var token in tokens.Where(s => s is { IsParsed: false, Invalid: false }))
+        {
             _errors.Add(ParserErrors.UnknownToken.With(token.Token));
+        }
     }
 
     private void BindOptionsToAttributes()
     {
         if (_errors.Count > 0)
+        {
             return;
+        }
 
         foreach (var option in _baseOptions)
         {
@@ -293,7 +303,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
     protected void AutoPrintHeaderText()
     {
         if (Settings.AutoPrintHeader != true)
+        {
             return;
+        }
 
         Console.Write(BuildHeaderText(true, true).ToString());
         Console.WriteLine();
@@ -302,17 +314,23 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private void AutoPrintHelpText()
     {
         if (_errors.Count > 0)
+        {
             return;
+        }
 
         var helpOption = _baseOptions.OfType<SwitchOption>().
             First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help));
 
         if (!IsOnlyOption(helpOption))
+        {
             return;
+        }
 
         IsHelpOption = true;
         if (Settings.AutoPrintHelp != true)
+        {
             return;
+        }
 
         Console.Write(BuildHelpText(Settings.EnableColoring).ToString());
         Console.WriteLine();
@@ -321,17 +339,23 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private void AutoPrintVersion()
     {
         if (_errors.Count > 0)
+        {
             return;
+        }
 
         var versionOption = _baseOptions.OfType<SwitchOption>().
             First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
 
         if (!IsOnlyOption(versionOption))
+        {
             return;
+        }
 
         IsVersionOption = true;
         if (Settings.AutoPrintVersion != true)
+        {
             return;
+        }
 
         Console.Write(AssemblyHelper.GetAssemblyVersion());
         Console.WriteLine();
@@ -340,7 +364,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
     protected void AutoPrintErrorText()
     {
         if (Settings.AutoPrintErrors != true || _errors.Count < 1)
+        {
             return;
+        }
 
         Console.Write(BuildErrorText(Settings.EnableColoring, false).ToString());
         Console.WriteLine();
@@ -351,9 +377,14 @@ internal abstract class BaseArgumentParser : IArgumentParser
         var sb = new StringBuilder();
 
         if (showTitle && !string.IsNullOrWhiteSpace(Settings.Title))
+        {
             sb.AppendLine(Settings.Title);
+        }
+
         if (showDescription && !string.IsNullOrWhiteSpace(Settings.Description))
+        {
             sb.AppendLine(Settings.Description);
+        }
 
         return sb;
     }
@@ -368,9 +399,14 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         var padLength = _baseOptions.OfType<INamedOption>().Select(n => n.Alias.Length).Max();
         if (padLength < 8)
+        {
             padLength = 8;
+        }
+
         if (padLength > 16)
+        {
             padLength = 16;
+        }
 
         var paddingString = string.Empty.PadRight(padLength, ' ');
 
@@ -416,11 +452,15 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 var descriptionWords = option.Description.Split(' ');
                 var descriptionLines = CreateLinesByWidth(descriptionWords);
                 foreach (var description in descriptionLines)
+                {
                     sb.AppendLine($"{paddingString} {description}");
+                }
             }
 
             if (Settings.NewLineAfterOption)
+            {
                 sb.AppendLine();
+            }
         }
 
         var usageLines = CreateLinesByWidth(_baseOptions.Select(o => o.Usage), true);
@@ -437,7 +477,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         var sb = new StringBuilder();
         if (_errors.Count < 1)
+        {
             return sb;
+        }
 
         TextColoring.SetEnabled(enableColoring);
 
@@ -509,7 +551,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
         };
 
         if (optionCount < 1)
+        {
             return false;
+        }
 
         var totalInputCount = _baseOptions.Sum(o => o switch
         {
@@ -528,7 +572,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
         foreach (var word in textWords)
         {
             if (textLines[^1].Length > Settings.HelpDisplayWidth)
+            {
                 textLines.Add(string.Empty);
+            }
 
             var space = textLines[^1].Length > 0 ? " " : string.Empty;
             var newWord = addBrackets ? $"[{word}]" : word;
@@ -542,7 +588,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private static void AutoInitializeOptionName(BaseOption option, List<string> names)
     {
         if (!string.IsNullOrEmpty(option.Name))
+        {
             return;
+        }
 
         if (names.Contains(option.KeyProperty.Name))
         {
@@ -557,17 +605,23 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private void AutoInitializeOptionAliases(BaseOption option, List<string> aliases)
     {
         if (option is not INamedOption)
+        {
             return;
+        }
 
         if (option.GetAliases().Count > 0)
+        {
             return;
+        }
 
         // suggest aliases for option by using the registered property name
         var suggestedAliases = option.KeyProperty.Name.SuggestAliasesHeuristically(
             aliases, CaseSensitive, Settings.MaxAliasLength, Settings.MaxSuggestedAliasWordCount);
 
         if (!CaseSensitive)
+        {
             suggestedAliases = suggestedAliases.Select(a => a.ToLowerInvariant());
+        }
 
         var validAliases = suggestedAliases
             .ValidateAliases(OptionPrefix, CaseSensitive, Settings.MaxAliasLength, false)

@@ -143,10 +143,14 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         }
 
         if (string.IsNullOrWhiteSpace(_settingsBuilder.Title))
+        {
             _settingsBuilder.Title = BuildTitleLine();
+        }
 
         if (string.IsNullOrWhiteSpace(_settingsBuilder.Description))
+        {
             _settingsBuilder.Description = BuildDescriptionLine();
+        }
     }
 
     private void BuildDefaultOptions()
@@ -201,11 +205,15 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         var version = AssemblyHelper.GetAssemblyVersion();
         if (!string.IsNullOrWhiteSpace(version))
+        {
             title += $" v{version}";
+        }
 
         var company = AssemblyHelper.GetAssemblyCompany();
         if (!string.IsNullOrWhiteSpace(company))
+        {
             title += $", {company}";
+        }
 
         return string.IsNullOrWhiteSpace(title) ? null : title;
     }

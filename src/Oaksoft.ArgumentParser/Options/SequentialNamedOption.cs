@@ -9,7 +9,7 @@ namespace Oaksoft.ArgumentParser.Options;
 
 internal sealed class SequentialNamedOption<TValue> 
     : BaseSequentialValueOption<TValue>, ISequentialNamedOption<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
     public bool EnableSequentialValues { get; private set; }
 
@@ -63,7 +63,9 @@ internal sealed class SequentialNamedOption<TValue>
         foreach (var alias in aliases.Select(s => s.ValidateAlias().GetOrThrow(KeyProperty.Name)))
         {
             if (!_aliases.Contains(alias))
+            {
                 _aliases.Add(alias);
+            }
         }
     }
 
@@ -88,10 +90,14 @@ internal sealed class SequentialNamedOption<TValue>
         _prefixAliases.AddRange(prefixedAliases);
 
         if (string.IsNullOrWhiteSpace(Usage))
+        {
             Usage = $"{Alias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
+        }
 
         if (string.IsNullOrWhiteSpace(Description))
+        {
             Description = $"Performs '{Name}' option.";
+        }
     }
 
     public override void Parse(TokenItem[] tokens)
@@ -104,12 +110,16 @@ internal sealed class SequentialNamedOption<TValue>
         {
             var token = tokens[i];
             if (token.Invalid || token.IsParsed || token.Alias is null)
+            {
                 continue;
+            }
 
             foreach (var alias in _prefixAliases)
             {
                 if (!token.Alias.Equals(alias, compareFlag))
+                {
                     continue;
+                }
 
                 token.IsParsed = true;
                 _optionTokens.Add(alias);
@@ -123,13 +133,17 @@ internal sealed class SequentialNamedOption<TValue>
                     {
                         var nextToken = tokens[i + 1];
                         if (!nextToken.IsOnlyValue)
+                        {
                             break;
+                        }
 
                         nextToken.IsParsed = true;
                         _valueTokens.Add(nextToken.Value!);
 
                         if (!EnableSequentialValues)
+                        {
                             break;
+                        }
                     }
                 }
                 else if (token.Value is not null)

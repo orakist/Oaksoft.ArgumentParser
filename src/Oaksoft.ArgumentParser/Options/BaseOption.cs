@@ -69,7 +69,9 @@ internal abstract class BaseOption : IBaseOption
         ParserInitializedGuard();
 
         if (string.IsNullOrWhiteSpace(description))
+        {
             return;
+        }
 
         Description = description.Trim();
     }
@@ -110,8 +112,10 @@ internal abstract class BaseOption : IBaseOption
             throw ParserErrors.TooManyOption.ToException(OptionArity.Max, OptionCount);
         }
 
-        if (OptionArity.Max >= 1 && OptionCount <= 0) 
+        if (OptionArity.Max >= 1 && OptionCount <= 0)
+        {
             return;
+        }
 
         if (ValueCount < ValueArity.Min)
         {
@@ -132,7 +136,9 @@ internal abstract class BaseOption : IBaseOption
     protected void ParserInitializedGuard()
     {
         if (_parser == null)
+        {
             return;
+        }
 
         throw BuilderErrors.CannotBeModified.WithName(KeyProperty.Name).ToException();
     }

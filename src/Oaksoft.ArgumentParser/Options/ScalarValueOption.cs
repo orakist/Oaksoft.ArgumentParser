@@ -5,7 +5,7 @@ using System.Reflection;
 namespace Oaksoft.ArgumentParser.Options;
 
 internal class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
     public override int OptionCount => 0;
 
@@ -20,10 +20,14 @@ internal class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
         base.Initialize();
 
         if (string.IsNullOrWhiteSpace(Usage))
+        {
             Usage = $"value for '{Name}' option";
+        }
 
         if (string.IsNullOrWhiteSpace(Description))
+        {
             Description = $"Captures value for '{Name}' option.";
+        }
     }
 
     public override void Parse(TokenItem[] tokens)
@@ -31,10 +35,14 @@ internal class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
         foreach (var token in tokens)
         {
             if (!token.IsOnlyValue)
+            {
                 continue;
+            }
 
             if (!IsValidValue(token.Value!))
+            {
                 continue;
+            }
 
             token.IsParsed = true;
             _valueTokens.Add(token.Value!);
@@ -47,7 +55,9 @@ internal class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
     public override void ApplyOptionResult(object appOptions, PropertyInfo keyProperty)
     {
         if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
+        {
             return;
+        }
 
         var result = ResultValue != null ? ResultValue.Value : default;
 

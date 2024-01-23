@@ -30,11 +30,11 @@ public interface ISwitchOption : IScalarNamedOption, IHaveResultValue<bool>, IHa
 }
 
 public interface IScalarNamedOption<TValue> : IScalarNamedOption, IScalarValueOption<TValue>, IHaveDefaultValue<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
 }
 
 public interface ISequentialNamedOption<TValue> : ISequentialNamedOption, ISequentialValueOption<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
 }

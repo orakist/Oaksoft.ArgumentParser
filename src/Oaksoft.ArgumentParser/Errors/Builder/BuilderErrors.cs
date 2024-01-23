@@ -63,9 +63,13 @@ public static class BuilderErrors
         $"{Name}.{nameof(MissingCallback)}",
         "Missing TryParse callback for custom type '{0}'! Configure a custom TryParse callback.");
 
+    public static readonly ErrorInfo EmptyAllowedValue = new(
+        $"{Name}.{nameof(EmptyAllowedValue)}",
+        "Any given allowed value cannot be empty or null!");
+
     public static readonly ErrorInfo InvalidAllowedValue = new(
         $"{Name}.{nameof(InvalidAllowedValue)}",
-        "Any given allowed value cannot be empty or null!");
+        "Allowed value '{0}' not recognized as enumeration value.");
 
     public static readonly ErrorInfo InvalidAlias = new(
         $"{Name}.{nameof(InvalidAlias)}",

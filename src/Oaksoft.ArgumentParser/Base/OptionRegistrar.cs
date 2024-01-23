@@ -39,7 +39,7 @@ internal static class OptionRegistrar
     public static IScalarNamedOption<TValue> RegisterNamedOption<TSource, TValue>(
         this IArgumentParserBuilder builder,
         PropertyInfo keyProperty, bool mustHaveOneValue, bool mandatoryOption)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         var optionLimits = mandatoryOption.GetLimits();
         var valueLimits = mustHaveOneValue.GetLimits();
@@ -53,7 +53,7 @@ internal static class OptionRegistrar
     public static ISequentialNamedOption<TValue> RegisterNamedOption<TSource, TValue>(
         this IArgumentParserBuilder builder,
         PropertyInfo keyProperty, ArityType valueArity, ArityType optionArity)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         var optionLimits = optionArity.GetLimits().GetOrThrow(keyProperty.Name);
         var valueLimits = valueArity.GetLimits().GetOrThrow(keyProperty.Name);
@@ -67,7 +67,7 @@ internal static class OptionRegistrar
     public static IScalarValueOption<TValue> RegisterValueOption<TSource, TValue>(
         this IArgumentParserBuilder builder,
         PropertyInfo keyProperty, bool mustHaveOneValue)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         var valueLimits = mustHaveOneValue.GetLimits();
         var option = new ScalarValueOption<TValue>(valueLimits.Min, valueLimits.Max);
@@ -80,7 +80,7 @@ internal static class OptionRegistrar
     public static ISequentialValueOption<TValue> RegisterValueOption<TSource, TValue>(
         this IArgumentParserBuilder builder,
         PropertyInfo keyProperty, ArityType valueArity)
-        where TValue : IComparable, IEquatable<TValue>
+        where TValue : IComparable
     {
         var valueLimits = valueArity.GetLimits().GetOrThrow(keyProperty.Name);
         var option = new SequentialValueOption<TValue>(valueLimits.Min, valueLimits.Max);

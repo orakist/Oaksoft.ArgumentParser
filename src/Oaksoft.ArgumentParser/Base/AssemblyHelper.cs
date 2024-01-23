@@ -10,10 +10,14 @@ internal static class AssemblyHelper
         var value = assembly?.GetCustomAttribute<AssemblyProductAttribute>()?.Product;
 
         if (string.IsNullOrWhiteSpace(value))
+        {
             value = assembly?.GetCustomAttribute<AssemblyTitleAttribute>()?.Title;
+        }
 
         if (string.IsNullOrWhiteSpace(value))
+        {
             value = Assembly.GetEntryAssembly()?.GetName().Name;
+        }
 
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
@@ -49,7 +53,9 @@ internal static class AssemblyHelper
         var value = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
         if (string.IsNullOrWhiteSpace(value))
+        {
             value = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3);
+        }
 
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }

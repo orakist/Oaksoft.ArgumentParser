@@ -18,13 +18,13 @@ public interface ISequentialValueOption : IValueOption
 
 public interface IScalarValueOption<TValue>
     : IScalarValueOption, IHaveResultValue<TValue>, IHaveAllowedValues<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
 }
 
 public interface ISequentialValueOption<TValue>
     : ISequentialValueOption, IHaveResultValues<TValue>, IHaveAllowedValues<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
 }
 

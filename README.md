@@ -200,8 +200,8 @@ var parser = CommandLine.CreateParser<MyOptions>()
 Here's an example of command-line input and the resulting output for the preceding example code:
 
 ```
-./> myapp --language my-language
-Option value 'my-language' not recognized. Must be one of: [C#, C++, Java, PHP, SQL], Option: Operator
+./> myapp --language my-lang
+Option value 'my-lang' not recognized. Must be one of: [C#, C++, Java, PHP, SQL], Option: Operator
 ```
 
 ## 4. Option Aliases

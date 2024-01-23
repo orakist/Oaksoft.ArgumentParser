@@ -122,7 +122,9 @@ internal sealed class ArgumentParser<TOptions>
             catch (Exception ex)
             {
                 if (!Settings.AutoPrintErrors)
+                {
                     throw;
+                }
 
                 var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
                 _errors.Add(error.WithException(ex));
@@ -169,7 +171,9 @@ internal sealed class ArgumentParser<TOptions>
     protected override void UpdateOptionPropertiesByReflection(BaseOption option)
     {
         if (!option.IsParsed)
+        {
             return;
+        }
 
         var keyProp = _propertyInfos.First(p => p.Name == option.KeyProperty.Name);
 

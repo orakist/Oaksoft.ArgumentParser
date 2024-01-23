@@ -10,7 +10,7 @@ namespace Oaksoft.ArgumentParser.Options;
 
 internal class ScalarNamedOption<TValue>
     : BaseScalarValueOption<TValue>, IScalarNamedOption<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
     public string Alias => _prefixAliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length).First();
 
@@ -70,7 +70,9 @@ internal class ScalarNamedOption<TValue>
         foreach (var alias in aliases.Select(s => s.ValidateAlias().GetOrThrow(KeyProperty.Name)))
         {
             if (!_aliases.Contains(alias))
+            {
                 _aliases.Add(alias);
+            }
         }
     }
 
@@ -88,10 +90,14 @@ internal class ScalarNamedOption<TValue>
         _prefixAliases.AddRange(prefixedAliases);
 
         if (string.IsNullOrWhiteSpace(Usage))
+        {
             Usage = $"{Alias}{(ValueArity.Min > 0 ? " <value>" : ValueArity.Max > 0 ? " (value)" : string.Empty)}";
+        }
 
         if (string.IsNullOrWhiteSpace(Description))
+        {
             Description = $"Performs '{Name}' option.";
+        }
     }
 
     public override void Parse(TokenItem[] tokens)
@@ -104,12 +110,16 @@ internal class ScalarNamedOption<TValue>
         {
             var token = tokens[i];
             if (token.Invalid || token.IsParsed || token.Alias is null)
+            {
                 continue;
+            }
 
             foreach (var alias in _prefixAliases)
             {
                 if (!token.Alias.Equals(alias, compareFlag))
+                {
                     continue;
+                }
 
                 token.IsParsed = true;
                 _optionTokens.Add(alias);
@@ -151,7 +161,9 @@ internal class ScalarNamedOption<TValue>
     public override void ApplyOptionResult(object appOptions, PropertyInfo keyProperty)
     {
         if (!keyProperty.PropertyType.IsAssignableFrom(typeof(TValue)))
+        {
             return;
+        }
 
         var result = ResultValue != null
             ? ResultValue.Value

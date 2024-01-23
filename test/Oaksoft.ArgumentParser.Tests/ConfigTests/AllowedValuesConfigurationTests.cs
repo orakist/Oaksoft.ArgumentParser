@@ -91,7 +91,6 @@ public class AllowedValuesConfigurationTests
         }
     }
 
-
     [Theory]
     [InlineData("Cat", null, "007")]
     [InlineData("  s", "  ", "x")]

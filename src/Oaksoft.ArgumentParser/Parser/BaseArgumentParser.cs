@@ -466,7 +466,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        var usageLines = CreateLinesByWidth(_baseOptions.Select(o => o.Usage), lineLength, true);
+        var usages = VerbosityLevel >= VerbosityLevelType.Detailed 
+            ? _baseOptions.Select(o => o.Usage)
+            : _baseOptions.Where(o => !AliasExtensions.BuiltInOptionNames.Contains(o.Name)).Select(o => o.Usage);
+
+        var usageLines = CreateLinesByWidth(usages, lineLength, true);
         sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
         sb.AppendLine(usageLines[0]);
 

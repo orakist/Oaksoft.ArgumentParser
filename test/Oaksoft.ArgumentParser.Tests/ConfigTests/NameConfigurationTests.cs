@@ -175,7 +175,7 @@ public class NameConfigurationTests
     {
         // Arrange
         const string name = "Help";
-        const string reservedNames = "'Help', 'Version'";
+        const string reservedNames = "'Help', 'Version', 'Verbosity'";
         var sut = CommandLine.CreateParser<IntAppOptions>();
 
         // Act

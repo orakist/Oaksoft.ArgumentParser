@@ -120,11 +120,11 @@ These are command line options of this application.
          Aliases: -h, -?, --help, /h, /?, /help
          Shows help and usage information.
 
---ver    Usage: --ver
-         Aliases: --ver, --version, /ver, /version
-         Shows version information.
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
 
-Usage: [-l <value>] [-r <value>] [-c <value>] [-h] [--ver]
+Usage: [-l <value>] [-r <value>] [-c <value>]
 Result: Invalid argument!
 ```
 
@@ -282,20 +282,20 @@ These are command line options of this application.
          Aliases: -r, --right, /r, /right
          Right operand of the operation.
 
--c       Usage: -c (value), Default Value: 'add'
-         Allowed Values: add | sub | mul | div | pow
+-c       Usage: -c (value)
          Aliases: -c, --calculate, /c, /calculate
-         Defines operator type of the calculation.
+         Defines operator type of the calculation. [Allowed-Values: add | sub |
+         mul | div | pow], [Default: add]
 
 -h       Usage: -h
          Aliases: -h, -?, --help, /h, /?, /help
          Shows help and usage information.
 
---ver    Usage: --ver
-         Aliases: --ver, --version, /ver, /version
-         Shows version information.
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
 
-Usage: [-l <value>] [-r <value>] [-c (value)] [-h] [--ver]
+Usage: [-l <value>] [-r <value>] [-c (value)]
 ```
 
 ### Tutorial Step 5
@@ -534,20 +534,118 @@ These are command line options of this application.
          Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
          Defines the numbers to be calculated.
 
--c       Usage: -c (value), Default Value: 'add'
-         Allowed Values: add | sub | mul | div | pow
+-c       Usage: -c (value)
          Aliases: -c, --calculate, /c, /calculate
-         Defines operator type of the calculation.
+         Defines operator type of the calculation. [Allowed-Values: add | sub |
+         mul | div | pow], [Default: add]
 
 -h       Usage: -h
          Aliases: -h, -?, --help, /h, /?, /help
          Shows help and usage information.
 
---ver    Usage: --ver
-         Aliases: --ver, --version, /ver, /version
-         Shows version information.
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
 
-Usage: [-n <value>] [-c (value)] [-h] [--ver]
+Usage: [-n <value>] [-c (value)]
+```
+
+### Tutorial Step 8
+
+To simplify calculate option registration;
+- Define an enum for Operator types
+- Change type of the operator to an enum.
+
+Enum option has some benefits. 
+- Parser configures allowed values automatically for enum options.
+- Any enum value update, updates the parser enum options. Because enums are strongly typed. 
+- Also, you can pass integer values to enum options.
+- See the updated codes method below.
+
+```cs
+public enum OperatorType { Add, Sub, Mul, Div, Pow, Rem }
+
+public class CalculatorOptions
+{
+    public IEnumerable<double>? Numbers { get; set; }
+
+    public OperatorType? Calculate { get; set; }
+}
+
+private static bool TryParseCustom(string value, out double result)
+{
+    if (value.StartsWith('(') && value.EndsWith(')'))
+        value = value.Substring(1, value.Length - 2);
+
+    return double.TryParse(value, out result);
+}
+
+public static IArgumentParser<CalculatorOptions> Build()
+{
+    return CommandLine.CreateParser<CalculatorOptions>()
+        .AddNamedOption(p => p.Numbers,
+            o => o.WithDescription("Defines the numbers to be calculated.")
+                .AddAliases("n", "numbers", "l", "left", "r", "right")
+                .AddPredicate(v => v >= 0)
+                .WithTryParseCallback(TryParseCustom)
+                .WithOptionArity(ArityType.OneOrMore)
+                .WithValueArity(2, int.MaxValue))
+        .AddNamedOption(o => o.Calculate,
+            o => o.WithDescription("Defines operator type of the calculation.")
+                .WithDefaultValue(OperatorType.Add),
+            mandatoryOption: true, mustHaveOneValue: false)
+        .Build();
+}
+
+public static void Parse(IArgumentParser<CalculatorOptions> parser, string[] args)
+{
+    Console.WriteLine($"Inputs: {string.Join(' ', args)}");
+
+    var options = parser.Parse(args);
+
+    if (!parser.IsValid || parser.IsEmpty || parser.IsHelpOption || parser.IsVersionOption)
+        return;
+
+    var numbers = options.Numbers!.ToList();
+    var equation = options.Calculate switch
+    {
+        OperatorType.Add => $"{string.Join(" + ", numbers)} = {numbers.Sum()}",
+        OperatorType.Sub => $"{string.Join(" - ", numbers)} = {numbers.First() - numbers.Skip(1).Sum()}",
+        OperatorType.Mul => $"{string.Join(" * ", numbers)} = {numbers.Aggregate<double, double>(1, (x, y) => x * y)}",
+        OperatorType.Div => $"{string.Join(" / ", numbers)} = {numbers.Skip(1).Aggregate(numbers.First(), (x, y) => x / y)}",
+        OperatorType.Pow => $"{string.Join(" ^ ", numbers)} = {numbers.Skip(1).Aggregate(numbers.First(), Math.Pow)}",
+        OperatorType.Rem => $"{string.Join(" % ", numbers)} = {numbers.Skip(1).Aggregate(numbers.First(), (x, y) => x % y)}",
+        _ => "Invalid Argument!"
+    };
+
+    Console.WriteLine($"Result: {equation}");
+}
+```
+
+This is the new --help output. See the "operator" option.
+
+```
+Oaksoft.ArgumentParser.Tutorial v1.0.0
+These are command line options of this application.
+
+-n       Usage: -n <value>
+         Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
+         Defines the numbers to be calculated.
+
+-c       Usage: -c (value)
+         Aliases: -c, --calculate, /c, /calculate
+         Defines operator type of the calculation. [Allowed-Values: Add | Sub |
+         Mul | Div | Pow | Rem], [Default: Add]
+
+-h       Usage: -h
+         Aliases: -h, -?, --help, /h, /?, /help
+         Shows help and usage information.
+
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
+
+Usage: [-n <value>] [-c (value)]
 ```
 
 #### to be continued ...

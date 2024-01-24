@@ -54,7 +54,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
             EnableColoring = _settingsBuilder.EnableColoring ??= true,
             Title = _settingsBuilder.Title,
             Description = _settingsBuilder.Description,
-            VerbosityLevel = _settingsBuilder.VerbosityLevel ?? VerbosityLevelType.Quiet,
+            VerbosityLevel = _settingsBuilder.VerbosityLevel ?? VerbosityLevelType.Minimal,
 
             MaxAliasLength = _settingsBuilder.MaxAliasLength ?? 32,
             MaxSuggestedAliasWordCount = _settingsBuilder.MaxSuggestedAliasWordCount ?? 4
@@ -124,7 +124,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         _settingsBuilder.NewLineAfterOption ??= true;
         _settingsBuilder.ShowTitle ??= true;
         _settingsBuilder.ShowDescription ??= true;
-        _settingsBuilder.VerbosityLevel ??= VerbosityLevelType.Quiet;
+        _settingsBuilder.VerbosityLevel ??= VerbosityLevelType.Minimal;
         _settingsBuilder.EnableColoring ??= true;
         _settingsBuilder.MaxAliasLength ??= 32;
         _settingsBuilder.MaxSuggestedAliasWordCount ??= 4;
@@ -193,9 +193,9 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
     private void BuildHelpOption()
     {
-        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Verbosity)))
+        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help)))
         {
-            throw BuilderErrors.ReservedProperty.ToException(nameof(IBuiltInOptions.Verbosity));
+            throw BuilderErrors.ReservedProperty.ToException(nameof(IBuiltInOptions.Help));
         }
 
         var properties = typeof(BuiltInOptions).GetProperties();

@@ -363,6 +363,12 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
         {
             if (!_tryParseValueCallback!.Invoke(inputValue, out var result))
             {
+                if (typeof(TValue).IsEnum && this is IHaveAllowedValues values)
+                {
+                    var joinedValues = string.Join(", ", values.GetAllowedValues());
+                    throw ParserErrors.ValueMustBeOneOf.ToException(inputValue, joinedValues);
+                }
+                
                 throw ParserErrors.InvalidOptionValue.ToException(inputValue);
             }
 

@@ -7,6 +7,7 @@ RunTutorial04();
 RunTutorial05();
 RunTutorial06();
 RunTutorial07();
+RunTutorial08();
 
 static void RunTutorial01()
 {
@@ -283,7 +284,6 @@ static void RunTutorial06()
         Tutorial06.Parse(parser, args);
 }
 
-
 static void RunTutorial07()
 {
     Console.WriteLine("#######  Tutorial - 07  #######");
@@ -306,6 +306,30 @@ static void RunTutorial07()
 
     foreach (var args in GetFloatArguments())
         Tutorial07.Parse(parser, args);
+}
+
+static void RunTutorial08()
+{
+    Console.WriteLine("#######  Tutorial - 08  #######");
+    var parser = Tutorial08.Build();
+
+    foreach (var args in GetNumberArguments())
+        Tutorial08.Parse(parser, args);
+
+    foreach (var args in GetLongArguments())
+        Tutorial08.Parse(parser, args);
+
+    foreach (var args in GetShortArguments())
+        Tutorial08.Parse(parser, args);
+
+    Console.WriteLine(">>> Help Option Case");
+    Tutorial08.Parse(parser, Arguments.HelpArgs);
+
+    Console.WriteLine(">>> Version Option Case");
+    Tutorial08.Parse(parser, Arguments.VersionArgs);
+
+    foreach (var args in GetFloatArguments())
+        Tutorial08.Parse(parser, args);
 }
 
 static IEnumerable<string[]> GetLongArguments()

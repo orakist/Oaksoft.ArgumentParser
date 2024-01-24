@@ -20,14 +20,16 @@ using Oaksoft.ArgumentParser.Extensions;
 
 namespace QuickStart;
 
-internal class CalculatorOptions
+enum OperatorType { Add, Sub, Mul, Div }
+
+class CalculatorOptions
 {
     public double Left { get; set; }
     public double Right { get; set; }
-    public string? Operator { get; set; }
+    public OperatorType? Operator { get; set; }
 }
 
-internal static class Program
+static class Program
 {
     private static void Main(string[] args)
     {
@@ -42,12 +44,12 @@ internal static class Program
 
     private static void EvaluateOptions(CalculatorOptions options)
     {
-        var result = options.Operator?.ToUpperInvariant() switch
+        var result = options.Operator switch
         {
-            "ADD" => $"{options.Left} + {options.Right} = {options.Left + options.Right}",
-            "SUB" => $"{options.Left} - {options.Right} = {options.Left - options.Right}",
-            "MUL" => $"{options.Left} * {options.Right} = {options.Left * options.Right}",
-            "DIV" => $"{options.Left} / {options.Right} = {options.Left / options.Right}",
+            OperatorType.Add => $"{options.Left} + {options.Right} = {options.Left + options.Right}",
+            OperatorType.Sub => $"{options.Left} - {options.Right} = {options.Left - options.Right}",
+            OperatorType.Mul => $"{options.Left} * {options.Right} = {options.Left * options.Right}",
+            OperatorType.Div => $"{options.Left} / {options.Right} = {options.Left / options.Right}",
             _ => "Invalid argument!"
         };
 
@@ -193,7 +195,16 @@ According to the preceding code, values of the ***'--number'*** option in the fo
 To specify a list of allowed values for an option, specify an enum as the option type or use ***.WithAllowedValues()***, as shown in the following example.
 
 ```cs
+enum OperatorType { Add, Sub, Mul, Div }
+
+class MyOptions
+{
+    public string? Language { get; set; }
+    public OperatorType? Operator { get; set; }
+}
+
 var parser = CommandLine.CreateParser<MyOptions>()
+        .AddNamedOption(o => o.Operator)
         .AddNamedOption(o => o.Language, o.WithAllowedValues("C#", "C++", "Java", "PHP", "SQL"))
         .Build();
 ```
@@ -202,7 +213,9 @@ Here's an example of command-line input and the resulting output for the precedi
 
 ```
 ./> myapp --language my-lang
-Option value 'my-lang' not recognized. Must be one of: [C#, C++, Java, PHP, SQL], Option: Operator
+Option value 'my-lang' not recognized. Must be one of: [C#, C++, Java, PHP, SQL], Option: Language
+./> myapp --operator abc
+Option value 'abc' not recognized. Must be one of: [Add, Sub, Mul, Div], Option: Operator
 ```
 
 ## 4. Option Aliases

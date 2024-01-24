@@ -28,7 +28,7 @@ internal static class Program
 
     private static void EvaluateOptions(IArgumentParser<CalculatorOptions> parser, CalculatorOptions options)
     {
-        if (!parser.IsValid || string.IsNullOrEmpty(options.Operator))
+        if (!parser.IsValid || options.Operator == null)
             return;
 
         var numbers = new List<double>();
@@ -54,21 +54,21 @@ internal static class Program
             return;
         }
 
-        var result = options.Operator.ToUpperInvariant() switch
+        var result = options.Operator switch
         {
-            "ADD" => numbers.Sum(),
-            "SUB" => numbers.First() - numbers.Skip(1).Sum(),
-            "MUL" => numbers.Aggregate<double, double>(1, (current, number) => current * number),
-            "DIV" => numbers.Skip(1).Aggregate(numbers.First(), (current, number) => current / number),
+            OperatorType.Add => numbers.Sum(),
+            OperatorType.Sub => numbers.First() - numbers.Skip(1).Sum(),
+            OperatorType.Mul => numbers.Aggregate<double, double>(1, (current, number) => current * number),
+            OperatorType.Div => numbers.Skip(1).Aggregate(numbers.First(), (current, number) => current / number),
             _ => 0
         };
 
-        var equation = options.Operator.ToUpperInvariant() switch
+        var equation = options.Operator switch
         {
-            "ADD" => $"{string.Join(" + ", numbers)} = {result}",
-            "SUB" => $"{string.Join(" - ", numbers)} = {result}",
-            "MUL" => $"{string.Join(" * ", numbers)} = {result}",
-            "DIV" => $"{string.Join(" / ", numbers)} = {result}",
+            OperatorType.Add => $"{string.Join(" + ", numbers)} = {result}",
+            OperatorType.Sub => $"{string.Join(" - ", numbers)} = {result}",
+            OperatorType.Mul => $"{string.Join(" * ", numbers)} = {result}",
+            OperatorType.Div => $"{string.Join(" / ", numbers)} = {result}",
             _ => "Invalid Argument!"
         };
 
@@ -94,8 +94,7 @@ internal static class Program
                 ArityType.OneOrMore)
 
             .AddNamedOption(o => o.Operator,
-                o => o.WithDescription("Sets the operator type.")
-                    .WithAllowedValues("ADD", "SUB", "MUL", "DIV"),
+                o => o.WithDescription("Sets the operator type."),
                 mandatoryOption: true);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Oaksoft.ArgumentParser.Console;
 
+internal enum OperatorType { Add, Sub, Mul, Div }
+
 internal class CalculatorOptions
 {
     public double? LeftOperand { get; set; }
@@ -12,5 +14,5 @@ internal class CalculatorOptions
 
     public IEnumerable<int>? Integers { get; set; }
 
-    public string? Operator { get; set; }
+    public OperatorType? Operator { get; set; }
 }

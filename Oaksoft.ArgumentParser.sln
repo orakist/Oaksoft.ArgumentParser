@@ -10,8 +10,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69BFAD59-3555-4F09-BBF2-20F182DBDC86}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		LICENSE.md = LICENSE.md
-		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oaksoft.ArgumentParser.Tests", "test\Oaksoft.ArgumentParser.Tests\Oaksoft.ArgumentParser.Tests.csproj", "{3BE2C797-5704-4610-9AA4-6D719FDE78E2}"
@@ -23,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 		docs\Tutorial.md = docs\Tutorial.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oaksoft.ArgumentParser.Tutorial", "test\Oaksoft.ArgumentParser.Tutorial\Oaksoft.ArgumentParser.Tutorial.csproj", "{FE007224-B1BE-4F09-80DC-E3547D118FEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oaksoft.ArgumentParser.Tutorial", "test\Oaksoft.ArgumentParser.Tutorial\Oaksoft.ArgumentParser.Tutorial.csproj", "{FE007224-B1BE-4F09-80DC-E3547D118FEE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

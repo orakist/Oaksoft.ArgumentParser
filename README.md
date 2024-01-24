@@ -60,7 +60,7 @@ static class Program
 
 Sample Command line output for the above console application
 
-```
+```console
 Type the options and press enter. Type 'q' to quit.
 ./> -l 13 -r 8 -o MUL
 Result: 13 * 8 = 104
@@ -93,7 +93,7 @@ There are two kinds of options. These are Named options and Value options.
 If an option has an alias, it is called a named option. Prefix of an alias can be two hyphens (--), one hyphen (-) or forward slash (/). 
 These are some valid commands according to the default alias prefix rules.
 
-```
+```console
 ./> myapp --open file.txt --read 100 --verbosity quiet
 ./> myapp /open file.txt /read 100 /verbosity quiet
 ./> myapp -o file.txt -r 100 -v quiet
@@ -145,9 +145,11 @@ var parser = CommandLine.CreateParser<ExampleOptions>()
     .AddValueOption(o => o.Names) // Thirdly, bind all remaining tokens
     .Build();
 ```
-```
-./> frodo 10.5 sam 30 gandalf => count: 30, total: 10.5, names: {frodo, sam, gandalf}
-./> frodo 10 sam 30.5 gandalf => count: 10, total: 30.5, names: {frodo, sam, gandalf}
+```console
+./> frodo 10.5 sam 30 gandalf
+count: 30, total: 10.5, names: {frodo, sam, gandalf}
+./> frodo 10 sam 30.5 gandalf
+count: 10, total: 30.5, names: {frodo, sam, gandalf}
 ```
 
 ```cs
@@ -157,9 +159,11 @@ var parser = CommandLine.CreateParser<ExampleOptions>()
     .AddValueOption(o => o.Total) // Thirdly, bind first double token from unbinded tokens
     .Build();
 ```
-```
-./> frodo 10.5 sam 30 gandalf => count: 30, total: 0, names: {frodo, 10.5, sam, gandalf}
-./> frodo 10 sam 30.5 gandalf => count: 10, total: 0, names: {frodo, sam, 30.5, gandalf}
+```console
+./> frodo 10.5 sam 30 gandalf
+count: 30, total: 0, names: {frodo, 10.5, sam, gandalf}
+./> frodo 10 sam 30.5 gandalf
+count: 10, total: 0, names: {frodo, sam, 30.5, gandalf}
 ```
 
 ## 2. Default Value
@@ -168,7 +172,7 @@ Options can have default values that apply if no value is explicitly provided. F
 are values with a default of true when the option name is in the command line. 
 The following command-line examples are equivalent:
 
-```
+```console
 ./> myapp --enabled
 ./> myapp --enabled true
 ```
@@ -184,7 +188,7 @@ var parser = CommandLine.CreateParser<MyOptions>()
 
 According to the preceding code, values of the ***'--number'*** option in the following first two lines are equal. And value of the last line is 15.
 
-```
+```console
 ./> myapp --number
 ./> myapp --number 12
 ./> myapp --number 15
@@ -211,7 +215,7 @@ var parser = CommandLine.CreateParser<MyOptions>()
 
 Here's an example of command-line input and the resulting output for the preceding example code:
 
-```
+```console
 ./> myapp --language my-lang
 Option value 'my-lang' not recognized. Must be one of: [C#, C++, Java, PHP, SQL], Option: Language
 ./> myapp --operator abc
@@ -220,13 +224,107 @@ Option value 'abc' not recognized. Must be one of: [Add, Sub, Mul, Div], Option:
 
 ## 4. Option Aliases
 
-Description will be added!
+In both POSIX and Windows, it's common for some commands and options to have aliases. These are usually short forms that are easier to type. 
+Aliases can also be used for other purposes, such as to simulate case-insensitivity and to support alternate spellings of a word.
+Option names and aliases are case-insensitive by default. But it is configurable while creating the parser. 
 
-## 5. Custom Option Parser & Validator
+POSIX short forms typically have a single leading dash followed by a single character. The following commands are equivalent:
 
-Description will be added!
+```console
+./> myapp --operator add
+./> myapp -o add
+```
 
-## 6. Arity Configuration
+*Oaksoft.ArgumentParser* lets you use a space, '=', or ':' as the delimiter between an option name and its argument.
+For example, the following commands are equivalent:
+
+```console
+./> myapp -o add
+./> myapp -o:add
+./> myapp -o=add
+```
+
+A POSIX convention lets you omit the delimiter when you are specifying a single-character option alias. 
+*Oaksoft.ArgumentParser* supports this syntax by default. For example, the following commands are equivalent:
+
+```console
+./> myapp -o add
+./> myapp -oadd
+```
+
+Oaksoft.ArgumentParser heuristically creates aliases by using the property name. For example parser creates "f" and "file" for the 'File' property.
+Aliases can also be configured manually using the parser's fluent api. If parser can't suggest an alias for an option it throws an exception.
+This can happen if lots of option property names are similar.
+
+## 5. Arity Configuration
+
+The arity of an option or value is the number of option or values that can be passed if that option or value is specified.
+Arity is expressed with a minimum value and a maximum value, as the following table illustrates:
+
+- Zero - No values allowed.
+- ZeroOrOne - May have one value, may have no values.
+- ExactlyOne - Must have one value.
+- ZeroOrMore - May have one value, multiple values, or no values.
+- OneOrMore - May have multiple values, must have at least one value.
+- Custom minimum and maximum configuration.
+
+There are two types of arities. These are option arity and value arity.
+Following table illustrates option arity for option '-n':
+
+| Min | Max  | Example validity | Example                     |
+|-----|------|------------------|-----------------------------|
+| 0   | 0    | Invalid          | -n                          |
+|     |      | Invalid          | -n 1                        |
+|     |      | Invalid          | -n 1 -n 2                   |
+| 0   | 1    | Valid            | -n                          |
+|     |      | Valid            | -n 1                        |
+|     |      | Invalid:         | -n 1 -n 2                   |
+| 1   | 1    | Valid            | -n                          |
+|     |      | Valid            | -n 1                        |
+|     |      | Invalid:         | -n 1 -n 2                   |
+| 0   | *n*  | Valid:           | -n                          |
+|     |      | Valid:           | -n 1                        |
+|     |      | Valid:           | -n 1 -n 2                   |
+| 1   | *n*  | Valid:           | -n                          |
+|     |      | Valid:           | -n 1                        |
+|     |      | Valid:           | -n 1 -n 2                   |
+
+Following table illustrates value arity:
+
+| Min | Max     | Example validity | Example                     |
+|-----|---------|------------------|-----------------------------|
+| 0   | 0       | Valid:           | --file                      |
+|     |         | Invalid:         | --file a.json               |
+|     |         | Invalid:         | --file a.json --file b.json |
+| 0   | 1       | Valid:           | --flag                      |
+|     |         | Valid:           | --flag true                 |
+|     |         | Valid:           | --flag false                |
+|     |         | Invalid:         | --flag false --flag false   |
+| 1   | 1       | Valid:           | --file a.json               |
+|     |         | Invalid:         | --file                      |
+|     |         | Invalid:         | --file a.json --file b.json |
+| 0   | *n*     | Valid:           | --file                      |
+|     |         | Valid:           | --file a.json               |
+|     |         | Valid:           | --file a.json --file b.json |
+| 1   | *n*     | Valid:           | --file a.json               |
+|     |         | Valid:           | --file a.json b.json        |
+|     |         | Invalid:         | --file                      |
+
+#### Option overrides
+If the arity maximum for an option is ZeroOrOne, *Oaksoft.ArgumentParser* can still be configured to accept multiple instances of an option.
+In that case, the last instance of a repeated option overwrites any earlier instances. In the following example, the value 2 would be passed to the delay option.
+
+```console
+./> myapp -delay 3 --message example --delay 2
+```
+
+In the following example, the list passed to the list option would contain "a", "b", "c", and "d":
+
+```console
+./> myapp --list a b c --list d
+```
+
+## 6. Custom Option Parser & Validator
 
 Description will be added!
 
@@ -235,9 +333,5 @@ Description will be added!
 Description will be added!
 
 ## 8. Built-In Options
-
-Description will be added!
-
-## 9. Step by Step Tutorial
 
 Description will be added!

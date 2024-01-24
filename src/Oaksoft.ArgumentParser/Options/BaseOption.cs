@@ -25,24 +25,19 @@ internal abstract class BaseOption : IBaseOption
 
     public bool IsParsed => IsValid && OptionCount + ValueCount > 0;
 
+    public bool IsHidden { get; private set; }
+
     public abstract int OptionCount { get; }
 
     public abstract int ValueCount { get; }
 
     public PropertyInfo KeyProperty { get; private set; } = default!;
 
-    public PropertyInfo? CountProperty { get; private set; }
-
     protected IArgumentParser? _parser;
 
     public void SetKeyProperty(PropertyInfo property)
     {
         KeyProperty = property;
-    }
-
-    public void SetCountProperty(PropertyInfo? property)
-    {
-        CountProperty = property;
     }
 
     public void SetParser(IArgumentParser parser)
@@ -54,9 +49,16 @@ internal abstract class BaseOption : IBaseOption
     {
         ParserInitializedGuard();
 
-        Name = validate 
+        Name = validate
             ? name.ValidateName().GetOrThrow(KeyProperty.Name)
             : name;
+    }
+
+    public void SetHidden(bool hidden)
+    {
+        ParserInitializedGuard();
+
+        IsHidden = hidden;
     }
 
     public void SetUsage(string usage)
@@ -76,7 +78,9 @@ internal abstract class BaseOption : IBaseOption
         ParserInitializedGuard();
 
         if (string.IsNullOrWhiteSpace(description))
+        {
             return;
+        }
 
         Description = description.Trim();
     }
@@ -117,8 +121,10 @@ internal abstract class BaseOption : IBaseOption
             throw ParserErrors.TooManyOption.ToException(OptionArity.Max, OptionCount);
         }
 
-        if (OptionArity.Max >= 1 && OptionCount <= 0) 
+        if (OptionArity.Max >= 1 && OptionCount <= 0)
+        {
             return;
+        }
 
         if (ValueCount < ValueArity.Min)
         {
@@ -139,7 +145,9 @@ internal abstract class BaseOption : IBaseOption
     protected void ParserInitializedGuard()
     {
         if (_parser == null)
+        {
             return;
+        }
 
         throw BuilderErrors.CannotBeModified.WithName(KeyProperty.Name).ToException();
     }

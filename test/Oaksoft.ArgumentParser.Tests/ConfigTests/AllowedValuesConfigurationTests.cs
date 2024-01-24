@@ -91,6 +91,26 @@ public class AllowedValuesConfigurationTests
         }
     }
 
+    [Theory]
+    [InlineData("Cat", null, "007")]
+    [InlineData("  s", "  ", "x")]
+    [InlineData("  ab ", "", "x")]
+    public void ShouldThrowException_WhenTryToUpdateEmptyAllowedValues(params string?[] values)
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<StringAppOptions>();
+        string[] valueStrings = values.ToArray()!;
+
+        // Act & Assert
+        var exception = Should.Throw<OptionBuilderException>(() => 
+            sut.AddNamedOption(s => s.Value, o => o.WithAllowedValues(valueStrings)));
+        var info = exception.Error;
+
+        info.Error.Code.ShouldBe(BuilderErrors.EmptyAllowedValue.Code);
+        info.Values.ShouldBeNull();
+        info.OptionName.ShouldBe(nameof(StringAppOptions.Value));
+    }
+
     [Fact]
     public void ShouldThrowException_WhenTryToUpdateAllowedValuesAfterBuild()
     {

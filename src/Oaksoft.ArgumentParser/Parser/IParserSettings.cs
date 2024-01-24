@@ -1,4 +1,6 @@
-﻿namespace Oaksoft.ArgumentParser.Parser;
+﻿using Oaksoft.ArgumentParser.Definitions;
+
+namespace Oaksoft.ArgumentParser.Parser;
 
 public interface IParserSettings
 {
@@ -23,6 +25,8 @@ public interface IParserSettings
     string? Title { get; }
 
     string? Description { get; }
+
+    VerbosityLevelType VerbosityLevel { get; }
 
     int MaxAliasLength { get; }
 

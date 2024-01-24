@@ -11,11 +11,11 @@ namespace Oaksoft.ArgumentParser.Base;
 
 internal static class AliasExtensions
 {
-    public static readonly string[] BuiltInOptionNames = { "Help", "Version" };
+    public static readonly string[] BuiltInOptionNames = { "Help", "Version", "Verbosity" };
 
     private static readonly char[] _suggestionTrimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
     private static readonly char[] _allowedAliasSymbols = { '?', '.', '-' };
-    private static readonly string[] _reservedAliases = { "?", "h", "help", "version" };
+    private static readonly string[] _reservedAliases = { "?", "h", "help", "vn", "version", "vl", "verbosity" };
 
     private static bool IsAsciiDigit(char c) => (uint)(c - '0') <= '9' - '0';
     private static bool IsAsciiLetter(char c) => (uint)((c | 0x20) - 'a') <= 'z' - 'a';
@@ -106,7 +106,9 @@ internal static class AliasExtensions
     {
         var words = name.GetHumanizedWords().ToList();
         if (words.Count < 1)
+        {
             yield break;
+        }
 
         var compareFlag = caseSensitive
             ? StringComparison.Ordinal
@@ -119,14 +121,20 @@ internal static class AliasExtensions
             foreach (var word in words.Take(maxAliasWordCount).Where(w => i < w.Length))
             {
                 if (IsAsciiDigit(word[i]))
+                {
                     continue;
+                }
 
                 var candidate = word.Substring(i, 1);
                 if (filter.Any(f => f.Equals(candidate, compareFlag)))
+                {
                     continue;
+                }
 
                 if (_reservedAliases.Any(f => f.Equals(candidate, StringComparison.OrdinalIgnoreCase)))
+                {
                     continue;
+                }
 
                 candidateFound = true;
                 yield return candidate;
@@ -134,21 +142,29 @@ internal static class AliasExtensions
             }
 
             if (candidateFound)
+            {
                 break;
+            }
         }
 
         for (var i = maxAliasWordCount; i > 0; --i)
         {
             // find a long alias
             if (words.Count < i || words.Take(i).Sum(s => s.Length) + i - 1 > maxAliasLength)
+            {
                 continue;
+            }
 
             var candidate = string.Join('-', words.Take(i));
             if (_reservedAliases.Any(r => r.Equals(candidate, StringComparison.OrdinalIgnoreCase)))
+            {
                 continue;
+            }
 
             if (filter.Any(f => f.Equals(candidate, compareFlag)))
+            {
                 continue;
+            }
 
             yield return candidate;
             yield break;
@@ -160,17 +176,27 @@ internal static class AliasExtensions
         foreach (var alias in aliases)
         {
             if (rules.HasFlag(OptionPrefixRules.AllowSingleDash))
+            {
                 yield return "-" + alias;
+            }
             else if (alias.Length < 2 && rules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
+            {
                 yield return "-" + alias;
+            }
 
             if (rules.HasFlag(OptionPrefixRules.AllowDoubleDash))
+            {
                 yield return "--" + alias;
+            }
             else if (alias.Length > 1 && rules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
+            {
                 yield return "--" + alias;
+            }
 
             if (rules.HasFlag(OptionPrefixRules.AllowForwardSlash))
+            {
                 yield return "/" + alias;
+            }
         }
     }
 
@@ -213,42 +239,60 @@ internal static class AliasExtensions
         OptionPrefixRules prefixRules, AliasDelimiterRules aliasRules)
     {
         if ((prefixRules & (OptionPrefixRules.AllowDoubleDash | OptionPrefixRules.AllowDoubleDashLongAlias)) <= 0)
+        {
             return null;
+        }
 
         if (!token.StartsWith("--"))
+        {
             return null;
+        }
 
         if (token.Length < 3)
+        {
             throw ParserErrors.InvalidToken.ToException(token);
+        }
 
         foreach (var alias in aliases)
         {
             if (!token.AsSpan(2).StartsWith(alias, compareFlag))
+            {
                 continue;
+            }
 
             if (prefixRules.HasFlag(OptionPrefixRules.AllowDoubleDash))
             {
                 // allow --o or --opt
                 if (token.Length == alias.Length + 2)
+                {
                     return token;
+                }
 
                 // allow --o:value or --o=value, --opt:value or --opt=value
                 if (token.Length > alias.Length + 3 && aliasRules.GetSymbols().Any(s => token[alias.Length + 2] == s))
+                {
                     return token[..(alias.Length + 2)];
+                }
             }
 
             if (prefixRules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
             {
                 if (alias.Length < 2)
+                {
                     throw ParserErrors.InvalidDoubleDashToken.ToException(token);
+                }
 
                 // allow only --opt
                 if (token.Length == alias.Length + 2)
+                {
                     return token;
+                }
 
                 // allow --opt:value or --opt=value
                 if (token.Length > alias.Length + 3 && aliasRules.GetSymbols().Any(s => token[alias.Length + 2] == s))
+                {
                     return token[..(alias.Length + 2)];
+                }
             }
 
             break;
@@ -262,53 +306,77 @@ internal static class AliasExtensions
         OptionPrefixRules prefixRules, AliasDelimiterRules aliasRules)
     {
         if ((prefixRules & (OptionPrefixRules.AllowSingleDash | OptionPrefixRules.AllowSingleDashShortAlias)) <= 0)
+        {
             return null;
+        }
 
         if (token[0] != '-')
+        {
             return null;
+        }
 
         if (token.Length < 2)
+        {
             throw ParserErrors.InvalidToken.ToException(token);
+        }
 
         if (token[1] == '-' || (!IsAsciiLetter(token[1]) && !_allowedAliasSymbols.Contains(token[1])))
+        {
             return null;
+        }
 
         foreach (var alias in aliases)
         {
             if (!token.AsSpan(1).StartsWith(alias, compareFlag))
+            {
                 continue;
+            }
 
             if (prefixRules.HasFlag(OptionPrefixRules.AllowSingleDash))
             {
                 // allow -o or -opt
                 if (token.Length == alias.Length + 1)
+                {
                     return token;
+                }
 
                 // allow -o=value, -o:value, -opt:value or -opt=value
                 if (token.Length > alias.Length + 2 && aliasRules.GetSymbols().Any(s => token[alias.Length + 1] == s))
+                {
                     return token[..(alias.Length + 1)];
+                }
 
                 // allow only -ovalue
                 if (alias.Length == 1 && aliasRules.HasFlag(AliasDelimiterRules.AllowOmittingDelimiter))
+                {
                     return token[..2];
+                }
             }
 
             if (prefixRules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
             {
                 if (alias.Length > 1)
+                {
                     throw ParserErrors.InvalidSingleDashToken.ToException(token);
+                }
 
                 // allow only -o
                 if (token.Length == 2)
+                {
                     return token;
+                }
 
                 // allow -o:value or -o=value
                 if (token.Length > 3 && aliasRules.GetSymbols().Any(s => token[2] == s))
+                {
                     return token[..2];
+                }
 
                 // allow only -ovalue
                 if (aliasRules.HasFlag(AliasDelimiterRules.AllowOmittingDelimiter))
+                {
                     return token[..2];
+                }
             }
 
             break;
@@ -322,26 +390,38 @@ internal static class AliasExtensions
         OptionPrefixRules prefixRules, AliasDelimiterRules aliasRules)
     {
         if ((prefixRules & OptionPrefixRules.AllowForwardSlash) <= 0)
+        {
             return null;
+        }
 
         if (token[0] != '/')
+        {
             return null;
+        }
 
         if (token.Length < 2)
+        {
             throw ParserErrors.InvalidToken.ToException(token);
+        }
 
         foreach (var alias in aliases)
         {
             if (!token.AsSpan(1).StartsWith(alias, compareFlag))
+            {
                 continue;
+            }
 
             // allow /o or /opt
             if (token.Length == alias.Length + 1)
+            {
                 return token;
+            }
 
             // allow /o=value, /o:value, /opt:value or /opt=value
             if (token.Length > alias.Length + 2 && aliasRules.GetSymbols().Any(s => token[alias.Length + 1] == s))
+            {
                 return token[..(alias.Length + 1)];
+            }
 
             break;
         }
@@ -352,19 +432,29 @@ internal static class AliasExtensions
     private static bool IsAliasAllowed(string alias, OptionPrefixRules rules)
     {
         if (rules.HasFlag(OptionPrefixRules.AllowSingleDash))
+        {
             return true;
+        }
 
         if (alias.Length < 2 && rules.HasFlag(OptionPrefixRules.AllowSingleDashShortAlias))
+        {
             return true;
+        }
 
         if (rules.HasFlag(OptionPrefixRules.AllowDoubleDash))
+        {
             return true;
+        }
 
         if (alias.Length > 1 && rules.HasFlag(OptionPrefixRules.AllowDoubleDashLongAlias))
+        {
             return true;
+        }
 
         if (rules.HasFlag(OptionPrefixRules.AllowForwardSlash))
+        {
             return true;
+        }
 
         return false;
     }
@@ -375,7 +465,9 @@ internal static class AliasExtensions
     private static string? GetAliasValue(string token, int aliasLength, AliasDelimiterRules aliasRules)
     {
         if (token.Length <= aliasLength)
+        {
             return null;
+        }
 
         if (aliasRules.GetSymbols().Any(s => token[aliasLength] == s))
         {
@@ -444,7 +536,9 @@ internal static class AliasExtensions
     private static string TrimStartPrefixes(string input)
     {
         if (input.StartsWith('/'))
+        {
             input = input[1..];
+        }
 
         input = input.Replace('_', ' ').Replace('-', ' ');
         return string.Join('-', input.Split(' ').Select(n => n.Trim()).Where(s => s.Length > 0));

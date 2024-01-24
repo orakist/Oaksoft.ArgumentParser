@@ -21,7 +21,9 @@ internal sealed class Result<TValue>
     public TValue GetOrThrow()
     {
         if (Success)
+        {
             return Value!;
+        }
 
         throw Error!.ToException();
     }

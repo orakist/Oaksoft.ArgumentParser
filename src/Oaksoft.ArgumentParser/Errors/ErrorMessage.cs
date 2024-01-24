@@ -26,7 +26,9 @@ internal abstract class ErrorMessage : IErrorMessage
         _message = null;
 
         if(values.Length > 0)
+        {
             Values = values;
+        }
 
         return this;
     }
@@ -52,7 +54,9 @@ internal abstract class ErrorMessage : IErrorMessage
         var message = Values?.Length > 0 ? string.Format(Error.Format, Values) : Error.Format;
 
         if (string.IsNullOrWhiteSpace(OptionName))
+        {
             return message;
+        }
 
         var comma = message.EndsWith(".") ? string.Empty : ",";
         _message = $"{message}{comma} Option: {OptionName}";

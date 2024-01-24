@@ -35,10 +35,6 @@ public static class BuilderErrors
         $"{Name}.{nameof(InvalidStringPropertyUsage)}",
         "Invalid lambda expression, string property '{0}' cannot be used as a collection!");
 
-    public static readonly ErrorInfo SamePropertyUsage = new(
-        $"{Name}.{nameof(SamePropertyUsage)}",
-        "Selected Key and Count property cannot be same! Properties: {0}, {1}");
-
     public static readonly ErrorInfo PropertyAlreadyInUse = new(
         $"{Name}.{nameof(PropertyAlreadyInUse)}",
         "Property '{0}' already registered with an option!");
@@ -67,9 +63,13 @@ public static class BuilderErrors
         $"{Name}.{nameof(MissingCallback)}",
         "Missing TryParse callback for custom type '{0}'! Configure a custom TryParse callback.");
 
+    public static readonly ErrorInfo EmptyAllowedValue = new(
+        $"{Name}.{nameof(EmptyAllowedValue)}",
+        "Any given allowed value cannot be empty or null!");
+
     public static readonly ErrorInfo InvalidAllowedValue = new(
         $"{Name}.{nameof(InvalidAllowedValue)}",
-        "Any given allowed value cannot be empty or null!");
+        "Allowed value '{0}' not recognized as enumeration value.");
 
     public static readonly ErrorInfo InvalidAlias = new(
         $"{Name}.{nameof(InvalidAlias)}",

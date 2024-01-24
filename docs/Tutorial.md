@@ -88,14 +88,12 @@ Following is the output of the example application for invalid command-line inpu
 
 ```
 Inputs: /left 5.1 /right 3.1 /calculate add
-     Error(s)!
-01 - Invalid option value '5.1' found!, Option: Left
-02 - Invalid option value '3.1' found!, Option: Right
+Invalid option value '5.1' found!, Option: Left
+Invalid option value '3.1' found!, Option: Right
 Result: Invalid argument!
 
 Inputs: -l 5 -r 3 -c
-     Error(s)!
-01 - At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
+At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
 Result: Invalid argument!
 ```
 
@@ -122,11 +120,11 @@ These are command line options of this application.
          Aliases: -h, -?, --help, /h, /?, /help
          Shows help and usage information.
 
---ver    Usage: --ver
-         Aliases: --ver, --version, /ver, /version
-         Shows version information.
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
 
-Usage: [-l <value>] [-r <value>] [-c <value>] [-h] [--ver]
+Usage: [-l <value>] [-r <value>] [-c <value>]
 Result: Invalid argument!
 ```
 
@@ -170,13 +168,11 @@ Following is the output of the code above for those command-line inputs.
 
 ```
 Inputs: /left 5.1 /right 3.1 /calculate add
-     Error(s)!
-01 - Invalid option value '5.1' found!, Option: Left
-02 - Invalid option value '3.1' found!, Option: Right
+Invalid option value '5.1' found!, Option: Left
+Invalid option value '3.1' found!, Option: Right
 
 Inputs: -l 5 -r 3 -c
-     Error(s)!
-01 - At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
+At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
 
 Inputs: --version
 1.0.0
@@ -218,13 +214,14 @@ Before updating the application, this is the parsing output for these cases.
 >>> Missing Numbers Case: This should not be allowed.
 Inputs: -c add
 Result: 0 + 0 = 0
+
 >>> Unknown Calculation Type Case: Parser should catch unknown calculation type.
 Inputs: -l 5 -r 1 -c abc
 Result: Invalid argument!
+
 >>> Missing Operation Value Case: This should not cause an error. Default Calculation Type is add.
 Inputs: -l 5 -r 3 -c
-     Error(s)!
-01 - At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
+At least '1' value(s) expected but '0' value(s) provided. Option: Calculate
 ```
 
 We can cover the all cases in the output above with simple changes. See the updated sample code below. To satisfy these case;
@@ -258,12 +255,13 @@ Now it covers all the cases. Compare the next output with previous.
 ```
 >>> Missing Numbers Case
 Inputs: -c add
-     Error(s)!
-01 - At least '1' option(s) expected but '0' option(s) provided. Option: Left
-02 - At least '1' option(s) expected but '0' option(s) provided. Option: Right
+At least '1' option(s) expected but '0' option(s) provided. Option: Left
+At least '1' option(s) expected but '0' option(s) provided. Option: Right
+
 >>> Unknown Calculation Type Case
 Inputs: -l 5 -r 1 -c abc
-     Error(s)!
+Option value 'abc' not recognized. Must be one of: [add, sub, mul, div, pow], Option: Operator
+
 >>> Missing Operation Value Case
 Inputs: -l 5 -r 3 -c
 Result: 5 + 3 = 8
@@ -284,20 +282,20 @@ These are command line options of this application.
          Aliases: -r, --right, /r, /right
          Right operand of the operation.
 
--c       Usage: -c (value), Default Value: 'add'
-         Allowed Values: add | sub | mul | div | pow
+-c       Usage: -c (value)
          Aliases: -c, --calculate, /c, /calculate
-         Defines operator type of the calculation.
+         Defines operator type of the calculation. [Allowed-Values: add | sub |
+         mul | div | pow], [Default: add]
 
 -h       Usage: -h
          Aliases: -h, -?, --help, /h, /?, /help
          Shows help and usage information.
 
---ver    Usage: --ver
-         Aliases: --ver, --version, /ver, /version
-         Shows version information.
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
 
-Usage: [-l <value>] [-r <value>] [-c (value)] [-h] [--ver]
+Usage: [-l <value>] [-r <value>] [-c (value)]
 ```
 
 ### Tutorial Step 5
@@ -312,11 +310,11 @@ Before updating the application, this is the parsing output for these cases.
 >>> Negative Number Arguments Case: Negative numbers should not allowed.
 Inputs: -l -5 -r -1 -c add
 Result: -5 + -1 = -6
+
 >>> Parentheses Number Arguments Case : It should parse numbers in parentheses.
 Inputs: -l (5.1) -r (2.4) -c add
-     Error(s)!
-01 - Invalid option value '(5.1)' found!, Option: Left
-02 - Invalid option value '(2.4)' found!, Option: Right
+Invalid option value '(5.1)' found!, Option: Left
+Invalid option value '(2.4)' found!, Option: Right
 ```
 
 We can cover the all cases in the output above with simple changes. See the updated sample code below. To satisfy these case;
@@ -359,9 +357,9 @@ Now it covers new parsing and validation cases. Compare the next output with pre
 ```
 >>> Negative Number Arguments Case
 Inputs: -l -5 -r -1 -c add
-     Error(s)!
-01 - Option value(s) validation failed. Value(s): -5, Option: Left
-02 - Option value(s) validation failed. Value(s): -1, Option: Right
+Option value(s) validation failed. Value(s): -5, Option: Left
+Option value(s) validation failed. Value(s): -1, Option: Right
+
 >>> Parentheses Number Arguments Case
 Inputs: -l (5.1) -r (2.4) -c add
 Result: 5.1 + 2.4 = 7.5
@@ -466,12 +464,10 @@ And this is the output for some exceptional cases.
 
 ```
 Inputs: -n 4 -c mul
-     Error(s)!
-01 - At least '2' value(s) expected but '1' value(s) provided. Option: Numbers
+At least '2' value(s) expected but '1' value(s) provided. Option: Numbers
 
 Inputs: -n 4|-5|-2|6|8 -c mul
-     Error(s)!
-01 - Option value validation failed. Value(s): -5, -2, Option: Numbers
+Option value validation failed. Value(s): -5, -2, Option: Numbers
 ```
 
 ### Tutorial Step 7
@@ -483,20 +479,18 @@ Before updating the application, this is the parsing output for these cases. As 
 
 ```
 Inputs: -l 35.2 -r 1.2 -c div
-###  Error(s)!  ###
-01 - Unknown single dash alias token '-l' found!
-02 - Unknown single dash alias token '-r' found!
-03 - At least '1' option(s) expected but '0' option(s) provided. Option: Numbers
-04 - Unknown token '35.2' found!
-05 - Unknown token '1.2' found!
+Unknown single dash alias token '-l' found!
+Unknown single dash alias token '-r' found!
+At least '1' option(s) expected but '0' option(s) provided. Option: Numbers
+Unknown token '35.2' found!
+Unknown token '1.2' found!
 
 Inputs: /left 5.1 /right 3.1 /calculate add
-###  Error(s)!  ###
-01 - Unknown forward slash alias token '/left' found!
-02 - Unknown forward slash alias token '/right' found!
-03 - At least '1' option(s) expected but '0' option(s) provided. Option: Numbers
-04 - Unknown token '5.1' found!
-05 - Unknown token '3.1' found!
+Unknown forward slash alias token '/left' found!
+Unknown forward slash alias token '/right' found!
+At least '1' option(s) expected but '0' option(s) provided. Option: Numbers
+Unknown token '5.1' found!
+Unknown token '3.1' found!
 ```
 
 See the updated ***Build()*** method below. Only this line *'.AddAliases("n", "numbers", "l", "left", "r", "right")'* added.
@@ -540,20 +534,118 @@ These are command line options of this application.
          Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
          Defines the numbers to be calculated.
 
--c       Usage: -c (value), Default Value: 'add'
-         Allowed Values: add | sub | mul | div | pow
+-c       Usage: -c (value)
          Aliases: -c, --calculate, /c, /calculate
-         Defines operator type of the calculation.
+         Defines operator type of the calculation. [Allowed-Values: add | sub |
+         mul | div | pow], [Default: add]
 
 -h       Usage: -h
          Aliases: -h, -?, --help, /h, /?, /help
          Shows help and usage information.
 
---ver    Usage: --ver
-         Aliases: --ver, --version, /ver, /version
-         Shows version information.
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
 
-Usage: [-n <value>] [-c (value)] [-h] [--ver]
+Usage: [-n <value>] [-c (value)]
+```
+
+### Tutorial Step 8
+
+To simplify calculate option registration;
+- Define an enum for Operator types
+- Change type of the operator to an enum.
+
+Enum option has some benefits. 
+- Parser configures allowed values automatically for enum options.
+- Any enum value update, updates the parser enum options. Because enums are strongly typed. 
+- Also, you can pass integer values to enum options.
+- See the updated codes method below.
+
+```cs
+public enum OperatorType { Add, Sub, Mul, Div, Pow, Rem }
+
+public class CalculatorOptions
+{
+    public IEnumerable<double>? Numbers { get; set; }
+
+    public OperatorType? Calculate { get; set; }
+}
+
+private static bool TryParseCustom(string value, out double result)
+{
+    if (value.StartsWith('(') && value.EndsWith(')'))
+        value = value.Substring(1, value.Length - 2);
+
+    return double.TryParse(value, out result);
+}
+
+public static IArgumentParser<CalculatorOptions> Build()
+{
+    return CommandLine.CreateParser<CalculatorOptions>()
+        .AddNamedOption(p => p.Numbers,
+            o => o.WithDescription("Defines the numbers to be calculated.")
+                .AddAliases("n", "numbers", "l", "left", "r", "right")
+                .AddPredicate(v => v >= 0)
+                .WithTryParseCallback(TryParseCustom)
+                .WithOptionArity(ArityType.OneOrMore)
+                .WithValueArity(2, int.MaxValue))
+        .AddNamedOption(o => o.Calculate,
+            o => o.WithDescription("Defines operator type of the calculation.")
+                .WithDefaultValue(OperatorType.Add),
+            mandatoryOption: true, mustHaveOneValue: false)
+        .Build();
+}
+
+public static void Parse(IArgumentParser<CalculatorOptions> parser, string[] args)
+{
+    Console.WriteLine($"Inputs: {string.Join(' ', args)}");
+
+    var options = parser.Parse(args);
+
+    if (!parser.IsValid || parser.IsEmpty || parser.IsHelpOption || parser.IsVersionOption)
+        return;
+
+    var numbers = options.Numbers!.ToList();
+    var equation = options.Calculate switch
+    {
+        OperatorType.Add => $"{string.Join(" + ", numbers)} = {numbers.Sum()}",
+        OperatorType.Sub => $"{string.Join(" - ", numbers)} = {numbers.First() - numbers.Skip(1).Sum()}",
+        OperatorType.Mul => $"{string.Join(" * ", numbers)} = {numbers.Aggregate<double, double>(1, (x, y) => x * y)}",
+        OperatorType.Div => $"{string.Join(" / ", numbers)} = {numbers.Skip(1).Aggregate(numbers.First(), (x, y) => x / y)}",
+        OperatorType.Pow => $"{string.Join(" ^ ", numbers)} = {numbers.Skip(1).Aggregate(numbers.First(), Math.Pow)}",
+        OperatorType.Rem => $"{string.Join(" % ", numbers)} = {numbers.Skip(1).Aggregate(numbers.First(), (x, y) => x % y)}",
+        _ => "Invalid Argument!"
+    };
+
+    Console.WriteLine($"Result: {equation}");
+}
+```
+
+This is the new --help output. See the "operator" option.
+
+```
+Oaksoft.ArgumentParser.Tutorial v1.0.0
+These are command line options of this application.
+
+-n       Usage: -n <value>
+         Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
+         Defines the numbers to be calculated.
+
+-c       Usage: -c (value)
+         Aliases: -c, --calculate, /c, /calculate
+         Defines operator type of the calculation. [Allowed-Values: Add | Sub |
+         Mul | Div | Pow | Rem], [Default: Add]
+
+-h       Usage: -h
+         Aliases: -h, -?, --help, /h, /?, /help
+         Shows help and usage information.
+
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
+
+Usage: [-n <value>] [-c (value)]
 ```
 
 #### to be continued ...

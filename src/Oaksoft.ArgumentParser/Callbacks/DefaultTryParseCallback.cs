@@ -9,6 +9,7 @@ internal sealed class DefaultTryParseCallback<TValue>
 
     public bool IsValidParser { get; }
 
+    private readonly bool _isEnumType;
     private readonly bool _isStringType;
     private readonly MethodInfo? _tryParseValueMethod;
 
@@ -17,14 +18,22 @@ internal sealed class DefaultTryParseCallback<TValue>
         var type = typeof(TValue);
 
         if (type == typeof(string))
+        {
             _isStringType = true;
+        }
+        else if (type.IsEnum)
+        {
+            _isEnumType = true;
+        }
 
-        if (!_isStringType)
+        if (!_isStringType && !_isEnumType)
         {
             _tryParseValueMethod = type.GetMethod("TryParse",
                 BindingFlags.Public | BindingFlags.Static, Type.DefaultBinder, new[] { typeof(string), type.MakeByRefType() }, default);
             if (_tryParseValueMethod == null)
+            {
                 return;
+            }
         }
         
         IsValidParser = true;
@@ -36,6 +45,13 @@ internal sealed class DefaultTryParseCallback<TValue>
         {
             result = (TValue)(object)value;
             return true;
+        }
+
+        if (_isEnumType)
+        {
+            var validEnum = Enum.TryParse(typeof(TValue), value, true, out var enumValue);
+            result = validEnum ? (TValue)enumValue! : default!;
+            return validEnum;
         }
 
         var parameter = new object[] { value, default! };

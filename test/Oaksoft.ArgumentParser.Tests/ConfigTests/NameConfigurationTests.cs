@@ -69,7 +69,7 @@ public class NameConfigurationTests
         // Arrange, should ignore empty names
         var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.Value)
-            .AddNamedOption(s => s.NullValue, s => s.NullValueFlag)
+            .AddNamedOption(s => s.NullValue)
             .AddNamedOption(s => s.Values)
             .AddValueOption(s => s.NullValues)
             .AddValueOption(s => s.ValueFlag);
@@ -87,7 +87,6 @@ public class NameConfigurationTests
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Name.ShouldBe(nameof(IntAppOptions.NullValue));
-        option = parser.GetOptionByName(nameof(IntAppOptions.NullValueFlag));
         option.ShouldNotBeNull();
 
         option = parser.GetOptionByName(nameof(IntAppOptions.Values));
@@ -176,7 +175,7 @@ public class NameConfigurationTests
     {
         // Arrange
         const string name = "Help";
-        const string reservedNames = "'Help', 'Version'";
+        const string reservedNames = "'Help', 'Version', 'Verbosity'";
         var sut = CommandLine.CreateParser<IntAppOptions>();
 
         // Act

@@ -4,7 +4,8 @@
 
 # Command Line Arguments Parser Library for .Net
 
-**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently under development but latest version is stable. And this documentation is for version **v1.3.0.**\
+**Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently under 
+development but latest version is stable. And this documentation is for the latest version.\
 This library is compatible with **.Net 6.0+**, **.Net Standard 2.1**
 
 ## Quick Start Example
@@ -19,14 +20,16 @@ using Oaksoft.ArgumentParser.Extensions;
 
 namespace QuickStart;
 
-internal class CalculatorOptions
+enum OperatorType { Add, Sub, Mul, Div }
+
+class CalculatorOptions
 {
     public double Left { get; set; }
     public double Right { get; set; }
-    public string? Operator { get; set; }
+    public OperatorType? Operator { get; set; }
 }
 
-internal static class Program
+static class Program
 {
     private static void Main(string[] args)
     {
@@ -41,12 +44,12 @@ internal static class Program
 
     private static void EvaluateOptions(CalculatorOptions options)
     {
-        var result = options.Operator?.ToUpperInvariant() switch
+        var result = options.Operator switch
         {
-            "ADD" => $"{options.Left} + {options.Right} = {options.Left + options.Right}",
-            "SUB" => $"{options.Left} - {options.Right} = {options.Left - options.Right}",
-            "MUL" => $"{options.Left} * {options.Right} = {options.Left * options.Right}",
-            "DIV" => $"{options.Left} / {options.Right} = {options.Left / options.Right}",
+            OperatorType.Add => $"{options.Left} + {options.Right} = {options.Left + options.Right}",
+            OperatorType.Sub => $"{options.Left} - {options.Right} = {options.Left - options.Right}",
+            OperatorType.Mul => $"{options.Left} * {options.Right} = {options.Left * options.Right}",
+            OperatorType.Div => $"{options.Left} / {options.Right} = {options.Left / options.Right}",
             _ => "Invalid argument!"
         };
 
@@ -161,11 +164,59 @@ var parser = CommandLine.CreateParser<ExampleOptions>()
 
 ## 2. Default Value
 
-Description will be added!
+Options can have default values that apply if no value is explicitly provided. For example, switch options 
+are values with a default of true when the option name is in the command line. 
+The following command-line examples are equivalent:
+
+```
+./> myapp --enabled
+./> myapp --enabled true
+```
+
+An option that is defined with a default value, such as number option in the following example, value of the option is treated as optional. 
+*'.WithDefaultValue()'* extension method configures the default value of a switch option and scalar named option.
+
+```cs
+var parser = CommandLine.CreateParser<MyOptions>()
+    .AddNamedOption(p => p.Number, o => o.WithDefaultValue(12))
+    .Build();
+```
+
+According to the preceding code, values of the ***'--number'*** option in the following first two lines are equal. And value of the last line is 15.
+
+```
+./> myapp --number
+./> myapp --number 12
+./> myapp --number 15
+```
 
 ## 3. Allowed Option Values
 
-Description will be added!
+To specify a list of allowed values for an option, specify an enum as the option type or use ***.WithAllowedValues()***, as shown in the following example.
+
+```cs
+enum OperatorType { Add, Sub, Mul, Div }
+
+class MyOptions
+{
+    public string? Language { get; set; }
+    public OperatorType? Operator { get; set; }
+}
+
+var parser = CommandLine.CreateParser<MyOptions>()
+        .AddNamedOption(o => o.Operator)
+        .AddNamedOption(o => o.Language, o.WithAllowedValues("C#", "C++", "Java", "PHP", "SQL"))
+        .Build();
+```
+
+Here's an example of command-line input and the resulting output for the preceding example code:
+
+```
+./> myapp --language my-lang
+Option value 'my-lang' not recognized. Must be one of: [C#, C++, Java, PHP, SQL], Option: Language
+./> myapp --operator abc
+Option value 'abc' not recognized. Must be one of: [Add, Sub, Mul, Div], Option: Operator
+```
 
 ## 4. Option Aliases
 

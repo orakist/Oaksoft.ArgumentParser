@@ -49,18 +49,12 @@ public class ArityConfigurationTests
             .AddNamedOption(s => s.Values, valueArity: type)
             .AddNamedOption(s => s.NullValues, valueArity: type);
         var sut2 = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Values, s => s.ValueCount, valueArity: type)
-            .AddNamedOption(s => s.NullValues, s => s.NullValueCount, valueArity: type);
-        var sut3 = CommandLine.CreateParser<IntAppOptions>()
             .AddValueOption(s => s.Values, valueArity: type)
             .AddValueOption(s => s.NullValues, valueArity: type);
-        var sut4 = CommandLine.CreateParser<IntAppOptions>()
-            .AddValueOption(s => s.Values, s => s.ValueCount, valueArity: type)
-            .AddValueOption(s => s.NullValues, s => s.NullValueCount, valueArity: type);
 
-        var builders = new []{ sut1, sut2, sut3, sut4 };
+        var builders = new[] { sut1, sut2 };
         foreach (var sut in builders)
-        {        
+        {
             // Act
             var parser = sut.Build();
 
@@ -82,14 +76,8 @@ public class ArityConfigurationTests
         var sut2 = CommandLine.CreateParser<IntAppOptions>()
             .AddValueOption(s => s.Value, mustHaveOneValue: enabled)
             .AddValueOption(s => s.NullValue, mustHaveOneValue: enabled);
-        var sut3 = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Value, s => s.ValueFlag, mustHaveOneValue: enabled)
-            .AddNamedOption(s => s.NullValue, s => s.NullValueFlag, mustHaveOneValue: enabled);
-        var sut4 = CommandLine.CreateParser<IntAppOptions>()
-            .AddValueOption(s => s.Value, s => s.ValueFlag, mustHaveOneValue: enabled)
-            .AddValueOption(s => s.NullValue, s => s.NullValueFlag, mustHaveOneValue: enabled);
 
-        var builders = new[] { sut1, sut2, sut3, sut4 };
+        var builders = new[] { sut1, sut2 };
         foreach (var sut in builders)
         {
             // Act
@@ -195,20 +183,13 @@ public class ArityConfigurationTests
         var sut1 = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.Values, optionArity: type)
             .AddNamedOption(s => s.NullValues, optionArity: type);
-        var sut2 = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Values, s => s.ValueCount, optionArity: type)
-            .AddNamedOption(s => s.NullValues, s => s.NullValueCount, optionArity: type);
 
-        var builders = new[] { sut1, sut2 };
-        foreach (var sut in builders)
-        {
-            // Act
-            var parser = sut.Build();
+        // Act
+        var parser = sut1.Build();
 
-            // Assert
-            foreach (var option in parser.GetOptions().Where(o => o.Name != "Help"))
-                option.OptionArity.ShouldBe(type.GetLimits());
-        }
+        // Assert
+        foreach (var option in parser.GetOptions().Where(o => o.Name != "Help"))
+            option.OptionArity.ShouldBe(type.GetLimits());
     }
 
     [Theory]
@@ -247,20 +228,13 @@ public class ArityConfigurationTests
         var sut1 = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.Value, mandatoryOption: enabled)
             .AddNamedOption(s => s.NullValue, mandatoryOption: enabled);
-        var sut2 = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Value, s => s.ValueFlag, mandatoryOption: enabled)
-            .AddNamedOption(s => s.NullValue, s => s.NullValueFlag, mandatoryOption: enabled);
 
-        var builders = new[] { sut1, sut2 };
-        foreach (var sut in builders)
-        {
-            // Act
-            var parser = sut.Build();
+        // Act
+        var parser = sut1.Build();
 
-            // Assert
-            foreach (var option in parser.GetOptions().Where(o => o.Name != "Help"))
-                option.OptionArity.ShouldBe(enabled ? (1, 1) : (0, 1));
-        }
+        // Assert
+        foreach (var option in parser.GetOptions().Where(o => o.Name != "Help"))
+            option.OptionArity.ShouldBe(enabled ? (1, 1) : (0, 1));
     }
 
     [Theory]

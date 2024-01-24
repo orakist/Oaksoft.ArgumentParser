@@ -14,7 +14,7 @@ namespace Oaksoft.ArgumentParser.Options;
 
 internal abstract class BaseScalarValueOption<TValue>
     : BaseAllowedValuesOption<TValue>, IScalarValueOption<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
     public Ref<TValue>? ResultValue { get; private set; }
 
@@ -28,7 +28,9 @@ internal abstract class BaseScalarValueOption<TValue>
         base.Validate();
 
         if (_inputValues.Count <= 0)
+        {
             return;
+        }
 
         var resultValues = GetValidatedValues();
 
@@ -49,7 +51,7 @@ internal abstract class BaseScalarValueOption<TValue>
 
 internal abstract class BaseSequentialValueOption<TValue>
     : BaseAllowedValuesOption<TValue>, ISequentialValueOption<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
     public bool EnableValueTokenSplitting { get; private set; }
 
@@ -86,7 +88,9 @@ internal abstract class BaseSequentialValueOption<TValue>
         base.Validate();
 
         if (_inputValues.Count <= 0)
+        {
             return;
+        }
 
         var resultValues = GetValidatedValues();
 
@@ -117,16 +121,15 @@ internal abstract class BaseSequentialValueOption<TValue>
 
     private object? CreateNullableListOrArray(PropertyInfo keyProperty)
     {
-        Type itemType;
-        if (keyProperty.PropertyType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+        Type? itemType = null;
+        if (keyProperty.PropertyType.GetInterfaces()
+            .Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
         {
-            itemType = keyProperty.PropertyType.GetGenericArguments()[0];
-            if (!itemType.IsAssignableFrom(typeof(TValue)))
-            {
-                return null;
-            }
+            var type = typeof(TValue);
+            itemType = type.IsValueType ? typeof(Nullable<>).MakeGenericType(type) : type;
         }
-        else
+
+        if (itemType == null)
         {
             return null;
         }
@@ -147,8 +150,10 @@ internal abstract class BaseSequentialValueOption<TValue>
         }
 
         var arrType = Array.CreateInstance(itemType, _resultValues.Count);
-        if(!keyProperty.PropertyType.IsInstanceOfType(arrType))
+        if (!keyProperty.PropertyType.IsInstanceOfType(arrType))
+        {
             return false;
+        }
 
         for (var index = 0; index < _resultValues.Count; ++index)
         {
@@ -167,10 +172,14 @@ internal abstract class BaseSequentialValueOption<TValue>
     protected IEnumerable<string> SplitByValueDelimiter(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             yield break;
+        }
 
         if (!EnableValueTokenSplitting)
+        {
             yield return value.Trim();
+        }
 
         var values = new List<string> { value };
 
@@ -186,7 +195,7 @@ internal abstract class BaseSequentialValueOption<TValue>
 
 internal abstract class BaseAllowedValuesOption<TValue>
     : BaseValueOption<TValue>, IHaveAllowedValues<TValue>
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
     public List<TValue> AllowedValues => _allowedValues.ToList();
 
@@ -214,7 +223,7 @@ internal abstract class BaseAllowedValuesOption<TValue>
         if (allowedValues.Cast<object?>()
             .Any(v => v is null || (v is string s && string.IsNullOrWhiteSpace(s))))
         {
-            throw BuilderErrors.InvalidAllowedValue.WithName(KeyProperty.Name).ToException();
+            throw BuilderErrors.EmptyAllowedValue.WithName(KeyProperty.Name).ToException();
         }
 
         var values = allowedValues
@@ -222,7 +231,30 @@ internal abstract class BaseAllowedValuesOption<TValue>
 
         _allowedValues.Clear();
         foreach (var value in values)
+        {
             _allowedValues.Add(value);
+        }
+
+        var type = typeof(TValue);
+        if (type.IsEnum && _allowedValues.Any(v => !type.IsEnumDefined(v)))
+        {
+            var value = _allowedValues.First(v => !type.IsEnumDefined(v)).ToString()!;
+            throw BuilderErrors.InvalidAllowedValue.WithName(KeyProperty.Name).ToException(value);
+        }
+    }
+
+    public override void Initialize()
+    {
+        base.Initialize();
+
+        var type = typeof(TValue);
+        if (type.IsEnum && _allowedValues.Count < 1)
+        {
+            foreach (var value in type.GetEnumValues())
+            {
+                _allowedValues.Add((TValue)value);
+            }
+        }
     }
 
     protected override List<TValue> GetValidatedValues()
@@ -237,8 +269,10 @@ internal abstract class BaseAllowedValuesOption<TValue>
             .Select(n => _inputValues[n.Index])
             .ToList();
 
-        if (invalidValues.Count < 1) 
+        if (invalidValues.Count < 1)
+        {
             return resultValues;
+        }
 
         var values = string.Join(", ", invalidValues);
         throw ParserErrors.PredicateFailure.ToException(values);
@@ -247,7 +281,9 @@ internal abstract class BaseAllowedValuesOption<TValue>
     private void ValidateByAllowedValues(IReadOnlyList<TValue> inputValues)
     {
         if (_allowedValues.Count <= 0)
+        {
             return;
+        }
 
         if (typeof(TValue) == typeof(string))
         {
@@ -258,7 +294,9 @@ internal abstract class BaseAllowedValuesOption<TValue>
                 var inputValue = inputValues[i] as string;
                 var allowedValues = _allowedValues.Select(a => (a as string)!);
                 if (allowedValues.Any(a => a.Equals(inputValue, flag)))
+                {
                     continue;
+                }
 
                 var values = string.Join(", ", _allowedValues);
                 throw ParserErrors.ValueMustBeOneOf.ToException(_inputValues[i], values);
@@ -270,7 +308,9 @@ internal abstract class BaseAllowedValuesOption<TValue>
             {
                 var inputValue = inputValues[i];
                 if (_allowedValues.Any(a => a.Equals(inputValue)))
+                {
                     continue;
+                }
 
                 var values = string.Join(", ", _allowedValues);
                 throw ParserErrors.ValueMustBeOneOf.ToException(_inputValues[i], values);
@@ -285,7 +325,7 @@ internal abstract class BaseAllowedValuesOption<TValue>
 }
 
 internal abstract class BaseValueOption<TValue> : BaseValueOption
-    where TValue : IComparable, IEquatable<TValue>
+    where TValue : IComparable
 {
     private TryParse<TValue>? _tryParseValueCallback;
 
@@ -323,6 +363,12 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
         {
             if (!_tryParseValueCallback!.Invoke(inputValue, out var result))
             {
+                if (typeof(TValue).IsEnum && this is IHaveAllowedValues values)
+                {
+                    var joinedValues = string.Join(", ", values.GetAllowedValues());
+                    throw ParserErrors.ValueMustBeOneOf.ToException(inputValue, joinedValues);
+                }
+                
                 throw ParserErrors.InvalidOptionValue.ToException(inputValue);
             }
 

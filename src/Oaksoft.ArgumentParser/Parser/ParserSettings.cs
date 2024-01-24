@@ -1,4 +1,6 @@
-﻿namespace Oaksoft.ArgumentParser.Parser;
+﻿using Oaksoft.ArgumentParser.Definitions;
+
+namespace Oaksoft.ArgumentParser.Parser;
 
 internal class ParserSettings : IParserSettings
 {
@@ -23,6 +25,8 @@ internal class ParserSettings : IParserSettings
     public string? Title { get; init; }
 
     public string? Description { get; init; }
+
+    public VerbosityLevelType VerbosityLevel { get; init; }
 
     public int MaxAliasLength { get; init; }
 

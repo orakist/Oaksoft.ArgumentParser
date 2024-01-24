@@ -58,7 +58,9 @@ internal class CounterOption : BaseValueOption, ICounterOption
         foreach (var alias in aliases.Select(s => s.ValidateAlias().GetOrThrow(KeyProperty.Name)))
         {
             if (!_aliases.Contains(alias))
+            {
                 _aliases.Add(alias);
+            }
         }
     }
 
@@ -76,10 +78,14 @@ internal class CounterOption : BaseValueOption, ICounterOption
         _prefixAliases.AddRange(prefixedAliases);
 
         if (string.IsNullOrWhiteSpace(Usage))
+        {
             Usage = Alias;
+        }
 
         if (string.IsNullOrWhiteSpace(Description))
+        {
             Description = $"Performs '{Name}' option.";
+        }
     }
 
     public override void Parse(TokenItem[] tokens)
@@ -92,12 +98,16 @@ internal class CounterOption : BaseValueOption, ICounterOption
         {
             var token = tokens[i];
             if (token.Invalid || token.IsParsed || token.Alias is null)
+            {
                 continue;
+            }
 
             foreach (var alias in _prefixAliases)
             {
                 if (!token.Alias.Equals(alias, compareFlag))
+                {
                     continue;
+                }
 
                 token.IsParsed = true;
                 _optionTokens.Add(alias);
@@ -139,7 +149,9 @@ internal class CounterOption : BaseValueOption, ICounterOption
     public override void ApplyOptionResult(object appOptions, PropertyInfo keyProperty)
     {
         if (!keyProperty.PropertyType.IsAssignableFrom(typeof(int)))
+        {
             return;
+        }
 
         keyProperty.SetValue(appOptions, OptionCount);
     }

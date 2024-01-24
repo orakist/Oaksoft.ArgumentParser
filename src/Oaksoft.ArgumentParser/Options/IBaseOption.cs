@@ -19,4 +19,6 @@ public interface IBaseOption
     bool IsValid { get; }
 
     bool IsParsed { get; }
+
+    bool IsHidden { get; }
 }

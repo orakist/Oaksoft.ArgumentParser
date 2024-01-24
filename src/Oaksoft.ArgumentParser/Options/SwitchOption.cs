@@ -13,7 +13,9 @@ internal sealed class SwitchOption
     public override void ApplyOptionResult(object appOptions, PropertyInfo keyProperty)
     {
         if (!keyProperty.PropertyType.IsAssignableFrom(typeof(bool)))
+        {
             return;
+        }
 
         keyProperty.SetValue(appOptions, ResultValue?.Value ?? DefaultValue?.Value ?? true);
     }

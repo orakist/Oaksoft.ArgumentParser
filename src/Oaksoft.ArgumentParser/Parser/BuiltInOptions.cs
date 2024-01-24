@@ -1,8 +1,12 @@
-﻿namespace Oaksoft.ArgumentParser.Parser;
+﻿using Oaksoft.ArgumentParser.Definitions;
 
-public interface IBuiltInOptions
+namespace Oaksoft.ArgumentParser.Parser;
+
+internal class BuiltInOptions : IBuiltInOptions
 {
-    bool Version { get; }
+    public bool? Help { get; set; }
 
-    bool Help { get; }
+    public bool? Version { get; set; }
+
+    public VerbosityLevelType? Verbosity { get; set; }
 }

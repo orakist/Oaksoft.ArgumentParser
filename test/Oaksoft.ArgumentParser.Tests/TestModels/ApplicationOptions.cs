@@ -1,6 +1,5 @@
 ﻿namespace Oaksoft.ArgumentParser.Tests.TestModels;
 
-
 public abstract class BaseAppOptions
 {
     public bool ValueFlag { get; set; }
@@ -53,8 +52,8 @@ public class IntAppOptions : BaseAppOptions
 {
     public int Value { get; set; }
     public int? NullValue { get; set; }
-    public List<int>? Values { get; set; }
-    public List<int?>? NullValues { get; set; }
+    public int[]? Values { get; set; }
+    public int?[]? NullValues { get; set; }
 }
 
 public class UnsignedIntAppOptions : BaseAppOptions

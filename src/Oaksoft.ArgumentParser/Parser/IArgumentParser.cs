@@ -38,6 +38,11 @@ public interface IArgumentParser
     /// </summary>
     bool IsVersionOption { get; }
 
+    /// <summary>
+    /// Indicates that the parser found a valid verbosity option usage. 
+    /// </summary>
+    VerbosityLevelType VerbosityLevel { get; }
+
     List<IErrorMessage> Errors { get; }
     
     string GetHeaderText();
@@ -64,4 +69,8 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
     void Run(Action<TOptions> callback, params string[] args);
 
     void Run(Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args);
+
+    void Run(string? comment, Action<TOptions> callback, params string[] args);
+
+    void Run(string? comment, Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args);
 }

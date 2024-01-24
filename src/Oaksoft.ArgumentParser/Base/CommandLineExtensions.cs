@@ -55,8 +55,10 @@ internal static class CommandLineExtensions
             }
             else if (chr == ' ' && !quoted)
             {
-                if (started) 
+                if (started)
+                {
                     yield return result.ToString();
+                }
 
                 result.Clear();
                 started = false;
@@ -68,8 +70,19 @@ internal static class CommandLineExtensions
             }
         }
 
-        if (started) 
+        if (started)
+        {
             yield return result.ToString();
+        }
+    }
 
+    public static string GetCommaByEndsWith(this StringBuilder builder)
+    {
+        if (builder.Length < 1)
+        {
+            return string.Empty;
+        }
+
+        return builder[^1] == '.' ? " " : ", ";
     }
 }

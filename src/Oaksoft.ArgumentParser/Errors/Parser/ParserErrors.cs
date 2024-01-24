@@ -34,7 +34,7 @@ public static class ParserErrors
 
     public static readonly ErrorInfo InvalidSingleOptionUsage = new(
         $"{Name}.{nameof(InvalidSingleOptionUsage)}",
-        "'{0}' option alias cannot be combined with other aliases.");
+        "'{0}' option cannot be combined with other options.");
 
     public static readonly ErrorInfo TooManyOption = new(
         $"{Name}.{nameof(TooManyOption)}",
@@ -58,7 +58,7 @@ public static class ParserErrors
 
     public static readonly ErrorInfo ValueMustBeOneOf = new(
         $"{Name}.{nameof(ValueMustBeOneOf)}",
-        "Option value '{0}' not recognized. Must be one of: {1}");
+        "Option value '{0}' not recognized. Must be one of: [{1}]");
 
     public static readonly ErrorInfo PredicateFailure = new(
         $"{Name}.{nameof(PredicateFailure)}",

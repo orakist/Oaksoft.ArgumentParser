@@ -254,7 +254,21 @@ A POSIX convention lets you omit the delimiter when you are specifying a single-
 
 Oaksoft.ArgumentParser heuristically creates aliases by using the property name. For example parser creates "f" and "file" for the 'File' property.
 Aliases can also be configured manually using the parser's fluent api. If parser can't suggest an alias for an option it throws an exception.
-This can happen if lots of option property names are similar.
+This can happen if lots of option property names are similar. Alias names are manually configurable as shown in the following example.
+
+```cs
+var parser = CommandLine.CreateParser<MyOptions>()
+        .AddNamedOption(o => o.Language, o => o.AddAliases("l", "lang", "language"))
+        .Build();
+```
+
+Now, the following commands are equivalent:
+
+```console
+./> myapp -l SQL
+./> myapp --lang SQL
+./> myapp --language SQL
+```
 
 ## 5. Arity Configuration
 
@@ -321,6 +335,19 @@ In the following example, the list passed to the list option would contain "a", 
 
 ```console
 ./> myapp --list a b c --list d
+```
+
+Option and value arities are manually configurable as shown in the following example.
+
+```cs
+var parser = CommandLine.CreateParser<MyOptions>()
+    .AddNamedOption(s => s.Value, 
+        o => o.WithOptionArity(ArityType.ZeroOrOne)
+            .WithValueArity(ArityType.ExactlyOne))
+    .AddNamedOption(s => s.Values, 
+        o => o.WithOptionArity(ArityType.ZeroOrMore)
+            .WithValueArity(ArityType.OneOrMore))
+    .Build();
 ```
 
 ## 6. Custom Option Parser & Validator

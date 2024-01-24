@@ -75,4 +75,14 @@ internal static class CommandLineExtensions
             yield return result.ToString();
         }
     }
+
+    public static string GetCommaByEndsWith(this StringBuilder builder)
+    {
+        if (builder.Length < 1)
+        {
+            return string.Empty;
+        }
+
+        return builder[^1] == '.' ? " " : ", ";
+    }
 }

@@ -50,6 +50,48 @@ public static partial class OptionExtensions
     }
     #endregion
 
+    #region Option Hidden Configuration
+    public static ISwitchOption WithHidden(this ISwitchOption option, bool hidden)
+    {
+        ((SwitchOption)option).SetHidden(hidden);
+        return option;
+    }
+
+    public static ICounterOption WithHidden(this ICounterOption option, bool hidden)
+    {
+        ((CounterOption)option).SetHidden(hidden);
+        return option;
+    }
+
+    public static IScalarNamedOption<TValue> WithHidden<TValue>(this IScalarNamedOption<TValue> option, bool hidden)
+        where TValue : IComparable
+    {
+        ((ScalarNamedOption<TValue>)option).SetHidden(hidden);
+        return option;
+    }
+
+    public static ISequentialNamedOption<TValue> WithHidden<TValue>(this ISequentialNamedOption<TValue> option, bool hidden)
+        where TValue : IComparable
+    {
+        ((SequentialNamedOption<TValue>)option).SetHidden(hidden);
+        return option;
+    }
+
+    public static IScalarValueOption<TValue> WithHidden<TValue>(this IScalarValueOption<TValue> option, bool hidden)
+        where TValue : IComparable
+    {
+        ((ScalarValueOption<TValue>)option).SetHidden(hidden);
+        return option;
+    }
+
+    public static ISequentialValueOption<TValue> WithHidden<TValue>(this ISequentialValueOption<TValue> option, bool hidden)
+        where TValue : IComparable
+    {
+        ((SequentialValueOption<TValue>)option).SetHidden(hidden);
+        return option;
+    }
+    #endregion
+
     #region Option Usage Configuration
     public static ISwitchOption WithUsage(this ISwitchOption option, string usage)
     {

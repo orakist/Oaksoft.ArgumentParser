@@ -34,7 +34,7 @@ public static class ParserErrors
 
     public static readonly ErrorInfo InvalidSingleOptionUsage = new(
         $"{Name}.{nameof(InvalidSingleOptionUsage)}",
-        "'{0}' option alias cannot be combined with other aliases.");
+        "'{0}' option cannot be combined with other options.");
 
     public static readonly ErrorInfo TooManyOption = new(
         $"{Name}.{nameof(TooManyOption)}",

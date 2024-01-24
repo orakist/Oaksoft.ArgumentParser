@@ -28,9 +28,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public bool IsEmpty { get; private set; }
 
-    public bool IsHelpOption { get; private set; }
+    public abstract bool IsHelpOption { get; }
 
-    public bool IsVersionOption { get; private set; }
+    public abstract bool IsVersionOption { get; }
+
+    public abstract VerbosityLevelType VerbosityLevel { get; }
 
     public List<IErrorMessage> Errors => _errors.ToList();
 
@@ -89,10 +91,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
         return BuildHelpText(coloring).ToString();
     }
 
-    public string GetErrorText(bool? enableColoring = default, bool showErrorTitle = false)
+    public string GetErrorText(bool? enableColoring = default)
     {
         var coloring = enableColoring ?? Settings.EnableColoring;
-        return BuildErrorText(coloring, showErrorTitle).ToString();
+        return BuildErrorText(coloring).ToString();
     }
 
     protected void InitializeOptions()
@@ -201,8 +203,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         _errors.Clear();
         IsEmpty = false;
-        IsHelpOption = false;
-        IsVersionOption = false;
 
         foreach (var option in _baseOptions)
         {
@@ -258,7 +258,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
     }
 
-    private void ValidateOptions(IEnumerable<TokenItem> tokens)
+    private void ValidateOptions(ICollection<TokenItem> tokens)
     {
         foreach (var option in _baseOptions)
         {
@@ -272,7 +272,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        ValidateBuiltInTokens();
+        ValidateBuiltInTokens(tokens.All(t => t.IsParsed));
 
         foreach (var token in tokens.Where(s => s is { IsParsed: false, Invalid: false }))
         {
@@ -284,6 +284,12 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         if (_errors.Count > 0)
         {
+            var verbosityOption = _baseOptions.First(n => n.Name == nameof(IBuiltInOptions.Verbosity));
+            if (verbosityOption.OptionCount > 0)
+            {
+                UpdateOptionPropertiesByReflection(verbosityOption);
+            }
+
             return;
         }
 
@@ -313,7 +319,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void AutoPrintHelpText()
     {
-        if (_errors.Count > 0)
+        if (_errors.Count > 0 || Settings.AutoPrintHelp != true)
         {
             return;
         }
@@ -326,19 +332,13 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
         }
 
-        IsHelpOption = true;
-        if (Settings.AutoPrintHelp != true)
-        {
-            return;
-        }
-
         Console.Write(BuildHelpText(Settings.EnableColoring).ToString());
         Console.WriteLine();
     }
 
     private void AutoPrintVersion()
     {
-        if (_errors.Count > 0)
+        if (_errors.Count > 0 || Settings.AutoPrintVersion != true)
         {
             return;
         }
@@ -347,12 +347,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
             First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
 
         if (!IsOnlyOption(versionOption))
-        {
-            return;
-        }
-
-        IsVersionOption = true;
-        if (Settings.AutoPrintVersion != true)
         {
             return;
         }
@@ -368,7 +362,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
         }
 
-        Console.Write(BuildErrorText(Settings.EnableColoring, false).ToString());
+        Console.Write(BuildErrorText(Settings.EnableColoring).ToString());
         Console.WriteLine();
     }
 
@@ -409,37 +403,20 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
 
         var paddingString = string.Empty.PadRight(padLength, ' ');
+        var lineLength = Settings.HelpDisplayWidth - padLength;
 
         foreach (var option in _baseOptions)
         {
+            if (VerbosityLevel < VerbosityLevelType.Detailed && option.IsHidden)
+            {
+                continue;
+            }
+
             var namedOption = option as INamedOption;
             var shortAlias = namedOption?.Alias ?? string.Empty;
             sb.Pastel($"{shortAlias.PadRight(padLength, ' ')} ", ConsoleColor.DarkGreen);
             sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
-            sb.Append(option.Usage);
-
-            if (option is IHaveDefaultValue defaultValueOption)
-            {
-                var defaultValue = defaultValueOption.GetDefaultValue();
-                if (!string.IsNullOrEmpty(defaultValue))
-                {
-                    sb.Append(", ");
-                    sb.Pastel("Default Value:", ConsoleColor.DarkYellow);
-                    sb.Append($" '{defaultValue}'");
-                }
-            }
-
-            sb.AppendLine();
-
-            if (option is IHaveAllowedValues allowedValueOption)
-            {
-                var allowedValues = allowedValueOption.GetAllowedValues();
-                if (allowedValues.Count > 0)
-                {
-                    sb.Pastel($"{paddingString} Allowed Values:", ConsoleColor.DarkYellow);
-                    sb.AppendLine($" {string.Join(" | ", allowedValues)}");
-                }
-            }
+            sb.AppendLine(option.Usage);
 
             if (namedOption is not null)
             {
@@ -447,13 +424,39 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 sb.AppendLine($" {string.Join(", ", namedOption.Aliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length))}");
             }
 
+            var descBuilder = new StringBuilder();
             if (option.Description is not null)
             {
-                var descriptionWords = option.Description.Split(' ');
-                var descriptionLines = CreateLinesByWidth(descriptionWords);
-                foreach (var description in descriptionLines)
+                descBuilder.Append(option.Description);
+            }
+
+            if (option is IHaveAllowedValues allowedValueOption)
+            {
+                var allowedValues = allowedValueOption.GetAllowedValues();
+                if (allowedValues.Count > 0)
                 {
-                    sb.AppendLine($"{paddingString} {description}");
+                    descBuilder.Append(descBuilder.GetCommaByEndsWith());
+                    descBuilder.Append($"[Allowed-Values: {string.Join(" | ", allowedValues)}]");
+                }
+            }
+
+            if (option is IHaveDefaultValue defaultValueOption)
+            {
+                var defaultValue = defaultValueOption.GetDefaultValue();
+                if (!string.IsNullOrEmpty(defaultValue))
+                {
+                    descBuilder.Append(descBuilder.GetCommaByEndsWith());
+                    descBuilder.Append($"[Default: {defaultValue}]");
+                }
+            }
+
+            if (descBuilder.Length > 0)
+            {
+                var words = descBuilder.ToString().Split(' ');
+                var lines = CreateLinesByWidth(words, lineLength);
+                foreach (var line in lines)
+                {
+                    sb.AppendLine($"{paddingString} {line}");
                 }
             }
 
@@ -463,7 +466,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        var usageLines = CreateLinesByWidth(_baseOptions.Select(o => o.Usage), true);
+        var usageLines = CreateLinesByWidth(_baseOptions.Select(o => o.Usage), lineLength, true);
         sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
         sb.AppendLine(usageLines[0]);
 
@@ -473,7 +476,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         return sb;
     }
 
-    private StringBuilder BuildErrorText(bool enableColoring, bool showErrorTitle)
+    private StringBuilder BuildErrorText(bool enableColoring)
     {
         var sb = new StringBuilder();
         if (_errors.Count < 1)
@@ -483,18 +486,22 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         TextColoring.SetEnabled(enableColoring);
 
-        if (showErrorTitle)
+        if (VerbosityLevel >= VerbosityLevelType.Detailed)
         {
             sb.Append("###  ");
-            sb.Pastel("Error(s)!", ConsoleColor.Red);
+            sb.Pastel("Error(s)!", ConsoleColor.DarkRed);
             sb.AppendLine("  ###");
         }
 
         for (var i = 0; i < _errors.Count; ++i)
         {
-            if (showErrorTitle)
+            if (VerbosityLevel >= VerbosityLevelType.Normal)
             {
                 sb.Pastel($"{(i + 1):00} - ", ConsoleColor.DarkYellow);
+            }
+
+            if (VerbosityLevel >= VerbosityLevelType.Detailed)
+            {
                 sb.Append($"Code: {_errors[i].Error.Code}, Message: ");
             }
 
@@ -502,21 +509,31 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
             if (_errors[i].Exception is not null)
             {
-                sb.AppendLine(_errors[i].Exception!.ToString());
+                if (VerbosityLevel >= VerbosityLevelType.Trace)
+                {
+                    sb.AppendLine(_errors[i].Exception!.ToString());
+                }
             }
+
+            if (VerbosityLevel < VerbosityLevelType.Minimal)
+                break;
         }
 
         return sb;
     }
 
-    private void ValidateBuiltInTokens()
+    private void ValidateBuiltInTokens(bool isAllTokensParsed)
     {
         var help = _baseOptions.OfType<SwitchOption>().
             First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help));
 
         if (IsOnlyOption(help))
         {
-            _errors.Clear();
+            if (isAllTokensParsed)
+            {
+                _errors.Clear();
+            }
+
             return;
         }
 
@@ -531,7 +548,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         if (IsOnlyOption(version))
         {
-            _errors.Clear();
+            if (isAllTokensParsed)
+            {
+                _errors.Clear();
+            }
+
             return;
         }
 
@@ -555,23 +576,25 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return false;
         }
 
-        var totalInputCount = _baseOptions.Sum(o => o switch
-        {
-            INamedOption c => c.OptionTokens.Count,
-            IValueOption d => d.ValueTokens.Count,
-            _ => 0
-        });
+        var totalInputCount = _baseOptions
+            .Where(n => n.Name != nameof(IBuiltInOptions.Verbosity))
+            .Sum(o => o switch
+            {
+                INamedOption c => c.OptionTokens.Count,
+                IValueOption d => d.ValueTokens.Count,
+                _ => 0
+            });
 
         return totalInputCount - optionCount < 1;
     }
 
-    private List<string> CreateLinesByWidth(IEnumerable<string> textWords, bool addBrackets = false)
+    private List<string> CreateLinesByWidth(IEnumerable<string> textWords, int lineLength, bool addBrackets = false)
     {
         var textLines = new List<string> { string.Empty };
 
         foreach (var word in textWords)
         {
-            if (textLines[^1].Length > Settings.HelpDisplayWidth)
+            if (textLines[^1].Length + word.Length > lineLength)
             {
                 textLines.Add(string.Empty);
             }

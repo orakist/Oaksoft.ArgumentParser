@@ -1,4 +1,6 @@
-﻿namespace Oaksoft.ArgumentParser.Builder;
+﻿using Oaksoft.ArgumentParser.Definitions;
+
+namespace Oaksoft.ArgumentParser.Builder;
 
 public interface IParserSettingsBuilder
 {
@@ -23,6 +25,8 @@ public interface IParserSettingsBuilder
     string? Title { get; set; }
 
     string? Description { get; set; }
+
+    public VerbosityLevelType? VerbosityLevel { get; set; }
 
     int? MaxAliasLength { get; set; }
 

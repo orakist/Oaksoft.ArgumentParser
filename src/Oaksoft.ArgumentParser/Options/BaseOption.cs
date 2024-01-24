@@ -25,6 +25,8 @@ internal abstract class BaseOption : IBaseOption
 
     public bool IsParsed => IsValid && OptionCount + ValueCount > 0;
 
+    public bool IsHidden { get; private set; }
+
     public abstract int OptionCount { get; }
 
     public abstract int ValueCount { get; }
@@ -47,9 +49,16 @@ internal abstract class BaseOption : IBaseOption
     {
         ParserInitializedGuard();
 
-        Name = validate 
+        Name = validate
             ? name.ValidateName().GetOrThrow(KeyProperty.Name)
             : name;
+    }
+
+    public void SetHidden(bool hidden)
+    {
+        ParserInitializedGuard();
+
+        IsHidden = hidden;
     }
 
     public void SetUsage(string usage)

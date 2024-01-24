@@ -11,11 +11,11 @@ namespace Oaksoft.ArgumentParser.Base;
 
 internal static class AliasExtensions
 {
-    public static readonly string[] BuiltInOptionNames = { "Help", "Version" };
+    public static readonly string[] BuiltInOptionNames = { "Help", "Version", "Verbosity" };
 
     private static readonly char[] _suggestionTrimChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
     private static readonly char[] _allowedAliasSymbols = { '?', '.', '-' };
-    private static readonly string[] _reservedAliases = { "?", "h", "help", "version" };
+    private static readonly string[] _reservedAliases = { "?", "h", "help", "vn", "version", "vl", "verbosity" };
 
     private static bool IsAsciiDigit(char c) => (uint)(c - '0') <= '9' - '0';
     private static bool IsAsciiLetter(char c) => (uint)((c | 0x20) - 'a') <= 'z' - 'a';

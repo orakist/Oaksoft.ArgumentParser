@@ -94,7 +94,7 @@ internal static class Program
                 ArityType.OneOrMore)
 
             .AddNamedOption(o => o.Operator,
-                o => o.WithDescription("Defines operator type of the operation.")
+                o => o.WithDescription("Sets the operator type.")
                     .WithAllowedValues("ADD", "SUB", "MUL", "DIV"),
                 mandatoryOption: true);
     }

@@ -2,6 +2,7 @@
 using System.Linq;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Builder;
+using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Errors;
 using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Options;
@@ -12,6 +13,12 @@ internal sealed class ArgumentParser<TOptions>
     : BaseArgumentParser, IArgumentParser<TOptions>
 {
     public override IParserSettings Settings { get; }
+
+    public override bool IsHelpOption => GetBuiltInOptions().Help ?? false;
+
+    public override bool IsVersionOption => GetBuiltInOptions().Version ?? false;
+
+    public override VerbosityLevelType VerbosityLevel => GetBuiltInOptions().Verbosity ?? Settings.VerbosityLevel;
 
     private readonly TOptions _appOptions;
     private readonly BuiltInOptions _builtInOptions;
@@ -73,9 +80,9 @@ internal sealed class ArgumentParser<TOptions>
         });
     }
 
-    public void Run(string? title, Action<TOptions> callback, params string[] args)
+    public void Run(string? comment, Action<TOptions> callback, params string[] args)
     {
-        RunInner(title, args, () =>
+        RunInner(comment, args, () =>
         {
             if (IsValid && !IsHelpOption && !IsVersionOption)
             {
@@ -84,19 +91,19 @@ internal sealed class ArgumentParser<TOptions>
         });
     }
 
-    public void Run(string? title, Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args)
+    public void Run(string? comment, Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args)
     {
-        RunInner(title, args, () =>
+        RunInner(comment, args, () =>
         {
             callback.Invoke(this, _appOptions);
         });
     }
 
-    private void RunInner(string? title, string[]? args, Action callback)
+    private void RunInner(string? comment, string[]? args, Action callback)
     {
-        if (!string.IsNullOrWhiteSpace(title))
+        if (!string.IsNullOrWhiteSpace(comment))
         {
-            Console.WriteLine(title);
+            Console.WriteLine(comment);
         }
 
         if (args?.Length > 0)

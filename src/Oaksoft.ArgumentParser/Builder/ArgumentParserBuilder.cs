@@ -47,13 +47,14 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
             AutoPrintVersion = _settingsBuilder.AutoPrintVersion ?? true,
             AutoPrintErrors = _settingsBuilder.AutoPrintErrors ?? true,
 
-            HelpDisplayWidth = _settingsBuilder.HelpDisplayWidth ?? 75,
+            HelpDisplayWidth = _settingsBuilder.HelpDisplayWidth ?? 80,
             NewLineAfterOption = _settingsBuilder.NewLineAfterOption ?? true,
             ShowTitle = _settingsBuilder.ShowTitle ?? true,
             ShowDescription = _settingsBuilder.ShowDescription ?? true,
             EnableColoring = _settingsBuilder.EnableColoring ??= true,
             Title = _settingsBuilder.Title,
             Description = _settingsBuilder.Description,
+            VerbosityLevel = _settingsBuilder.VerbosityLevel ?? VerbosityLevelType.Quiet,
 
             MaxAliasLength = _settingsBuilder.MaxAliasLength ?? 32,
             MaxSuggestedAliasWordCount = _settingsBuilder.MaxSuggestedAliasWordCount ?? 4
@@ -119,10 +120,11 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         _settingsBuilder.AutoPrintHelp ??= true;
         _settingsBuilder.AutoPrintVersion ??= true;
         _settingsBuilder.AutoPrintErrors ??= true;
-        _settingsBuilder.HelpDisplayWidth ??= 75;
+        _settingsBuilder.HelpDisplayWidth ??= 80;
         _settingsBuilder.NewLineAfterOption ??= true;
         _settingsBuilder.ShowTitle ??= true;
         _settingsBuilder.ShowDescription ??= true;
+        _settingsBuilder.VerbosityLevel ??= VerbosityLevelType.Quiet;
         _settingsBuilder.EnableColoring ??= true;
         _settingsBuilder.MaxAliasLength ??= 32;
         _settingsBuilder.MaxSuggestedAliasWordCount ??= 4;
@@ -156,9 +158,44 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     private void BuildDefaultOptions()
     {
         // add help option
-        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help)))
+        BuildHelpOption();
+
+        // add version option
+        BuildVersionOption();
+
+        // add verbosity option
+        BuildVerbosityOption();
+    }
+
+    private void BuildVersionOption()
+    {
+        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version)))
         {
-            throw BuilderErrors.ReservedProperty.ToException(nameof(IBuiltInOptions.Help));
+            throw BuilderErrors.ReservedProperty.ToException(nameof(IBuiltInOptions.Version));
+        }
+
+        var properties = typeof(BuiltInOptions).GetProperties();
+        var keyProperty = properties.First(p => p.Name == nameof(IBuiltInOptions.Version));
+        this.RegisterSwitchOption<TOptions>(keyProperty, false);
+
+        string[] aliases = new[] { "VN", "Version" };
+        var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
+
+        List<string> validAliases = aliases
+            .ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false)
+            .GetOrThrow();
+
+        option.SetName(nameof(IBuiltInOptions.Version), false);
+        option.SetValidAliases(validAliases);
+        option.SetDescription("Shows version-number of the application.");
+        ((BaseValueOption)option).SetValueArity(ArityType.Zero);
+    }
+
+    private void BuildHelpOption()
+    {
+        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Verbosity)))
+        {
+            throw BuilderErrors.ReservedProperty.ToException(nameof(IBuiltInOptions.Verbosity));
         }
 
         var properties = typeof(BuiltInOptions).GetProperties();
@@ -171,32 +208,39 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         var validAliases = aliases
             .ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false)
             .GetOrThrow();
-        
+
         option.SetName(nameof(IBuiltInOptions.Help), false);
         option.SetValidAliases(validAliases);
         option.SetDescription("Shows help and usage information.");
         ((BaseValueOption)option).SetValueArity(ArityType.Zero);
+    }
 
-        // add version option
-        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version)))
+    private void BuildVerbosityOption()
+    {
+        if (_baseOptions.Any(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Verbosity)))
         {
-            throw BuilderErrors.ReservedProperty.ToException(nameof(IBuiltInOptions.Version));
+            throw BuilderErrors.ReservedProperty.ToException(nameof(IBuiltInOptions.Verbosity));
         }
 
-        keyProperty = properties.First(p => p.Name == nameof(IBuiltInOptions.Version));
-        this.RegisterSwitchOption<TOptions>(keyProperty, false);
+        var properties = typeof(BuiltInOptions).GetProperties();
+        var keyProperty = properties.First(p => p.Name == nameof(IBuiltInOptions.Verbosity));
+        this.RegisterNamedOption<TOptions, VerbosityLevelType>(keyProperty, false, false);
 
-        aliases = new[] { "Ver", "Version" };
-        option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
+        var aliases = new[] { "VL", "Verbosity" };
+        var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Verbosity));
 
-        validAliases = aliases
+
+        var validAliases = aliases
             .ValidateAliases(OptionPrefix, CaseSensitive, _settingsBuilder.MaxAliasLength!.Value, false)
             .GetOrThrow();
 
-        option.SetName(nameof(IBuiltInOptions.Version), false);
+        option.SetHidden(true);
+        option.SetName(nameof(IBuiltInOptions.Verbosity), false);
         option.SetValidAliases(validAliases);
-        option.SetDescription("Shows version information.");
-        ((BaseValueOption)option).SetValueArity(ArityType.Zero);
+        option.SetDescription("Sets verbosity-level that specifies how much output is sent to the console.");
+
+        var scalarOption = option as ScalarNamedOption<VerbosityLevelType>;
+        scalarOption!.SetDefaultValue(_settingsBuilder.VerbosityLevel!.Value);
     }
 
     private static string? BuildTitleLine()

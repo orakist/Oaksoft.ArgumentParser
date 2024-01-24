@@ -259,7 +259,7 @@ This can happen if lots of option property names are similar.
 ## 5. Arity Configuration
 
 The arity of an option or value is the number of option or values that can be passed if that option or value is specified.
-Arity is expressed with a minimum value and a maximum value, as the following table illustrates:
+There are two types of arity configuration. These are option arity and value arity. Arity is expressed with a minimum value and a maximum value.
 
 - Zero - No values allowed.
 - ZeroOrOne - May have one value, may have no values.
@@ -268,7 +268,6 @@ Arity is expressed with a minimum value and a maximum value, as the following ta
 - OneOrMore - May have multiple values, must have at least one value.
 - Custom minimum and maximum configuration.
 
-There are two types of arities. These are option arity and value arity.
 Following table illustrates option arity for option '-n':
 
 | Min | Max  | Example validity | Example                     |

@@ -362,7 +362,44 @@ var parser = CommandLine.CreateParser<MyOptions>()
 
 ## 6. Custom Option Parser & Validator
 
-Description will be added!
+### 6.1. Custom Option Value Parser
+
+If you want to parse the value input of an option, use *.WithTryParseCallback(...)* method to configure a custom parser delegate, as shown in the following example:
+
+```cs
+class MyOptions
+{
+    public double? Number { get; set; }
+}
+
+static bool TryParseCustom(string value, out double result)
+{
+    if (value.StartsWith('(') && value.EndsWith(')'))
+        value = value.Substring(1, value.Length - 2);
+
+    return double.TryParse(value, out result);
+}
+
+static void Main(params string[] args)
+{
+    var parser = CommandLine.CreateParser<MyOptions>()
+        .AddNamedOption(p => p.Number, o => o.WithTryParseCallback(TryParseCustom))
+        .Build();
+
+    var options = parser.Parse(args);
+    Console.WriteLine("Result: " + options.Number);
+}
+```
+
+Now, parser can parse a number inside parentheses, see the following command-line output for the preceding example:
+
+```console
+./> myapp -n (2.3)
+Result: 2.3
+```
+
+### 6.2. Custom Option Value Validator
+
 
 ## 7. Other Option Configurations
 

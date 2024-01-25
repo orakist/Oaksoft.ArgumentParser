@@ -666,4 +666,3 @@ These are command line options of this application.
 
 Usage: [-n (value)] [-c <value>] [-h] [--vn] [--vl (value)]
 ```
-

@@ -6,7 +6,7 @@ using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Parser;
 
-namespace Oaksoft.ArgumentParser.Console;
+namespace Oaksoft.ArgumentParser.Tester;
 
 internal static class Program
 {
@@ -22,7 +22,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine(ex);
+            Console.WriteLine(ex);
         }
     }
 
@@ -50,30 +50,21 @@ internal static class Program
 
         if (numbers.Count < 1)
         {
-            System.Console.WriteLine("Provide at least one number.");
+            Console.WriteLine("Provide at least one number.");
             return;
         }
 
-        var result = options.Operator switch
-        {
-            OperatorType.Add => numbers.Sum(),
-            OperatorType.Sub => numbers.First() - numbers.Skip(1).Sum(),
-            OperatorType.Mul => numbers.Aggregate<double, double>(1, (current, number) => current * number),
-            OperatorType.Div => numbers.Skip(1).Aggregate(numbers.First(), (current, number) => current / number),
-            _ => 0
-        };
-
         var equation = options.Operator switch
         {
-            OperatorType.Add => $"{string.Join(" + ", numbers)} = {result}",
-            OperatorType.Sub => $"{string.Join(" - ", numbers)} = {result}",
-            OperatorType.Mul => $"{string.Join(" * ", numbers)} = {result}",
-            OperatorType.Div => $"{string.Join(" / ", numbers)} = {result}",
+            OperatorType.Add => $"{string.Join(" + ", numbers)} = {numbers.Sum()}",
+            OperatorType.Sub => $"{string.Join(" - ", numbers)} = {numbers.First() - numbers.Skip(1).Sum()}",
+            OperatorType.Mul => $"{string.Join(" * ", numbers)} = {numbers.Aggregate<double, double>(1, (x, y) => x * y)}",
+            OperatorType.Div => $"{string.Join(" / ", numbers)} = {numbers.Skip(1).Aggregate(numbers.First(), (x, y) => x / y)}",
             _ => "Invalid Argument!"
         };
 
-        System.Console.WriteLine($"Result: {equation}");
-        System.Console.WriteLine();
+        Console.WriteLine($"Result: {equation}");
+        Console.WriteLine();
     }
 
     private static IArgumentParserBuilder<CalculatorOptions> ConfigureOptions(this IArgumentParserBuilder<CalculatorOptions> builder)

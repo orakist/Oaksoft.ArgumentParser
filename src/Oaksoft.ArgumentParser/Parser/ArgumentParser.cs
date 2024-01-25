@@ -52,7 +52,7 @@ internal sealed class ArgumentParser<TOptions>
         AutoPrintHeaderText();
     }
 
-    public TOptions Parse(string[] arguments)
+    public TOptions Parse(params string[] arguments)
     {
         ParseTokens(arguments);
 

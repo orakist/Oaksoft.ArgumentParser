@@ -64,7 +64,7 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
 
     TOptions GetApplicationOptions();
 
-    TOptions Parse(string[] args);
+    TOptions Parse(params string[] args);
 
     void Run(Action<TOptions> callback, params string[] args);
 

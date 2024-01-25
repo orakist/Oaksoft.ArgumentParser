@@ -134,8 +134,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
             ValidateOptions(tokens);
 
-            BindOptionsToAttributes();
-
             AutoPrintHelpText();
 
             AutoPrintVersion();
@@ -144,6 +142,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             var error = new ErrorInfo($"{ParserErrors.Name}.UnexpectedError", ex.Message);
             _errors.Add(error.WithException(ex));
+        }
+        finally
+        {
+            BindOptionsToAttributes();
         }
     }
 
@@ -270,6 +272,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 _errors.Add(ex.Error.WithName(option.Name));
             }
+            catch (Exception ex)
+            {
+                var error = new ErrorInfo($"{ParserErrors.Name}.UnexpectedError", ex.Message);
+                _errors.Add(error.WithName(option.Name).WithException(ex));
+            }
         }
 
         ValidateBuiltInTokens(tokens.All(t => t.IsParsed));
@@ -282,18 +289,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void BindOptionsToAttributes()
     {
-        if (_errors.Count > 0)
-        {
-            var verbosityOption = _baseOptions.First(n => n.Name == nameof(IBuiltInOptions.Verbosity));
-            if (verbosityOption.OptionCount > 0)
-            {
-                UpdateOptionPropertiesByReflection(verbosityOption);
-            }
+        var options = _errors.Count > 0 
+            ? _baseOptions.Where(n => n.Name == nameof(IBuiltInOptions.Verbosity))
+            : _baseOptions;
 
-            return;
-        }
-
-        foreach (var option in _baseOptions)
+        foreach (var option in options)
         {
             try
             {
@@ -302,6 +302,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
             catch (OptionParserException ex)
             {
                 _errors.Add(ex.Error.WithName(option.Name));
+            }
+            catch (Exception ex)
+            {
+                var error = new ErrorInfo($"{ParserErrors.Name}.UnexpectedError", ex.Message);
+                _errors.Add(error.WithName(option.Name).WithException(ex));
             }
         }
     }

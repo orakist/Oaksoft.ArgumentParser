@@ -360,11 +360,50 @@ var parser = CommandLine.CreateParser<MyOptions>()
     .Build();
 ```
 
-## 6. Custom Option Parser & Validator
+## 6. Custom Value Validator & Parser
 
-### 6.1. Custom Option Value Parser
+### 6.1. Custom Option Value Validator
 
-If you want to parse the value input of an option, use *.WithTryParseCallback(...)* method to configure a custom parser delegate, as shown in the following example:
+To provide custom validation code for parsed option values, call *.AddPredicate(...)* method to configure a custom predicate delegate.
+Here is a simple code example, to invalidate negative numbers.
+
+```cs
+class MyOptions
+{
+    public double? Number { get; set; }
+}
+
+static void Main(params string[] args)
+{
+    var parser = CommandLine.CreateParser<MyOptions>()
+        .AddNamedOption(p => p.Number, o => o.AddPredicate(v => v >= 0))
+        .Build();
+
+    var options = parser.Parse(args);
+
+    if (parser.IsValid)
+    {
+        Console.WriteLine("Result: " + options.Number);
+    }
+}
+```
+
+Now, parser invalidates negative numbers, see the following command-line output for the preceding example:
+
+```console
+./> myapp -n -5
+Option value(s) validation failed. Value(s): -5, Option: Number
+```
+
+### 6.2. Custom Option Value Parser
+
+If you want to parse the value input of an option, use *.WithTryParseCallback(...)* method to configure a custom parser delegate.
+Here are some examples of what you can do with *.WithTryParseCallback(...)*
+- Parsing of custom types, classes, structs.
+- Parsing of other kinds of input strings (for example, parse "1-2-3-4" into int[]).
+- Parsing postcodes, telephone number, emails etc.
+
+Here is a simple code example, to parse the number inside parentheses:
 
 ```cs
 class MyOptions
@@ -383,11 +422,16 @@ static bool TryParseCustom(string value, out double result)
 static void Main(params string[] args)
 {
     var parser = CommandLine.CreateParser<MyOptions>()
-        .AddNamedOption(p => p.Number, o => o.WithTryParseCallback(TryParseCustom))
+        .AddNamedOption(p => p.Number,
+            o => o.AddPredicate(v => v >= 0).WithTryParseCallback(TryParseCustom))
         .Build();
 
     var options = parser.Parse(args);
-    Console.WriteLine("Result: " + options.Number);
+
+    if (parser.IsValid)
+    {
+        Console.WriteLine("Result: " + options.Number);
+    }
 }
 ```
 
@@ -397,8 +441,6 @@ Now, parser can parse a number inside parentheses, see the following command-lin
 ./> myapp -n (2.3)
 Result: 2.3
 ```
-
-### 6.2. Custom Option Value Validator
 
 
 ## 7. Other Option Configurations

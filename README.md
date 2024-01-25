@@ -166,7 +166,7 @@ count: 30, total: 0, names: {frodo, 10.5, sam, gandalf}
 count: 10, total: 0, names: {frodo, sam, 30.5, gandalf}
 ```
 
-## 2. Default Value
+## Sets option arity of a named option. By default parser configures option arity of options. Or it is manually configurable by this *WithOptionArity* method. See [Arity Configuration](#Arity Configuration)
 
 Options can have default values that apply if no value is explicitly provided. For example, switch options 
 are values with a default of true when the option name is in the command line. 
@@ -442,11 +442,43 @@ Now, parser can parse a number inside parentheses, see the following command-lin
 Result: 2.3
 ```
 
-
 ## 7. Other Option Configurations
 
-Description will be added!
+You can manually configure following properties of an option.
 
+- Name: .WithName(string name)
+  Configures name of the options.
+- Description: .WithDescription(string description)
+  Sets description of the options to show a custom description in the help output.
+- Usage: .WithUsage(string usage)
+  Sets usage string of the options to show a custom usage string in the help output.
+- IsHidden: .WithHidden(bool hidden)
+  Do not prints the option in the help output, if it is a hidden option.
+- Aliases: .AddAliases(params string[] aliases)
+  Sets aliases of named options. By default parser heuristically creates aliases of named options. Or it is manually configurable by this *AddAliases* method. AddAliases can be used multiple times for an option.
+- ValueArity: .WithValueArity(ArityType valueArity)
+  Sets value arity of options. By default parser configures value arity of options. Or it is manually configurable by this *WithValueArity* method. See [Arity Configuration](#5. Arity Configuration)
+- OptionArity: .WithOptionArity(ArityType optionArity)
+  Sets option arity of named options. By default parser configures option arity of options. Or it is manually configurable by this *WithOptionArity* method. See [Arity Configuration](#5. Arity Configuration)
+- DefaultValue: .WithDefaultValue<TValue>(TValue defaultValue)
+  Sets default value of scalar named options. See [Default Value](#3. Default Value)
+- EnableSequentialValues: .WithEnableSequentialValues(bool enabled)
+  Sets EnableSequentialValues property of sequential named options. It is true by default.
+  If EnableSequentialValues is set to true, 'one two three' inputs will be parsed as 3 values for "items" option: "myapp --items one two three"
+  If it is set to false, parser graps only first value for "items" option.
+- EnableValueTokenSplitting: .WithEnableValueTokenSplitting(bool enabled)
+  Sets EnableValueTokenSplitting property of sequential named and value options. It is true by default.
+  If EnableValueTokenSplitting is set to true, 'one;two;three' inputs will be parsed as 3 values for "items" option: "myapp --items one;two;three"
+  If it is set to false, inputs will be parsed as 1 string "one;two;three" value for "items" option.
+- AllowedValues: .WithAllowedValues<TValue>(params TValue[] allowedValues)
+  Sets allowed values of options. See [Allowed Option Values](#3. Allowed Option Values)
+- Predicates or Validators: .AddPredicate<TValue>(Predicate<TValue> predicate)
+  Adds a value predicate delegate for option values. AddPredicate can be used multiple times for an option. See [Option Value Validator](#6.1. Custom Option Value Validator)
+- List Predicates or List Validators: .AddListPredicate<TValue>(Predicate<List<TValue>> predicate)
+  Adds a value list predicate delegate for sequential option values. AddListPredicate can be used multiple times for an option. See [Option Value Validator](#6.1. Custom Option Value Validator)
+- Input Parser Callback: .WithTryParseCallback<TValue>(TryParse<TValue> callback)
+  Sets a parser callback delegate for options to parse inputs manually. See [Option Value Parser](#6.2. Custom Option Value Parser)
+  
 ## 8. Built-In Options
 
 Description will be added!

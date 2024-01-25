@@ -401,7 +401,7 @@ If you want to parse the value input of an option, use *.WithTryParseCallback(..
 Here are some examples of what you can do with *.WithTryParseCallback(...)*
 - Parsing of custom types, classes, structs.
 - Parsing of other kinds of input strings (for example, parse "1-2-3-4" into int[]).
-- Parsing postcodes, telephone number, emails etc.
+- Parsing of postcodes, telephone number, emails etc.
 
 Here is a simple code example, to parse the number inside parentheses:
 
@@ -494,4 +494,98 @@ You can manually configure following properties of an option.
   
 ## 8. Built-In Options
 
-Description will be added!
+There are 3 built-in options: --help, --version and --verbosity. See the following example to demonstrate built-in options.
+
+```cs
+enum OperatorType { Add, Sub, Mul, Div }
+
+class CalculatorOptions
+{
+    public IEnumerable<double>? Numbers { get; set; }
+    public OperatorType? Calculate { get; set; }
+}
+
+static void EvaluateOptions(CalculatorOptions options)
+{
+    var numbers = options.Numbers!.ToList();
+
+    var equation = options.Calculate switch
+    {
+        OperatorType.Add => $"{string.Join(" + ", numbers)} = {numbers.Sum()}",
+        OperatorType.Sub => $"{string.Join(" - ", numbers)} = {numbers.First() - numbers.Skip(1).Sum()}",
+        OperatorType.Mul => $"{string.Join(" * ", numbers)} = {numbers.Aggregate<double, double>(1, (x, y) => x * y)}",
+        OperatorType.Div => $"{string.Join(" / ", numbers)} = {numbers.Skip(1).Aggregate(numbers.First(), (x, y) => x / y)}",
+        _ => "Invalid Argument!"
+    };
+
+    Console.WriteLine($"Result: {equation}");
+}
+
+static void Main(string[] args)
+{
+    var parser = CommandLine.CreateParser<CalculatorOptions>()
+        .AddNamedOption(p => p.Numbers)
+        .AddNamedOption(o => o.Calculate, o => o.AddPredicate(v => v > 0 ? true : throw new NotImplementedException())))
+        .Build();
+
+    parser.Run(EvaluateOptions, args);
+}
+```
+
+### 8.1 Verbosity Level option
+
+*Oaksoft.ArgumentParser* typically offer a --verbosity (or -vl) option that specifies how much output is sent to the console. Here are the standard five settings: 
+
+Quiet, Minimal, Normal, Detailed, Trace
+
+By default, verbosity level is Minimal. You can globally configure it by using *.ConfigureSettings()* method of parser builder. Or you can overwrite verbosity level by using as a command-line option.
+Here are a some error outputs of preceding example with different verbosity levels.
+
+```console
+./> --abc 234 -c add -n 5 -n -3
+Unknown double dash alias token '--abc' found!
+The method or operation is not implemented. Option: Calculate
+Unknown token '234' found!
+
+./> --abc 234 -c add -n 5 -n -3 --verbosity:quiet
+Unknown double dash alias token '--abc' found!
+
+./> --abc 234 -c add -n 5 -n -3 --verbosity:minimal
+Unknown double dash alias token '--abc' found!
+The method or operation is not implemented. Option: Calculate
+Unknown token '234' found!
+
+./> --abc 234 -c add -n 5 -n -3 --verbosity:normal
+01 - Unknown double dash alias token '--abc' found!
+02 - The method or operation is not implemented. Option: Calculate
+03 - Unknown token '234' found!
+
+./> --abc 234 -c add -n 5 -n -3 --verbosity:detailed
+###  Error(s)!  ###
+01 - Code: ParserErrors.UnknownDoubleDashToken, Message: Unknown double dash alias token '--abc' found!
+02 - Code: ParserErrors.UnexpectedError, Message: The method or operation is not implemented. Option: Calculate
+03 - Code: ParserErrors.UnknownToken, Message: Unknown token '234' found!
+
+./> --abc 234 -c add -n 5 -n -3 --verbosity:trace
+###  Error(s)!  ###
+01 - Code: ParserErrors.UnknownDoubleDashToken, Message: Unknown double dash alias token '--abc' found!
+02 - Code: ParserErrors.UnexpectedError, Message: The method or operation is not implemented. Option: Calculate
+System.NotImplementedException: The method or operation is not implemented.
+   at Oaksoft.ArgumentParser.Tester.Program.<>c.<Main>b__3_3(OperatorType v) in D:\Oaksoft\Oaksoft.ArgumentParser\test\Oaksoft.ArgumentParser.Console\Program.cs:line 42
+   at Oaksoft.ArgumentParser.Options.BaseAllowedValuesOption`1.<>c__DisplayClass8_0.<GetValidatedValues>b__3(Predicate`1 p) in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 268
+   at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+   at Oaksoft.ArgumentParser.Options.BaseAllowedValuesOption`1.<GetValidatedValues>b__8_1(ValueTuple`2 n) in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 268
+   at System.Linq.Enumerable.WhereSelectEnumerableIterator`2.ToList()
+   at Oaksoft.ArgumentParser.Options.BaseAllowedValuesOption`1.GetValidatedValues() in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 266
+   at Oaksoft.ArgumentParser.Options.BaseScalarValueOption`1.Validate() in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 35
+   at Oaksoft.ArgumentParser.Options.ScalarNamedOption`1.Validate() in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Options\ScalarNamedOption.cs:line 156
+   at Oaksoft.ArgumentParser.Parser.BaseArgumentParser.ValidateOptions(ICollection`1 tokens) in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Parser\BaseArgumentParser.cs:line 269
+03 - Code: ParserErrors.UnknownToken, Message: Unknown token '234' found!
+```
+
+As you can see in the preceding output;
+- Level Quiet: Prints only first error message.
+- Level Minimal: Prints all error messages. this is the default verbosity.
+- Level Normal: Prints all error messages with error index.
+- Level Detailed: Prints all error messages with error index, title and code.
+- Level Trace: In addition to Detailed level error, prints exception call stack of validator in the example code. See the throwal of NotImplementedException.

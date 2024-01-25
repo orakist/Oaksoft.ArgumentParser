@@ -52,3 +52,5 @@ Default alias prefix rules of the Oaksoft.ArgumentParser are 2, 4 and 5. The fol
 ```
 
 First command is parsed by the library into these named options: (--open file.txt), (--read 10), (--verbosity quiet). 
+
+### to be continued ...

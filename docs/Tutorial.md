@@ -554,7 +554,7 @@ Usage: [-n <value>] [-c (value)]
 
 To simplify calculate option registration;
 - Define an enum for Operator types
-- Change type of the operator to an enum.
+- Change type of the calculate option to an enum.
 
 Enum option has some benefits. 
 - Parser configures allowed values automatically for enum options.
@@ -622,7 +622,7 @@ public static void Parse(IArgumentParser<CalculatorOptions> parser, string[] arg
 }
 ```
 
-This is the new --help output. See the "operator" option.
+This is the new --help output. See the "calculate" option.
 
 ```
 Oaksoft.ArgumentParser.Tutorial v1.0.0

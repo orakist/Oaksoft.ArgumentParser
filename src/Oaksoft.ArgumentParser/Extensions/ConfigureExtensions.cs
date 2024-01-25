@@ -205,9 +205,9 @@ public static partial class OptionExtensions
     #endregion
 
     #region Value Arity Configuration
-    public static ISwitchOption WithValueArity(this ISwitchOption option, ArityType optionArity)
+    public static ISwitchOption WithValueArity(this ISwitchOption option, ArityType valueArity)
     {
-        ((SwitchOption)option).SetValueArity(optionArity);
+        ((SwitchOption)option).SetValueArity(valueArity);
         return option;
     }
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Oaksoft.ArgumentParser.Console;
+namespace Oaksoft.ArgumentParser.Tester;
 
 internal enum OperatorType { Add, Sub, Mul, Div }
 

@@ -534,7 +534,7 @@ static void Main(string[] args)
 
 ### 8.1 Verbosity Level option
 
-*Oaksoft.ArgumentParser* typically offer a --verbosity (or -vl) option that specifies how much output is sent to the console. Here are the standard five settings: 
+*Oaksoft.ArgumentParser* typically offer a --verbosity (or --vl) option that specifies how much output is sent to the console. Here are the standard five settings: 
 
 Quiet, Minimal, Normal, Detailed, Trace
 
@@ -589,3 +589,13 @@ As you can see in the preceding output;
 - Level Normal: Prints all error messages with error index.
 - Level Detailed: Prints all error messages with error index, title and code.
 - Level Trace: In addition to Detailed level error, prints exception call stack of validator in the example code. See the throwal of NotImplementedException.
+
+### 8.2 Version Number option
+
+*Oaksoft.ArgumentParser* typically offer a --version (or --vn) option that shows the version of the application. 
+Version is read from AssemblyInformationalVersionAttribute. If you configure version of the application in the .csproj file with this setting "<Version>0.9.0-beta</Version>". Here is the example version output.
+
+```console
+./> --version
+0.9.0-beta
+```

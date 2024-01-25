@@ -421,7 +421,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
             sb.AppendLine(option.Usage);
 
-            if (namedOption is not null)
+            if (namedOption?.Aliases.Count > 1)
             {
                 sb.Pastel($"{paddingString} Aliases:", ConsoleColor.DarkYellow);
                 sb.AppendLine($" {string.Join(", ", namedOption.Aliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length))}");

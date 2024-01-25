@@ -457,11 +457,11 @@ You can manually configure following properties of an option.
 - Aliases: .AddAliases(params string[] aliases)
   Sets aliases of named options. By default parser heuristically creates aliases of named options. Or it is manually configurable by this *AddAliases* method. AddAliases can be used multiple times for an option.
 - ValueArity: .WithValueArity(ArityType valueArity)
-  Sets value arity of options. By default parser configures value arity of options. Or it is manually configurable by this *WithValueArity* method. See [Arity Configuration](#5. Arity Configuration)
+  Sets value arity of options. By default parser configures value arity of options. Or it is manually configurable by this *WithValueArity* method. See [Arity Configuration](#5-arity-configuration)
 - OptionArity: .WithOptionArity(ArityType optionArity)
-  Sets option arity of named options. By default parser configures option arity of options. Or it is manually configurable by this *WithOptionArity* method. See [Arity Configuration](#5. Arity Configuration)
+  Sets option arity of named options. By default parser configures option arity of options. Or it is manually configurable by this *WithOptionArity* method. See [Arity Configuration](#5-arity-configuration)
 - DefaultValue: .WithDefaultValue<TValue>(TValue defaultValue)
-  Sets default value of scalar named options. See [Default Value](#3. Default Value)
+  Sets default value of scalar named options. See [Default Value](#2-default-value)
 - EnableSequentialValues: .WithEnableSequentialValues(bool enabled)
   Sets EnableSequentialValues property of sequential named options. It is true by default.
   If EnableSequentialValues is set to true, 'one two three' inputs will be parsed as 3 values for "items" option: "myapp --items one two three"
@@ -471,13 +471,13 @@ You can manually configure following properties of an option.
   If EnableValueTokenSplitting is set to true, 'one;two;three' inputs will be parsed as 3 values for "items" option: "myapp --items one;two;three"
   If it is set to false, inputs will be parsed as 1 string "one;two;three" value for "items" option.
 - AllowedValues: .WithAllowedValues<TValue>(params TValue[] allowedValues)
-  Sets allowed values of options. See [Allowed Option Values](#3. Allowed Option Values)
+  Sets allowed values of options. See [Allowed Option Values](#3-allowed-option-values)
 - Predicates or Validators: .AddPredicate<TValue>(Predicate<TValue> predicate)
-  Adds a value predicate delegate for option values. AddPredicate can be used multiple times for an option. See [Option Value Validator](#6.1. Custom Option Value Validator)
+  Adds a value predicate delegate for option values. AddPredicate can be used multiple times for an option. See [Option Value Validator](#61-custom-option-value-validator)
 - List Predicates or List Validators: .AddListPredicate<TValue>(Predicate<List<TValue>> predicate)
-  Adds a value list predicate delegate for sequential option values. AddListPredicate can be used multiple times for an option. See [Option Value Validator](#6.1. Custom Option Value Validator)
+  Adds a value list predicate delegate for sequential option values. AddListPredicate can be used multiple times for an option. See [Option Value Validator](#61-custom-option-value-validator)
 - Input Parser Callback: .WithTryParseCallback<TValue>(TryParse<TValue> callback)
-  Sets a parser callback delegate for options to parse inputs manually. See [Option Value Parser](#6.2. Custom Option Value Parser)
+  Sets a parser callback delegate for options to parse inputs manually. See [Option Value Parser](#62-custom-option-value-parser)
   
 ## 8. Built-In Options
 

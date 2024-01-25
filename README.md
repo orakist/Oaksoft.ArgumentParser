@@ -446,50 +446,50 @@ Result: 2.3
 
 You can manually configure following properties of an option.
 
-- Name: .WithName(string name)
+- **Name:** *.WithName(string name)*\
   Configures name of the options.
   
-- Description: .WithDescription(string description)
+- **Description:** *.WithDescription(string description)*\
   Sets description of the options to show a custom description in the help output.
   
-- Usage: .WithUsage(string usage)
+- **Usage:** *.WithUsage(string usage)*\
   Sets usage string of the options to show a custom usage string in the help output.
   
-- IsHidden: .WithHidden(bool hidden)
+- **IsHidden:** *.WithHidden(bool hidden)*\
   Do not prints the option in the help output, if it is a hidden option.
   
-- Aliases: .AddAliases(params string[] aliases)
+- **Aliases:** *.AddAliases(params string[] aliases)*\
   Sets aliases of named options. By default parser heuristically creates aliases of named options. Or it is manually configurable by this *AddAliases* method. AddAliases can be used multiple times for an option.
   
-- ValueArity: .WithValueArity(ArityType valueArity)
+- **ValueArity:** *.WithValueArity(ArityType valueArity)*\
   Sets value arity of options. By default parser configures value arity of options. Or it is manually configurable by this *WithValueArity* method. See [Arity Configuration](#5-arity-configuration)
   
-- OptionArity: .WithOptionArity(ArityType optionArity)
+- **OptionArity:** *.WithOptionArity(ArityType optionArity)*\
   Sets option arity of named options. By default parser configures option arity of options. Or it is manually configurable by this *WithOptionArity* method. See [Arity Configuration](#5-arity-configuration)
   
-- DefaultValue: .WithDefaultValue<TValue>(TValue defaultValue)
+- **DefaultValue:** *.WithDefaultValue<TValue>(TValue defaultValue)*\
   Sets default value of scalar named options. See [Default Value](#2-default-value)
   
-- EnableSequentialValues: .WithEnableSequentialValues(bool enabled)
+- **EnableSequentialValues:** *.WithEnableSequentialValues(bool enabled)*\
   Sets EnableSequentialValues property of sequential named options. It is true by default.
   If EnableSequentialValues is set to true, 'one two three' inputs will be parsed as 3 values for "items" option: "myapp --items one two three"
   If it is set to false, parser graps only first value for "items" option.
   
-- EnableValueTokenSplitting: .WithEnableValueTokenSplitting(bool enabled)
+- **EnableValueTokenSplitting:** *.WithEnableValueTokenSplitting(bool enabled)*\
   Sets EnableValueTokenSplitting property of sequential named and value options. It is true by default.
   If EnableValueTokenSplitting is set to true, 'one;two;three' inputs will be parsed as 3 values for "items" option: "myapp --items one;two;three"
   If it is set to false, inputs will be parsed as 1 string "one;two;three" value for "items" option.
   
-- AllowedValues: .WithAllowedValues<TValue>(params TValue[] allowedValues)
+- **AllowedValues:** *.WithAllowedValues<TValue>(params TValue[] allowedValues)*\
   Sets allowed values of options. See [Allowed Option Values](#3-allowed-option-values)
   
-- Predicates or Validators: .AddPredicate<TValue>(Predicate<TValue> predicate)
+- **Predicates or Validators:** *.AddPredicate<TValue>(Predicate<TValue> predicate)*\
   Adds a value predicate delegate for option values. AddPredicate can be used multiple times for an option. See [Option Value Validator](#61-custom-option-value-validator)
   
-- List Predicates or List Validators: .AddListPredicate<TValue>(Predicate<List<TValue>> predicate)
+- **List Predicates or List Validators:** *.AddListPredicate<TValue>(Predicate<List<TValue>> predicate)*\
   Adds a value list predicate delegate for sequential option values. AddListPredicate can be used multiple times for an option. See [Option Value Validator](#61-custom-option-value-validator)
   
-- Input Parser Callback: .WithTryParseCallback<TValue>(TryParse<TValue> callback)
+- **Value Parser Callback:** *.WithTryParseCallback<TValue>(TryParse<TValue> callback)*\
   Sets a parser callback delegate for options to parse inputs manually. See [Option Value Parser](#62-custom-option-value-parser)
   
 ## 8. Built-In Options

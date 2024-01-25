@@ -111,9 +111,9 @@ There are 4 types of named options.
    Sequential named option requires one or more argument values. Option name may be repeated more than one time. A sequential named option grabs all values.\
    Example: --numbers 123 321 --numbers 456|789 (numbers: {123, 321, 456, 789})
 3. Switch Option
-   Switch option is a boolean type. If it is passed in the command-line, it default value will be true.\
+   Switch option is a boolean type. It is a shorthand scalar named option for boolean types. If it is passed in the command-line, its default value will be true.\
    Example: --start (start: true)
-4. Counter Option
+5. Counter Option
    Counter option counts occurrences of the option in the command-line.\
    Example: --next --next -n -n /n /next (next: 6)
 
@@ -337,7 +337,17 @@ In the following example, the list passed to the list option would contain "a", 
 ./> myapp --list a b c --list d
 ```
 
-Option and value arities are manually configurable as shown in the following example.
+By default,
+- Option arity of Scalar Named options and Switch options are ZeroOrOne.
+- Option arity of Sequential Named options and Counter options are ZeroOrMore.
+- Value arity of Scalar Named options are ExactyOne.
+- Value arity of Sequential Named options are ZeroOrMore.
+- Value arity of Switch options are ZeroOrOne.
+- Value arity of Counter options are Zero.
+- Value arity of Scalar Value options are ZeroOrOne.
+- Value arity of Sequential Value options are ZeroOrMore.
+
+Also, option and value arities are manually configurable as shown in the following example.
 
 ```cs
 var parser = CommandLine.CreateParser<MyOptions>()

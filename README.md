@@ -472,13 +472,13 @@ You can manually configure following properties of an option.
   
 - **EnableSequentialValues:** *.WithEnableSequentialValues(bool enabled)*\
   Sets EnableSequentialValues property of sequential named options. It is true by default.\
-  If EnableSequentialValues is set to true, 'one two three' inputs will be parsed as 3 values for "items" option: "myapp --items one two three"\
-  If it is set to false, parser graps only first value for "items" option.
+  If it is set to true, 'one two three' inputs will be parsed as 3 string values: "myapp --items one two three"\
+  If it is set to false, parser graps only first input "one" as a value.
   
 - **EnableValueTokenSplitting:** *.WithEnableValueTokenSplitting(bool enabled)*\
   Sets EnableValueTokenSplitting property of sequential named and value options. It is true by default.\
-  If EnableValueTokenSplitting is set to true, 'one;two;three' inputs will be parsed as 3 values for "items" option: "myapp --items one;two;three"\
-  If it is set to false, inputs will be parsed as 1 string "one;two;three" value for "items" option.
+  If it is set to true, 'one;two;three' inputs will be parsed as 3 string values: "myapp --items one;two;three"\
+  If it is set to false, inputs will be parsed as 1 string "one;two;three" value.
   
 - **AllowedValues:** *.WithAllowedValues<TValue>(params TValue[] allowedValues)*\
   Sets allowed values of options. See [Allowed Option Values](#3-allowed-option-values)

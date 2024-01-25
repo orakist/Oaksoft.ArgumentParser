@@ -166,7 +166,7 @@ count: 30, total: 0, names: {frodo, 10.5, sam, gandalf}
 count: 10, total: 0, names: {frodo, sam, 30.5, gandalf}
 ```
 
-## Sets option arity of a named option. By default parser configures option arity of options. Or it is manually configurable by this *WithOptionArity* method. See [Arity Configuration](#Arity Configuration)
+## 2. Default Value
 
 Options can have default values that apply if no value is explicitly provided. For example, switch options 
 are values with a default of true when the option name is in the command line. 

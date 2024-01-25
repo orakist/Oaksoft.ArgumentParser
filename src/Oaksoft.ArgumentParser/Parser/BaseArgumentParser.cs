@@ -134,6 +134,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
             ValidateOptions(tokens);
 
+            BindOptionsToAttributes();
+
             AutoPrintHelpText();
 
             AutoPrintVersion();
@@ -142,10 +144,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             var error = new ErrorInfo($"{ParserErrors.Name}.UnexpectedError", ex.Message);
             _errors.Add(error.WithException(ex));
-        }
-        finally
-        {
-            BindOptionsToAttributes();
         }
     }
 

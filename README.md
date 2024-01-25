@@ -571,15 +571,15 @@ Unknown token '234' found!
 01 - Code: ParserErrors.UnknownDoubleDashToken, Message: Unknown double dash alias token '--abc' found!
 02 - Code: ParserErrors.UnexpectedError, Message: The method or operation is not implemented. Option: Calculate
 System.NotImplementedException: The method or operation is not implemented.
-   at Oaksoft.ArgumentParser.Tester.Program.<>c.<Main>b__3_3(OperatorType v) in D:\Oaksoft\Oaksoft.ArgumentParser\test\Oaksoft.ArgumentParser.Console\Program.cs:line 42
-   at Oaksoft.ArgumentParser.Options.BaseAllowedValuesOption`1.<>c__DisplayClass8_0.<GetValidatedValues>b__3(Predicate`1 p) in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 268
+   at Oaksoft.ArgumentParser.Tester.Program.<>c.<Main>b__3_3(OperatorType v) in ***\Program.cs:line 42
+   at Oaksoft.ArgumentParser.Options.BaseAllowedValuesOption`1.<>c__DisplayClass8_0.<GetValidatedValues>b__3(Predicate`1 p) in ***\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 268
    at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
-   at Oaksoft.ArgumentParser.Options.BaseAllowedValuesOption`1.<GetValidatedValues>b__8_1(ValueTuple`2 n) in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 268
+   at Oaksoft.ArgumentParser.Options.BaseAllowedValuesOption`1.<GetValidatedValues>b__8_1(ValueTuple`2 n) in ***\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 268
    at System.Linq.Enumerable.WhereSelectEnumerableIterator`2.ToList()
-   at Oaksoft.ArgumentParser.Options.BaseAllowedValuesOption`1.GetValidatedValues() in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 266
-   at Oaksoft.ArgumentParser.Options.BaseScalarValueOption`1.Validate() in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 35
-   at Oaksoft.ArgumentParser.Options.ScalarNamedOption`1.Validate() in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Options\ScalarNamedOption.cs:line 156
-   at Oaksoft.ArgumentParser.Parser.BaseArgumentParser.ValidateOptions(ICollection`1 tokens) in D:\Oaksoft\Oaksoft.ArgumentParser\src\Oaksoft.ArgumentParser\Parser\BaseArgumentParser.cs:line 269
+   at Oaksoft.ArgumentParser.Options.BaseAllowedValuesOption`1.GetValidatedValues() in ***\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 266
+   at Oaksoft.ArgumentParser.Options.BaseScalarValueOption`1.Validate() in ***\Oaksoft.ArgumentParser\Options\BaseValueOption.cs:line 35
+   at Oaksoft.ArgumentParser.Options.ScalarNamedOption`1.Validate() in ***\Oaksoft.ArgumentParser\Options\ScalarNamedOption.cs:line 156
+   at Oaksoft.ArgumentParser.Parser.BaseArgumentParser.ValidateOptions(ICollection`1 tokens) in ***\Oaksoft.ArgumentParser\Parser\BaseArgumentParser.cs:line 269
 03 - Code: ParserErrors.UnknownToken, Message: Unknown token '234' found!
 ```
 

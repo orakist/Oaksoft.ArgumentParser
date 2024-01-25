@@ -524,8 +524,8 @@ static void EvaluateOptions(CalculatorOptions options)
 static void Main(string[] args)
 {
     var parser = CommandLine.CreateParser<CalculatorOptions>()
-        .AddNamedOption(p => p.Numbers)
-        .AddNamedOption(o => o.Calculate, o => o.AddPredicate(v => v > 0 ? true : throw new NotImplementedException())))
+        .AddNamedOption(p => p.Numbers, o => o.AddPredicate(v => v > 0 ? true : throw new NotImplementedException()))
+        .AddNamedOption(o => o.Calculate)
         .Build();
 
     parser.Run(EvaluateOptions, args);
@@ -593,9 +593,77 @@ As you can see in the preceding output;
 ### 8.2 Version Number option
 
 *Oaksoft.ArgumentParser* typically offer a --version (or --vn) option that shows the version of the application. 
-Version is read from AssemblyInformationalVersionAttribute. If you configure version of the application in the .csproj file with this setting "<Version>0.9.0-beta</Version>". Here is the example version output.
+Version is read from AssemblyInformationalVersionAttribute. If you configure version of the application in the .csproj file with this setting "<Version>0.9.0-beta</Version>".\
+Here is the example version output.
 
 ```console
 ./> --version
 0.9.0-beta
 ```
+
+### 8.3 Help option
+
+Command-line apps typically provide an option to display a brief description of the available commands, options, and arguments. *Oaksoft.ArgumentParser* automatically generates help output.
+Help output is configurable by project settings (Version, Product, Company and Description),  ArgumentParser settings and option configuration (name, alias, description etc.). 
+See the [here (source code)](https://github.com/orakist/Oaksoft.ArgumentParser/tree/dev/test/Oaksoft.ArgumentParser.Console) for the project settings.
+
+Example help output:
+
+```console
+./> --help
+Command Line Arguments Parser Tester v0.9.0-beta, Oaksoft Tech.
+This Console App tests Oaksoft.ArgumentParser library. Copyright (C) 2023 All Rights Reserved
+These are command line options of this application.
+
+-n       Usage: -n (value)
+         Aliases: -n, --numbers, /n, /numbers
+         Performs 'Numbers' option.
+
+-c       Usage: -c <value>
+         Aliases: -c, --calculate, /c, /calculate
+         Performs 'Calculate' option. [Allowed-Values: Add | Sub | Mul | Div]
+
+-h       Usage: -h
+         Aliases: -h, -?, --help, /h, /?, /help
+         Shows help and usage information.
+
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
+
+Usage: [-n (value)] [-c <value>]
+```
+
+To print hidden options too, set verbosity level to detailed or trace. See the following output --verbosity is a hidden option. For example:
+
+```console
+./> --help --vl:detailed
+Command Line Arguments Parser Tester v0.9.0-beta, Oaksoft Tech.
+This Console App tests Oaksoft.ArgumentParser library. Copyright (C) 2023 All Rights Reserved
+These are command line options of this application.
+
+-n       Usage: -n (value)
+         Aliases: -n, --numbers, /n, /numbers
+         Performs 'Numbers' option.
+
+-c       Usage: -c <value>
+         Aliases: -c, --calculate, /c, /calculate
+         Performs 'Calculate' option. [Allowed-Values: Add | Sub | Mul | Div]
+
+-h       Usage: -h
+         Aliases: -h, -?, --help, /h, /?, /help
+         Shows help and usage information.
+
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
+
+--vl     Usage: --vl (value)
+         Aliases: --vl, --verbosity, /vl, /verbosity
+         Sets verbosity-level that specifies how much output is sent to the
+         console. [Allowed-Values: Quiet | Minimal | Normal | Detailed | Trace],
+         [Default: Minimal]
+
+Usage: [-n (value)] [-c <value>] [-h] [--vn] [--vl (value)]
+```
+

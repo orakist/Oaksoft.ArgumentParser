@@ -636,7 +636,7 @@ These are command line options of this application.
 Usage: [-n (value)] [-c <value>]
 ```
 
-To print hidden options too, set verbosity level to detailed or trace. See the following output --verbosity is a hidden option. For example:
+To print hidden options too, set verbosity level to detailed or trace. See the following help output with hidden options:
 
 ```console
 ./> --help --vl:detailed

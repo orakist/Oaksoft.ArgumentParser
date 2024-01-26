@@ -46,22 +46,6 @@ public class OptionRegistrationTests : ArgumentParserTestBase
     }
 
     [Fact]
-    public void ShouldParseHelp_WhenHelpInputIsFalse()
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<SampleOptionNames>()
-            .AddNamedOption(s => s.Value);
-
-        // Act & Assert
-        var parser = sut.Build();
-        parser.Parse("-h:false");
-
-        var builtInOpts = parser.GetBuiltInOptions();
-        builtInOpts.Help.ShouldBe(false);
-        parser.IsHelpOption.ShouldBeFalse();
-    }
-
-    [Fact]
     public void ShouldCreateError_WhenHelpInputIsNotValid()
     {
         // Arrange

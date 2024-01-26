@@ -188,6 +188,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         option.SetName(nameof(IBuiltInOptions.Version), false);
         option.SetValidAliases(validAliases);
         option.SetDescription("Shows version-number of the application.");
+        ((BaseValueOption)option).SetValueArity(ArityType.Zero);
     }
 
     private void BuildHelpOption()
@@ -211,6 +212,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         option.SetName(nameof(IBuiltInOptions.Help), false);
         option.SetValidAliases(validAliases);
         option.SetDescription("Shows help and usage information.");
+        ((BaseValueOption)option).SetValueArity(ArityType.Zero);
     }
 
     private void BuildVerbosityOption()

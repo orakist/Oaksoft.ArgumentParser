@@ -7,7 +7,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class ArityConfigurationTests
+public class ArityConfigurationTests : ArgumentParserTestBase
 {
     [Theory]
     [InlineData(ArityType.Zero)]

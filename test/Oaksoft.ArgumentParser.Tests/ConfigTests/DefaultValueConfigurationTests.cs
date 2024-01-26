@@ -6,7 +6,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class DefaultValueConfigurationTests
+public class DefaultValueConfigurationTests : ArgumentParserTestBase
 {
     [Fact]
     public void ShouldBuild_WhenDefaultValueUsed1()

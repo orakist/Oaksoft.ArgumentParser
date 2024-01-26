@@ -4,10 +4,9 @@ using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
 
-
 namespace Oaksoft.ArgumentParser.Tests.ParserTests;
 
-public class OptionValuePredicateTests
+public class OptionValuePredicateTests : ArgumentParserTestBase
 {
     [Theory]
     [InlineData("-v", "4")]

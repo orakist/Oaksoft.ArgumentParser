@@ -7,7 +7,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class AliasSuggestionTests
+public class AliasSuggestionTests : ArgumentParserTestBase
 {
     [Fact]
     public void ShouldSuggestAlias_WhenOnlyLettersUsedInOptionNames()

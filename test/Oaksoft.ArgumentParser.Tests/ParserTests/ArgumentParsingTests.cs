@@ -8,7 +8,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ParserTests;
 
-public class ArgumentParsingTests
+public class ArgumentParsingTests : ArgumentParserTestBase
 {
     [Theory]
     [InlineData("-v", "10")]

@@ -7,7 +7,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class UsageConfigurationTests
+public class UsageConfigurationTests : ArgumentParserTestBase
 {
     [Fact]
     public void ShouldBuild_WithCustomUsage()

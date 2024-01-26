@@ -7,7 +7,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ParserTests;
 
-public class OptionValueTryParseCallbackTests
+public class OptionValueTryParseCallbackTests : ArgumentParserTestBase
 {
     [Theory]
     [InlineData("-v", "4")]

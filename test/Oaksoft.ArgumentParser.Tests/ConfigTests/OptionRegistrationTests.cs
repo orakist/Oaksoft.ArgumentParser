@@ -5,7 +5,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class OptionRegistrationTests
+public class OptionRegistrationTests : ArgumentParserTestBase
 {
     [Fact]
     public void ShouldThrowException_WhenTryToAddReservedProperty()

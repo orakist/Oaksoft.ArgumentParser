@@ -4,7 +4,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.NamedOptionTests;
 
-public class UnsignedIntNamedOptionTests
+public class UnsignedIntNamedOptionTests : ArgumentParserTestBase
 {
     [Theory]
     [InlineData(10, 200, "-v10", "-n200")]

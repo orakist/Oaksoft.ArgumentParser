@@ -6,7 +6,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class DescriptionConfigurationTests
+public class DescriptionConfigurationTests : ArgumentParserTestBase
 {
     [Fact]
     public void ShouldBuild_WhenDescriptionUsed()

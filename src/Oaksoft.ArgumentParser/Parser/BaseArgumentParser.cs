@@ -311,7 +311,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected void AutoPrintHeaderText()
     {
-        if (Settings.AutoPrintHeader != true)
+        if (CommandLine.DisableConsoleOutput || Settings.AutoPrintHeader != true)
         {
             return;
         }
@@ -322,7 +322,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void AutoPrintHelpText()
     {
-        if (_errors.Count > 0 || Settings.AutoPrintHelp != true)
+        if (CommandLine.DisableConsoleOutput || _errors.Count > 0 || Settings.AutoPrintHelp != true)
         {
             return;
         }
@@ -341,7 +341,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void AutoPrintVersion()
     {
-        if (_errors.Count > 0 || Settings.AutoPrintVersion != true)
+        if (CommandLine.DisableConsoleOutput || _errors.Count > 0 || Settings.AutoPrintVersion != true)
         {
             return;
         }
@@ -360,7 +360,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected void AutoPrintErrorText()
     {
-        if (Settings.AutoPrintErrors != true || _errors.Count < 1)
+        if (CommandLine.DisableConsoleOutput || Settings.AutoPrintErrors != true || _errors.Count < 1)
         {
             return;
         }

@@ -29,12 +29,20 @@ public static class BuilderErrors
 
     public static readonly ErrorInfo InvalidPropertyExpression = new(
         $"{Name}.{nameof(InvalidPropertyExpression)}",
-        "Invalid lambda expression, please select a '{0}' type property!");
+        "Invalid lambda expression! Please select a '{0}' type property.");
 
     public static readonly ErrorInfo InvalidStringPropertyUsage = new(
         $"{Name}.{nameof(InvalidStringPropertyUsage)}",
-        "Invalid lambda expression, string property '{0}' cannot be used as a collection!");
+        "Invalid lambda expression! String property '{0}' cannot be used as a collection.");
 
+    public static readonly ErrorInfo UnsupportedPropertyType = new(
+        $"{Name}.{nameof(UnsupportedPropertyType)}",
+        "Invalid property '{0}'! Property type '{1}' is not supported.");
+
+    public static readonly ErrorInfo PropertyWithoutSetMethod = new(
+        $"{Name}.{nameof(PropertyWithoutSetMethod)}",
+        "Invalid property! Property '{0}' doesn't have set method.");
+    
     public static readonly ErrorInfo PropertyAlreadyInUse = new(
         $"{Name}.{nameof(PropertyAlreadyInUse)}",
         "Property '{0}' already registered with an option!");

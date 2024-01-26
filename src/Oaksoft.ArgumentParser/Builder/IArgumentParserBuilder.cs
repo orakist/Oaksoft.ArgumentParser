@@ -19,5 +19,7 @@ public interface IArgumentParserBuilder<out TOptions> : IArgumentParserBuilder
 {
     IArgumentParserBuilder<TOptions> ConfigureSettings(Action<IParserSettingsBuilder> action);
 
+    IArgumentParser<TOptions> AutoBuild();
+
     IArgumentParser<TOptions> Build();
 }

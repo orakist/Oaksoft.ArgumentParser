@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -91,7 +93,7 @@ internal static class OptionRegistrar
     }
 
     public static PropertyInfo ValidateExpression<TSource, TValue>(
-        this IArgumentParserBuilder builder, Expression<Func<TSource, TValue>>? expression, string type)
+        this IArgumentParserBuilder builder, Expression<Func<TSource, TValue>>? expression, string typeName)
     {
         if (expression?.Body == null)
         {
@@ -102,14 +104,24 @@ internal static class OptionRegistrar
             expression.Body is not MemberExpression member ||
             member.Member.MemberType != MemberTypes.Property)
         {
-            throw BuilderErrors.InvalidPropertyExpression.ToException(type);
+            throw BuilderErrors.InvalidPropertyExpression.ToException(typeName);
         }
 
         var parserBuilder = (ArgumentParserBuilder<TSource>)builder;
         var properties = parserBuilder.GetApplicationOptions()!.GetType().GetProperties();
         var property = properties.First(p => p.Name == member.Member.Name);
 
-        if (member.Type == typeof(string) && type == typeof(char).ToString())
+        if (property.GetOptionType().OptionType == null)
+        {
+            throw BuilderErrors.UnsupportedPropertyType.ToException(property.Name, property.PropertyType.ToString());
+        }
+
+        if (property.SetMethod == null)
+        {
+            throw BuilderErrors.PropertyWithoutSetMethod.ToException(property.Name);
+        }
+
+        if (member.Type == typeof(string) && typeName == typeof(char).ToString())
         {
             throw BuilderErrors.InvalidStringPropertyUsage.ToException(property.Name);
         }
@@ -117,7 +129,7 @@ internal static class OptionRegistrar
         return property;
     }
 
-    private static void RegisterOptionProperty<TSource>(
+    public static void RegisterOptionProperty<TSource>(
         this IArgumentParserBuilder builder, BaseOption option, PropertyInfo keyProperty)
     {
         var parserBuilder = (ArgumentParserBuilder<TSource>)builder;
@@ -132,6 +144,51 @@ internal static class OptionRegistrar
         option.SetKeyProperty(keyProperty);
 
         parserBuilder.RegisterOption(option);
+    }
+
+    public static (Type? OptionType, bool Sequential) GetOptionType(this PropertyInfo property)
+    {
+        var propType = property.PropertyType;
+        var isSequential = IsSequentialPropertyType(propType);
+        var valueType = isSequential ? propType.GetElementType() ?? propType.GetGenericArguments()[0] : propType;
+        var optionType = Nullable.GetUnderlyingType(valueType) ?? valueType;
+
+        if (isSequential)
+        {
+            var genericType = typeof(List<>).MakeGenericType(valueType);
+            if (propType.IsAssignableFrom(genericType))
+                return (optionType, true);
+
+            genericType = valueType.MakeArrayType();
+            if (propType.IsAssignableFrom(genericType))
+                return (optionType, true);
+
+            genericType = typeof(Collection<>).MakeGenericType(valueType);
+            if (propType.IsAssignableFrom(genericType))
+                return (optionType, true);
+
+            genericType = typeof(HashSet<>).MakeGenericType(valueType);
+            if (propType.IsAssignableFrom(genericType))
+                return (optionType, true);
+
+            return (null, true);
+        }
+
+        return (optionType, false);
+    }
+
+    private static bool IsSequentialPropertyType(Type propType)
+    {
+        if (propType == typeof(string))
+            return false;
+
+        if (propType.IsGenericType && propType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            return true;
+
+        if (propType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+            return true;
+
+        return false;
     }
 
     private static (int Min, int Max) GetLimits(this bool arityType)

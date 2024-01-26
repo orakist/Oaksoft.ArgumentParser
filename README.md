@@ -1,5 +1,7 @@
 [![NuGet](https://img.shields.io/nuget/dt/Oaksoft.ArgumentParser.svg)](https://www.nuget.org/packages/Oaksoft.ArgumentParser/)
 [![NuGet](https://img.shields.io/nuget/vpre/Oaksoft.ArgumentParser.svg)](https://www.nuget.org/packages/Oaksoft.ArgumentParser/)
+[![Build Status](https://github.com/orakist/Oaksoft.ArgumentParser/actions/workflows/coveralls.yml/badge.svg)](https://github.com/orakist/Oaksoft.ArgumentParser/actions/workflows/coveralls.yml)
+[![Coverage Status](https://coveralls.io/repos/github/orakist/Oaksoft.ArgumentParser/badge.svg?branch=dev)](https://coveralls.io/github/orakist/Oaksoft.ArgumentParser?branch=dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/orakist/Oaksoft.ArgumentParser/blob/dev/LICENSE.md)
 
 # Command Line Arguments Parser Library for .Net

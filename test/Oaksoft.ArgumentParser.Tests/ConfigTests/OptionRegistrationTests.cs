@@ -136,6 +136,24 @@ public class OptionRegistrationTests : ArgumentParserTestBase
     }
 
     [Fact]
+    public void ShouldAutoBuild_WhenOptionsAreValid()
+    {
+        // Arrange
+        var parser = CommandLine.AutoBuild<IntAppOptions>();
+        var header = parser.GetHeaderText();
+
+        // Act & Assert
+        var options = parser.Parse("-v:5", "-l:true");
+
+        parser.GetOptions().Count.ShouldBe(8);
+        var builtInOpts = parser.GetBuiltInOptions();
+        builtInOpts.Help.ShouldBeNull();
+        parser.IsHelpOption.ShouldBeFalse();
+        options.NullValueFlag.ShouldBeTrue();
+        header.ShouldNotBeEmpty();
+    }
+
+    [Fact]
     public void ShouldBuildError_WhenArgumentInvalid1()
     {
         // Arrange

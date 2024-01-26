@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -36,6 +37,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public List<IErrorMessage> Errors => _errors.ToList();
 
+    protected TextReader _reader;
     protected readonly List<BaseOption> _baseOptions;
     protected readonly List<PropertyInfo> _propertyInfos;
     protected readonly List<IErrorMessage> _errors;
@@ -55,6 +57,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         _errors = new List<IErrorMessage>();
         _allAliases = new List<string>();
+        _reader = Console.In;
     }
 
     public List<IBaseOption> GetOptions()
@@ -78,6 +81,11 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         return _baseOptions.OfType<INamedOption>()
             .FirstOrDefault(o => o.Aliases.Any(a => a.Equals(alias, flag)));
+    }
+
+    public void SetTextReader(TextReader reader)
+    {
+        _reader = reader;
     }
 
     public string GetHeaderText()
@@ -277,17 +285,17 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        ValidateBuiltInTokens(tokens.All(t => t.IsParsed));
-
         foreach (var token in tokens.Where(s => s is { IsParsed: false, Invalid: false }))
         {
             _errors.Add(ParserErrors.UnknownToken.With(token.Token));
         }
+
+        ValidateBuiltInTokens(tokens.All(t => t.IsParsed));
     }
 
     private void BindOptionsToAttributes()
     {
-        var options = _errors.Count > 0 
+        var options = _errors.Count > 0
             ? _baseOptions.Where(n => n.Name == nameof(IBuiltInOptions.Verbosity))
             : _baseOptions;
 
@@ -311,7 +319,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected void AutoPrintHeaderText()
     {
-        if (CommandLine.DisableConsoleOutput || Settings.AutoPrintHeader != true)
+        if (CommandLine.DisableConsoleOutput || !Settings.AutoPrintHeader)
         {
             return;
         }
@@ -322,7 +330,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void AutoPrintHelpText()
     {
-        if (CommandLine.DisableConsoleOutput || _errors.Count > 0 || Settings.AutoPrintHelp != true)
+        if (CommandLine.DisableConsoleOutput || _errors.Count > 0 || !IsHelpOption || !Settings.AutoPrintHelp)
         {
             return;
         }
@@ -341,7 +349,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void AutoPrintVersion()
     {
-        if (CommandLine.DisableConsoleOutput || _errors.Count > 0 || Settings.AutoPrintVersion != true)
+        if (CommandLine.DisableConsoleOutput || _errors.Count > 0 || !IsVersionOption || !Settings.AutoPrintVersion)
         {
             return;
         }
@@ -360,7 +368,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected void AutoPrintErrorText()
     {
-        if (CommandLine.DisableConsoleOutput || Settings.AutoPrintErrors != true || _errors.Count < 1)
+        if (CommandLine.DisableConsoleOutput || _errors.Count < 1 || !Settings.AutoPrintErrors)
         {
             return;
         }
@@ -469,7 +477,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
         }
 
-        var usages = VerbosityLevel >= VerbosityLevelType.Detailed 
+        var usages = VerbosityLevel >= VerbosityLevelType.Detailed
             ? _baseOptions.Select(o => o.Usage)
             : _baseOptions.Where(o => !AliasExtensions.BuiltInOptionNames.Contains(o.Name)).Select(o => o.Usage);
 
@@ -536,12 +544,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         if (IsOnlyOption(help))
         {
-            if (isAllTokensParsed)
-            {
-                _errors.Clear();
-            }
-
-            return;
+            RemoveIrrelevantErrors(isAllTokensParsed, nameof(IBuiltInOptions.Help));
+            if(_errors.All(s => s.OptionName != null))
+                return;
         }
 
         if (help.OptionTokens.Count > 0)
@@ -555,18 +560,25 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         if (IsOnlyOption(version))
         {
-            if (isAllTokensParsed)
-            {
-                _errors.Clear();
-            }
-
-            return;
+            RemoveIrrelevantErrors(isAllTokensParsed, nameof(IBuiltInOptions.Version));
+            if (_errors.All(s => s.OptionName != null))
+                return;
         }
 
         if (version.OptionTokens.Count > 0)
         {
             _errors.Add(ParserErrors.InvalidSingleOptionUsage.With(version.Alias).WithName(version.Name));
         }
+    }
+
+    private void RemoveIrrelevantErrors(bool isAllTokensParsed, string optionName)
+    {
+        var errors = isAllTokensParsed
+            ? _errors.Where(o => o.OptionName == optionName).ToList()
+            : _errors.Where(o => o.OptionName is null).ToList();
+
+        _errors.Clear();
+        _errors.AddRange(errors);
     }
 
     private bool IsOnlyOption(IBaseOption option)

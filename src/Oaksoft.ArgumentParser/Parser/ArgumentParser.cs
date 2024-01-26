@@ -103,19 +103,25 @@ internal sealed class ArgumentParser<TOptions>
     {
         if (!string.IsNullOrWhiteSpace(comment))
         {
-            Console.WriteLine(comment);
+            if (!CommandLine.DisableConsoleOutput)
+            {
+                Console.WriteLine(comment);
+            }
         }
 
         if (args?.Length > 0)
         {
-            Console.WriteLine($"./> {string.Join(' ', args)}");
+            if (!CommandLine.DisableConsoleOutput)
+            {
+                Console.WriteLine($"./> {string.Join(' ', args)}");
+            }
         }
         else
         {
             args = GetInputArguments();
         }
 
-        while (args.Length != 1 || (args[0] != "q" && args[0] != "Q"))
+        while (!IsQuitArgument(args))
         {
             ParseTokens(args);
 
@@ -128,13 +134,13 @@ internal sealed class ArgumentParser<TOptions>
             }
             catch (Exception ex)
             {
+                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
+                _errors.Add(error.WithException(ex));
+
                 if (!Settings.AutoPrintErrors)
                 {
                     throw;
                 }
-
-                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
-                _errors.Add(error.WithException(ex));
             }
 
             AutoPrintErrorText();
@@ -143,10 +149,25 @@ internal sealed class ArgumentParser<TOptions>
         }
     }
 
-    private static string[] GetInputArguments()
+    private static bool IsQuitArgument(string[] args)
     {
-        Console.Write("./> ");
-        var commandLine = Console.In.ReadLine();
+        if (args.Length != 1)
+            return false;
+
+        if (args[0].Equals("q", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return args[0].Equals("quit", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string[] GetInputArguments()
+    {
+        if (!CommandLine.DisableConsoleOutput)
+        {
+            Console.Write("./> ");
+        }
+
+        var commandLine = _reader.ReadLine();
 
         return commandLine?.SplitToArguments().ToArray() ??
                Array.Empty<string>();

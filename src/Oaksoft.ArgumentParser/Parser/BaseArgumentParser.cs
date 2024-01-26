@@ -335,14 +335,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
         }
 
-        var helpOption = _baseOptions.OfType<SwitchOption>().
-            First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help));
-
-        if (!IsOnlyOption(helpOption))
-        {
-            return;
-        }
-
         Console.Write(BuildHelpText(Settings.EnableColoring).ToString());
         Console.WriteLine();
     }
@@ -350,14 +342,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private void AutoPrintVersion()
     {
         if (CommandLine.DisableConsoleOutput || _errors.Count > 0 || !IsVersionOption || !Settings.AutoPrintVersion)
-        {
-            return;
-        }
-
-        var versionOption = _baseOptions.OfType<SwitchOption>().
-            First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
-
-        if (!IsOnlyOption(versionOption))
         {
             return;
         }

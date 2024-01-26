@@ -6,7 +6,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class AllowedValuesConfigurationTests
+public class AllowedValuesConfigurationTests : ArgumentParserTestBase
 {
     [Theory]
     [InlineData("Cat", "Puppy", "007")]

@@ -6,7 +6,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class NameConfigurationTests
+public class NameConfigurationTests : ArgumentParserTestBase
 {
     [Fact]
     public void ShouldBuild_WhenDifferentNamesUsed()

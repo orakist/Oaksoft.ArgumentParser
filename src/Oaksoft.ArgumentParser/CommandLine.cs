@@ -5,6 +5,8 @@ namespace Oaksoft.ArgumentParser;
 
 public static class CommandLine
 {
+    public static bool DisableConsoleOutput { get; set; }
+
     public static IArgumentParserBuilder<TOptions> CreateParser<TOptions>(
         OptionPrefixRules optionPrefix = OptionPrefixRules.Default, 
         AliasDelimiterRules aliasDelimiter = AliasDelimiterRules.Default, 

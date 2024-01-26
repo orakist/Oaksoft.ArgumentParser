@@ -5,10 +5,9 @@ using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
 
-
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class AliasConfigurationTests
+public class AliasConfigurationTests : ArgumentParserTestBase
 {
     [Fact]
     public void ShouldBuild_WhenOnlyLettersUsedInAliases()

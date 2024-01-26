@@ -6,7 +6,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class SequentialValueConfigurationTests
+public class SequentialValueConfigurationTests : ArgumentParserTestBase
 {
     [Fact]
     public void ShouldBuild_WhenAllowSequentialValuesConfigured()

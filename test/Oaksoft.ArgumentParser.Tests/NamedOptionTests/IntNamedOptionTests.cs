@@ -4,7 +4,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.NamedOptionTests;
 
-public class IntNamedOptionTests
+public class IntNamedOptionTests : ArgumentParserTestBase
 {
     [Theory]
     [InlineData(10, -100, "-v10", "-n-100")]
@@ -58,13 +58,13 @@ public class IntNamedOptionTests
     }
 
     [Theory]
-    [InlineData(new int[] { 1, 2 }, new int[] { 3 }, "-v1", "-v2", "-n3")]
-    [InlineData(new int[] { 4, 5 }, new int[] { 6 }, "-v4", "--values:5", "--null-values:6")]
-    [InlineData(new int[] { 11, 33 }, new int[] { 22, 44 }, "-v11", "-n:22", "-v:33", "-n:44")]
-    [InlineData(new int[] { 12, 13 }, new int[] { 14, 15 }, "-v12", "-v=13", "-n=14;15")]
-    [InlineData(new int[] { 1, 2, 3 }, new int[] { 4, 5 }, "-v1;2", "--values:3", "--null-values=4|5")]
-    [InlineData(new int[] { 10, 12, 14 }, new int[] { 16 }, "-v10;12", "/v=14", "/null-values:16")]
-    [InlineData(new int[] { 6, 8, 10 }, new int[] { 2, 4 }, "/null-values", "2,4", "-v6", "/v", "8|10")]
+    [InlineData(new [] { 1, 2 }, new [] { 3 }, "-v1", "-v2", "-n3")]
+    [InlineData(new [] { 4, 5 }, new [] { 6 }, "-v4", "--values:5", "--null-values:6")]
+    [InlineData(new [] { 11, 33 }, new [] { 22, 44 }, "-v11", "-n:22", "-v:33", "-n:44")]
+    [InlineData(new [] { 12, 13 }, new [] { 14, 15 }, "-v12", "-v=13", "-n=14;15")]
+    [InlineData(new [] { 1, 2, 3 }, new [] { 4, 5 }, "-v1;2", "--values:3", "--null-values=4|5")]
+    [InlineData(new [] { 10, 12, 14 }, new [] { 16 }, "-v10;12", "/v=14", "/null-values:16")]
+    [InlineData(new [] { 6, 8, 10 }, new [] { 2, 4 }, "/null-values", "2,4", "-v6", "/v", "8|10")]
     public void ParseSequentialOption_WhenArgumentsValid(int[] val1, int[] val2, params string[] args)
     {
         // Arrange

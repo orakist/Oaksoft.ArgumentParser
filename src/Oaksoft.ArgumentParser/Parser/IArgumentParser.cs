@@ -1,6 +1,7 @@
 ﻿using System;
 using Oaksoft.ArgumentParser.Definitions;
 using System.Collections.Generic;
+using System.IO;
 using Oaksoft.ArgumentParser.Errors;
 using Oaksoft.ArgumentParser.Options;
 
@@ -56,6 +57,8 @@ public interface IArgumentParser
     IBaseOption? GetOptionByName(string name);
 
     INamedOption? GetOptionByAlias(string alias);
+
+    void SetTextReader(TextReader reader);
 }
 
 public interface IArgumentParser<out TOptions> : IArgumentParser

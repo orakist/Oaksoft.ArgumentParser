@@ -5,7 +5,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ParserTests;
 
-public class SwitchOptionTests
+public class SwitchOptionTests : ArgumentParserTestBase
 {
     [Theory]
     [InlineData(true, true, "-v", "-n")]

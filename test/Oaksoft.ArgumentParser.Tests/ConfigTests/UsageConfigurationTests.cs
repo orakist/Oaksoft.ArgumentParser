@@ -7,7 +7,7 @@ using Shouldly;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
-public class UsageConfigurationTests
+public class UsageConfigurationTests : ArgumentParserTestBase
 {
     [Fact]
     public void ShouldBuild_WithCustomUsage()
@@ -90,7 +90,7 @@ public class UsageConfigurationTests
     {
         // Arrange, should ignore empty usages
         var sut = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Value, o => o.WithDefaultValue(5).WithAllowedValues(1, 2, 3))
             .AddNamedOption(s => s.NullValue, mustHaveOneValue: false)
             .AddNamedOption(s => s.Values)
             .AddValueOption(s => s.NullValues)
@@ -107,6 +107,9 @@ public class UsageConfigurationTests
         option.ShouldNotBeNull();
         option.Usage.ShouldBe("-v <value>");
         text.ShouldContain(option.Usage);
+
+        text.ShouldContain("[Default: 5]");
+        text.ShouldContain("[Allowed-Values: 1 | 2 | 3]");
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();

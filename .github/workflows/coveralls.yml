@@ -24,7 +24,7 @@ jobs:
       run: dotnet build --verbosity minimal --configuration Release --no-restore -p:TreatWarningsAsErrors=true
       
     - name: Test
-      run: dotnet test --configuration Release --verbosity normal --no-restore --no-build --collect:"Code Coverage" --results-directory ./coverage -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
+      run: dotnet test --verbosity minimal --configuration Release --no-restore --no-build --collect:"XPlat Code Coverage" --results-directory ./coverage
         
     - name: Coveralls
       uses: coverallsapp/github-action@v2

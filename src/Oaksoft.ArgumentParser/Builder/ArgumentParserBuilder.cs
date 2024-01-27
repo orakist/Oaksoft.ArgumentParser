@@ -87,6 +87,57 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         return _baseOptions.Select(o => o.KeyProperty.Name).ToList();
     }
 
+    public IArgumentParser<TOptions> AutoBuild()
+    {
+        AutoBuildApplicationOptions();
+
+        BuildDefaultSettings();
+
+        BuildDefaultOptions();
+
+        var parser = new ArgumentParser<TOptions>(_appOptions, this);
+        parser.Initialize();
+
+        return parser;
+    }
+
+    private void AutoBuildApplicationOptions()
+    {
+        var registeredNames = GetRegisteredPropertyNames();
+        var properties = _appOptions!.GetType().GetProperties()
+            .Where(p => p.SetMethod is not null)
+            .Where(p => !AliasExtensions.BuiltInOptionNames.Any(r => r.Equals(p.Name, StringComparison.OrdinalIgnoreCase)))
+            .Where(p => !registeredNames.Contains(p.Name)).ToList();
+
+        foreach (var property in properties)
+        {
+            var (optionType, isSequential) = property.GetOptionType();
+            if (optionType == null)
+                continue;
+
+            if (isSequential)
+            {
+                var genericType = typeof(SequentialNamedOption<>).MakeGenericType(optionType);
+                var option = Activator.CreateInstance(genericType, 0, int.MaxValue, 0, int.MaxValue) as BaseOption;
+                this.RegisterOptionProperty<TOptions>(option!, property);
+            }
+            else
+            {
+                if (optionType == typeof(bool))
+                {
+                    var option = new SwitchOption(0, 1);
+                    this.RegisterOptionProperty<TOptions>(option, property);
+                }
+                else
+                {
+                    var genericType = typeof(ScalarNamedOption<>).MakeGenericType(optionType);
+                    var option = Activator.CreateInstance(genericType, 0, 1, 1, 1) as BaseOption;
+                    this.RegisterOptionProperty<TOptions>(option!, property);
+                }
+            }
+        }
+    }
+
     public IArgumentParser<TOptions> Build()
     {
         BuildDefaultSettings();
@@ -188,6 +239,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         option.SetName(nameof(IBuiltInOptions.Version), false);
         option.SetValidAliases(validAliases);
         option.SetDescription("Shows version-number of the application.");
+        ((BaseValueOption)option).SetValueArity(ArityType.Zero);
     }
 
     private void BuildHelpOption()
@@ -211,6 +263,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         option.SetName(nameof(IBuiltInOptions.Help), false);
         option.SetValidAliases(validAliases);
         option.SetDescription("Shows help and usage information.");
+        ((BaseValueOption)option).SetValueArity(ArityType.Zero);
     }
 
     private void BuildVerbosityOption()

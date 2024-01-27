@@ -33,10 +33,10 @@ public enum AliasDelimiterRules
     /// <summary>
     /// Default token delimiter rule
     /// </summary>
-    Default = AllowEqualSymbol | AllowColonSymbol | AllowOmittingDelimiter,
+    Default = AllowEqualSymbol | AllowColonSymbol | AllowOmittingDelimiter | AllowWhitespace,
 
     /// <summary>
     /// All token delimiter rules enabled
     /// </summary>
-    All = Default | AllowWhitespace
+    All = Default
 }

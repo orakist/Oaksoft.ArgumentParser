@@ -1,4 +1,5 @@
 using Oaksoft.ArgumentParser.Definitions;
+using Oaksoft.ArgumentParser.Errors.Builder;
 using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
@@ -224,6 +225,19 @@ public class OptionValueTryParseCallbackTests : ArgumentParserTestBase
         option2.ResultValues.ShouldAllBe(v => v > 3 && v < 11);
     }
 
+    [Fact]
+    public void ShouldNotRegisterNamedOption_WithoutTryParsePointFunction()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<SampleOptionNames>()
+            .AddNamedOption(s => s.PointValue);
+
+        // Act & Assert
+        var exception = Should.Throw<OptionBuilderException>(() => sut.Build());
+
+        exception.Error.Error.Code.ShouldBe(BuilderErrors.MissingCallback.Code);
+    }
+
     [Theory]
     [InlineData("-p", "(4;5)")]
     [InlineData("-p:(4;5)")]
@@ -257,7 +271,6 @@ public class OptionValueTryParseCallbackTests : ArgumentParserTestBase
         option.InputValues.ShouldHaveSingleItem();
         option.ResultValue.ShouldNotBeNull();
     }
-
 
     [Theory]
     [InlineData("-p", "(4;5)|(1;2)")]

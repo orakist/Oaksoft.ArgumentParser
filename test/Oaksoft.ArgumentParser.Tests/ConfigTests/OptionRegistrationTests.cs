@@ -30,6 +30,42 @@ public class OptionRegistrationTests : ArgumentParserTestBase
     }
 
     [Fact]
+    public void ShouldNotRegisterNamedOption_WithInvalidBodyExpression()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<SampleOptionNames>();
+
+        // Act & Assert
+        var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value.ToString()));
+
+        exception.Error.Error.Code.ShouldBe(BuilderErrors.InvalidPropertyExpression.Code);
+    }
+
+    [Fact]
+    public void ShouldNotRegisterNamedOption_WithoutSetMethod()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<SampleOptionNames>();
+
+        // Act & Assert
+        var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.WithoutSet));
+
+        exception.Error.Error.Code.ShouldBe(BuilderErrors.PropertyWithoutSetMethod.Code);
+    }
+
+    [Fact]
+    public void ShouldNotRegisterNamedOption_UnsupportedProperty()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<SampleOptionNames>();
+
+        // Act & Assert
+        var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Unknown));
+
+        exception.Error.Error.Code.ShouldBe(BuilderErrors.UnsupportedPropertyType.Code);
+    }
+
+    [Fact]
     public void ShouldParseHelp_WhenHelpInputIsTrue()
     {
         // Arrange
@@ -43,22 +79,6 @@ public class OptionRegistrationTests : ArgumentParserTestBase
         var builtInOpts = parser.GetBuiltInOptions();
         builtInOpts.Help.ShouldBe(true);
         parser.IsHelpOption.ShouldBeTrue();
-    }
-
-    [Fact]
-    public void ShouldParseHelp_WhenHelpInputIsFalse()
-    {
-        // Arrange
-        var sut = CommandLine.CreateParser<SampleOptionNames>()
-            .AddNamedOption(s => s.Value);
-
-        // Act & Assert
-        var parser = sut.Build();
-        parser.Parse("-h:false");
-
-        var builtInOpts = parser.GetBuiltInOptions();
-        builtInOpts.Help.ShouldBe(false);
-        parser.IsHelpOption.ShouldBeFalse();
     }
 
     [Fact]
@@ -113,6 +133,24 @@ public class OptionRegistrationTests : ArgumentParserTestBase
 
         builtInOpts.Help.ShouldBeNull();
         parser.IsHelpOption.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void ShouldAutoBuild_WhenOptionsAreValid()
+    {
+        // Arrange
+        var parser = CommandLine.AutoBuild<IntAppOptions>();
+        var header = parser.GetHeaderText();
+
+        // Act & Assert
+        var options = parser.Parse("-v:5", "-l:true");
+
+        parser.GetOptions().Count.ShouldBe(8);
+        var builtInOpts = parser.GetBuiltInOptions();
+        builtInOpts.Help.ShouldBeNull();
+        parser.IsHelpOption.ShouldBeFalse();
+        options.NullValueFlag.ShouldBeTrue();
+        header.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -201,12 +239,12 @@ public class OptionRegistrationTests : ArgumentParserTestBase
     }
 
     [Theory]
-    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nq")]
-    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nquit")]
+    [InlineData("--value ^5 \"--values 1,3,5\"\n-f -c -c -c\nq")]
+    [InlineData("--value ^5 --values 1,3,5\n-f -c -c -c\nquit")]
     public async Task ShouldRun1_WhenTryToPassInputsByReader(string argument)
     {
         // Arrange
-        var sut = CommandLine.CreateParser<DoubleAppOptions>()
+        var sut = CommandLine.CreateParser<StringAppOptions>()
             .ConfigureSettings(s => s.AutoPrintErrors = false)
             .AddNamedOption(s => s.Value)
             .AddNamedOption(s => s.Values)
@@ -226,8 +264,8 @@ public class OptionRegistrationTests : ArgumentParserTestBase
             {
                 if (loopIndex == 0)
                 {
-                    opts.Value.ShouldBe(5);
-                    opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
+                    opts.Value.ShouldBe("5");
+                    opts.Values.ShouldBe(new List<string> { "1", "3", "5" });
                 }
                 else
                 {

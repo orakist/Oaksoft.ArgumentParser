@@ -5,75 +5,69 @@ namespace Oaksoft.ArgumentParser.Base;
 
 internal static class CommandLineExtensions
 {
-    public static IEnumerable<string> SplitToArguments(this string commandLine)
+    public static IEnumerable<string> SplitToArguments(this string args)
     {
-        var result = new StringBuilder();
-
-        var quoted = false;
+        var paramChars = args.ToCharArray();
+        var inSingleQuote = false;
+        var inDoubleQuote = false;
         var escaped = false;
-        var started = false;
-        var allowCaret = false;
+        var lastSplitted = false;
+        var justSplitted = false;
+        var lastQuoted = false;
+        var justQuoted = false;
 
-        for (var i = 0; i < commandLine.Length; i++)
+        int i, j;
+
+        for (i = 0, j = 0; i < paramChars.Length; i++, j++)
         {
-            var chr = commandLine[i];
+            paramChars[j] = paramChars[i];
 
-            if (chr == '^' && !quoted)
+            if (!escaped)
             {
-                if (allowCaret)
+                if (paramChars[i] == '^')
                 {
-                    result.Append(chr);
-                    started = true;
-                    escaped = false;
-                    allowCaret = false;
+                    escaped = true;
+                    j--;
                 }
-                else if (i + 1 < commandLine.Length && commandLine[i + 1] == '^')
+                else if (paramChars[i] == '"' && !inSingleQuote)
                 {
-                    allowCaret = true;
+                    inDoubleQuote = !inDoubleQuote;
+                    paramChars[j] = '\n';
+                    justSplitted = true;
+                    justQuoted = true;
                 }
-                else if (i + 1 == commandLine.Length)
+                else if (paramChars[i] == '\'' && !inDoubleQuote)
                 {
-                    result.Append(chr);
-                    started = true;
-                    escaped = false;
+                    inSingleQuote = !inSingleQuote;
+                    paramChars[j] = '\n';
+                    justSplitted = true;
+                    justQuoted = true;
                 }
-            }
-            else if (escaped)
-            {
-                result.Append(chr);
-                started = true;
-                escaped = false;
-            }
-            else if (chr == '"')
-            {
-                quoted = !quoted;
-                started = true;
-            }
-            else if (chr == '\\' && i + 1 < commandLine.Length && commandLine[i + 1] == '"')
-            {
-                escaped = true;
-            }
-            else if (chr == ' ' && !quoted)
-            {
-                if (started)
+                else if (!inSingleQuote && !inDoubleQuote && paramChars[i] == ' ')
                 {
-                    yield return result.ToString();
+                    paramChars[j] = '\n';
+                    justSplitted = true;
                 }
 
-                result.Clear();
-                started = false;
+                if (justSplitted && lastSplitted && (!lastQuoted || !justQuoted))
+                    j--;
+
+                lastSplitted = justSplitted;
+                justSplitted = false;
+
+                lastQuoted = justQuoted;
+                justQuoted = false;
             }
             else
             {
-                result.Append(chr);
-                started = true;
+                escaped = false;
             }
         }
 
-        if (started)
-        {
-            yield return result.ToString();
-        }
+        if (lastQuoted)
+            j--;
+
+        return (new string(paramChars, 0, j)).Split(new[] { '\n' });
     }
 
     public static string GetCommaByEndsWith(this StringBuilder builder)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using Oaksoft.ArgumentParser.Base;
@@ -113,54 +114,84 @@ internal abstract class BaseSequentialValueOption<TValue>
         {
             keyProperty.SetValue(appOptions, _resultValues.ToArray());
         }
+        else if (keyProperty.PropertyType.IsAssignableFrom(typeof(Collection<TValue>)))
+        {
+            keyProperty.SetValue(appOptions, new Collection<TValue>(_resultValues));
+        }
+        else if (keyProperty.PropertyType.IsAssignableFrom(typeof(HashSet<TValue>)))
+        {
+            keyProperty.SetValue(appOptions, _resultValues.ToHashSet());
+        }
         else // if nullable generic TValue
         {
-            keyProperty.SetValue(appOptions, CreateNullableListOrArray(keyProperty));
+            keyProperty.SetValue(appOptions, CreateNullableCollection(keyProperty));
         }
     }
 
-    private object? CreateNullableListOrArray(PropertyInfo keyProperty)
+    private object? CreateNullableCollection(PropertyInfo keyProperty)
     {
-        Type? itemType = null;
-        if (keyProperty.PropertyType.GetInterfaces()
-            .Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
-        {
-            var type = typeof(TValue);
-            itemType = type.IsValueType ? typeof(Nullable<>).MakeGenericType(type) : type;
-        }
+        var type = typeof(TValue);
+        var valueType = type.IsValueType ? typeof(Nullable<>).MakeGenericType(type) : type;
 
-        if (itemType == null)
-        {
-            return null;
-        }
-
-        // first try list creation
-        var listType = typeof(List<>);
-        var constructedListType = listType.MakeGenericType(itemType);
+        // firstly try list creation
+        var constructedListType = typeof(List<>).MakeGenericType(valueType);
         if (keyProperty.PropertyType.IsAssignableFrom(constructedListType))
         {
-            var listInstance = (IList)Activator.CreateInstance(constructedListType)!;
+            var genericInstance = (IList)Activator.CreateInstance(constructedListType)!;
 
             foreach (var resultValue in _resultValues)
             {
-                listInstance.Add(resultValue);
+                genericInstance.Add(resultValue);
             }
 
-            return listInstance;
+            return genericInstance;
         }
 
-        var arrType = Array.CreateInstance(itemType, _resultValues.Count);
-        if (!keyProperty.PropertyType.IsInstanceOfType(arrType))
+        // secondly try array creation
+        var arrInstance = Array.CreateInstance(valueType, _resultValues.Count);
+        if (keyProperty.PropertyType.IsInstanceOfType(arrInstance))
         {
-            return false;
+            for (var index = 0; index < _resultValues.Count; ++index)
+            {
+                arrInstance.SetValue(_resultValues[index], index);
+            }
+
+            return arrInstance;
         }
 
-        for (var index = 0; index < _resultValues.Count; ++index)
+        // thirdly try collection creation
+        var constructedCollectionType = typeof(Collection<>).MakeGenericType(valueType);
+        if (keyProperty.PropertyType.IsAssignableFrom(constructedCollectionType))
         {
-            arrType.SetValue(_resultValues[index], index);
+            var genericInstance = (IList)Activator.CreateInstance(constructedCollectionType)!;
+
+            foreach (var resultValue in _resultValues)
+            {
+                genericInstance.Add(resultValue);
+            }
+
+            return genericInstance;
         }
 
-        return arrType;
+        // fourthly try hashset creation
+        var constructedHashSetType = typeof(HashSet<>).MakeGenericType(valueType);
+        if (keyProperty.PropertyType.IsAssignableFrom(constructedHashSetType))
+        {
+            var genericInstance = Activator.CreateInstance(constructedHashSetType)!;
+            var addMethod = constructedHashSetType.GetMethods().FirstOrDefault(m => m.Name == "Add");
+
+            if (addMethod != null)
+            {
+                foreach (var resultValue in _resultValues)
+                {
+                    addMethod.Invoke(genericInstance, new object[] { resultValue });
+                }
+
+                return genericInstance;
+            }
+        }
+
+        return null;
     }
 
     public override void Clear()
@@ -368,7 +399,7 @@ internal abstract class BaseValueOption<TValue> : BaseValueOption
                     var joinedValues = string.Join(", ", values.GetAllowedValues());
                     throw ParserErrors.ValueMustBeOneOf.ToException(inputValue, joinedValues);
                 }
-                
+
                 throw ParserErrors.InvalidOptionValue.ToException(inputValue);
             }
 

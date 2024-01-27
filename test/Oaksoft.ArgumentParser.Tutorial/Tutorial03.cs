@@ -16,11 +16,7 @@ internal static class Tutorial03
 
     public static IArgumentParser<CalculatorOptions> Build()
     {
-        return CommandLine.CreateParser<CalculatorOptions>()
-            .AddNamedOption(p => p.Left)
-            .AddNamedOption(p => p.Right)
-            .AddNamedOption(o => o.Calculate)
-            .Build();
+        return CommandLine.AutoBuild<CalculatorOptions>();
     }
 
     public static void Parse(IArgumentParser<CalculatorOptions> parser, string[] args)

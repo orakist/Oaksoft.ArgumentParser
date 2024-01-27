@@ -9,7 +9,7 @@ Please see [here (source code)](https://github.com/orakist/Oaksoft.ArgumentParse
 4. Parse the inputs.
 
 ### Tutorial Step 1
-Following example is the simplest Oaksoft.ArgumentParser configuration.
+Following example is a simple usage of *Oaksoft.ArgumentParser*.
 
 ```cs
 class CalculatorOptions
@@ -21,11 +21,7 @@ class CalculatorOptions
 
 static IArgumentParser<CalculatorOptions> Build()
 {
-    return CommandLine.CreateParser<CalculatorOptions>()
-        .AddNamedOption(p => p.Left)
-        .AddNamedOption(p => p.Right)
-        .AddNamedOption(o => o.Calculate)
-        .Build();
+    return CommandLine.AutoBuild<CalculatorOptions>();
 }
 
 static void Parse(IArgumentParser<CalculatorOptions> parser, string[] args)

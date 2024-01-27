@@ -18,7 +18,6 @@ This library is compatible with **.Net 6.0+**, **.Net Standard 2.1**
 
 ```cs
 using Oaksoft.ArgumentParser;
-using Oaksoft.ArgumentParser.Extensions;
 
 namespace QuickStart;
 
@@ -35,17 +34,10 @@ static class Program
 {
     private static void Main(string[] args)
     {
-        var parser = CommandLine.CreateParser<CalculatorOptions>()
-            .AddNamedOption(p => p.Left)
-            .AddNamedOption(p => p.Right)
-            .AddNamedOption(o => o.Operator)
-            .Build();
+        var parser = CommandLine.AutoBuild<CalculatorOptions>();
 
-        parser.Run(EvaluateOptions, args);
-    }
+        var options = parser.Parse(args);
 
-    private static void EvaluateOptions(CalculatorOptions options)
-    {
         var result = options.Operator switch
         {
             OperatorType.Add => $"{options.Left} + {options.Right} = {options.Left + options.Right}",
@@ -63,9 +55,33 @@ static class Program
 Sample Command line output for the above console application
 
 ```console
-Type the options and press enter. Type 'q' to quit.
 ./> -l 13 -r 8 -o MUL
 Result: 13 * 8 = 104
+
+./> --help
+These are command line options of this application.
+
+-l       Usage: -l <value>
+         Aliases: -l, --left, /l, /left
+         Performs 'Left' option.
+
+-r       Usage: -r <value>
+         Aliases: -r, --right, /r, /right
+         Performs 'Right' option.
+
+-o       Usage: -o <value>
+         Aliases: -o, --operator, /o, /operator
+         Performs 'Operator' option. [Allowed-Values: Add | Sub | Mul | Div]
+
+-h       Usage: -h
+         Aliases: -h, -?, --help, /h, /?, /help
+         Shows help and usage information.
+
+--vn     Usage: --vn
+         Aliases: --vn, --version, /vn, /version
+         Shows version-number of the application.
+
+Usage: [-l <value>] [-r <value>] [-o <value>]
 ```
 
 ## Library Features & Overview

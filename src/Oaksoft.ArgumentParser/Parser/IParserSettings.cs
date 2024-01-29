@@ -16,8 +16,6 @@ public interface IParserSettings
 
     bool NewLineAfterOption { get; }
 
-    bool ShowTitle { get; }
-
     bool ShowDescription { get; }
 
     bool EnableColoring { get; }

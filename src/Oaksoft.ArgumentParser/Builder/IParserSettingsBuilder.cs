@@ -16,7 +16,7 @@ public interface IParserSettingsBuilder
 
     bool? NewLineAfterOption { get; set; }
 
-    bool? ShowTitle { get; set; }
+    bool? ShowCopyright { get; set; }
 
     bool? ShowDescription { get; set; }
 

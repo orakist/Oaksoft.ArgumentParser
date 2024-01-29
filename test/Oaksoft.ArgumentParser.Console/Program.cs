@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Oaksoft.ArgumentParser.Builder;
-using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Parser;
 
@@ -39,13 +38,22 @@ internal static class Program
             if (options.RightOperand.HasValue)
                 numbers.Add(options.RightOperand.Value);
         }
-        else if (options.Numbers?.Any() == true)
+        else
         {
-            numbers.AddRange(options.Numbers);
-        }
-        else if (options.Integers?.Any() == true)
-        {
-            numbers.AddRange(options.Integers.Select(i => (double)i));
+            if (options.Numbers?.Any() == true)
+            {
+                numbers.AddRange(options.Numbers);
+            }
+
+            if (options.Integers?.Any() == true)
+            {
+                numbers.AddRange(options.Integers.Select(i => (double)i));
+            }
+
+            if (options.Decimals?.Any() == true)
+            {
+                numbers.AddRange(options.Decimals.Select(i => (double)i));
+            }
         }
 
         if (numbers.Count < 1)
@@ -77,12 +85,10 @@ internal static class Program
                 o => o.WithDescription("Right operand of the operation."))
 
             .AddNamedOption(p => p.Numbers,
-                o => o.WithDescription("Defines numbers for the operation."),
-                ArityType.OneOrMore)
+                o => o.WithDescription("Defines numbers for the operation."))
 
-            .AddNamedOption(p => p.Integers,
-                o => o.WithDescription("Defines integers for the operation."),
-                ArityType.OneOrMore)
+            .AddValueOption(p => p.Integers)
+            .AddValueOption(p => p.Decimals)
 
             .AddNamedOption(o => o.Operator,
                 o => o.WithDescription("Sets the operator type."),

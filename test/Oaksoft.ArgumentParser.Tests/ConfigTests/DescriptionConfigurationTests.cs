@@ -94,7 +94,7 @@ public class DescriptionConfigurationTests : ArgumentParserTestBase
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
-        option.Description.ShouldBe($"Captures value for '{option.Name}' option.");
+        option.Description.ShouldBe($"Captures values for '{option.Name}' option.");
         text.ShouldContain(option.Description!);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));

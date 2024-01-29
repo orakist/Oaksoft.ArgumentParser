@@ -118,20 +118,6 @@ public static partial class OptionExtensions
         ((SequentialNamedOption<TValue>)option).SetUsage(usage);
         return option;
     }
-
-    public static IScalarValueOption<TValue> WithUsage<TValue>(this IScalarValueOption<TValue> option, string usage)
-        where TValue : IComparable
-    {
-        ((ScalarValueOption<TValue>)option).SetUsage(usage);
-        return option;
-    }
-
-    public static ISequentialValueOption<TValue> WithUsage<TValue>(this ISequentialValueOption<TValue> option, string usage)
-        where TValue : IComparable
-    {
-        ((SequentialValueOption<TValue>)option).SetUsage(usage);
-        return option;
-    }
     #endregion
 
     #region Option Description Configuration

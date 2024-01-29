@@ -16,7 +16,7 @@ internal class ParserSettingsBuilder : IParserSettingsBuilder
 
     public bool? NewLineAfterOption { get; set; }
 
-    public bool? ShowTitle { get; set; }
+    public bool? ShowCopyright { get; set; }
 
     public bool? ShowDescription { get; set; }
 

@@ -336,7 +336,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
 
         Console.Write(BuildHelpText(Settings.EnableColoring).ToString());
-        Console.WriteLine();
     }
 
     private void AutoPrintVersion()
@@ -361,7 +360,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         Console.WriteLine();
     }
 
-    private StringBuilder BuildHeaderText(bool showTitle, bool showDescription)
+    private StringBuilder BuildHeaderText(bool showTitle, bool showDescription, bool showSectionName = false)
     {
         var sb = new StringBuilder();
 
@@ -372,7 +371,22 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         if (showDescription && !string.IsNullOrWhiteSpace(Settings.Description))
         {
-            sb.AppendLine(Settings.Description);
+            if (showSectionName)
+            {
+                sb.Pastel("Description:", ConsoleColor.DarkYellow);
+                sb.AppendLine();
+
+                var words = Settings.Description.Split(' ');
+                var lines = CreateLinesByWidth(words, Settings.HelpDisplayWidth - 2);
+                foreach (var line in lines)
+                {
+                    sb.AppendLine($"  {line}");
+                }
+            }
+            else
+            {
+                sb.AppendLine(Settings.Description);
+            }
         }
 
         return sb;
@@ -382,41 +396,63 @@ internal abstract class BaseArgumentParser : IArgumentParser
     {
         TextColoring.SetEnabled(enableColoring);
 
-        var sb = BuildHeaderText(Settings.ShowTitle, Settings.ShowDescription);
-        sb.AppendLine("These are command line options of this application.");
+        var sb = BuildHeaderText(false, Settings.ShowDescription, true);
         sb.AppendLine();
 
-        var padLength = _baseOptions.OfType<INamedOption>().Select(n => n.Alias.Length).Max();
+        sb.Pastel("Usage:", ConsoleColor.DarkYellow);
+        sb.AppendLine();
+        sb.Append("  appname [options]");
+
+        if (_baseOptions.Any(o => o is not INamedOption))
+        {
+            sb.Append(" [values]");
+        }
+        sb.AppendLine();
+        sb.AppendLine();
+
+        BuildOptionsHelp(sb);
+        BuildValuesHelp(sb);
+
+        return sb;
+    }
+
+    private void BuildOptionsHelp(StringBuilder sb)
+    {
+        var padLength = _baseOptions
+            .OfType<INamedOption>()
+            .Select(n => n.Alias.Length).Max();
+
         if (padLength < 8)
         {
             padLength = 8;
         }
 
-        if (padLength > 16)
+        if (padLength > 24)
         {
-            padLength = 16;
+            padLength = 24;
         }
 
         var paddingString = string.Empty.PadRight(padLength, ' ');
         var lineLength = Settings.HelpDisplayWidth - padLength;
 
-        foreach (var option in _baseOptions)
+        sb.Pastel("Options:", ConsoleColor.DarkYellow);
+        sb.AppendLine();
+
+        foreach (var option in _baseOptions.OfType<INamedOption>())
         {
             if (VerbosityLevel < VerbosityLevelType.Detailed && option.IsHidden)
             {
                 continue;
             }
 
-            var namedOption = option as INamedOption;
-            var shortAlias = namedOption?.Alias ?? string.Empty;
-            sb.Pastel($"{shortAlias.PadRight(padLength, ' ')} ", ConsoleColor.DarkGreen);
+            sb.Pastel($"  {option.Alias.PadRight(padLength, ' ')} ", ConsoleColor.DarkGreen);
             sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
             sb.AppendLine(option.Usage);
 
-            if (namedOption?.Aliases.Count > 1)
+            if (option.Aliases.Count > 1)
             {
-                sb.Pastel($"{paddingString} Aliases:", ConsoleColor.DarkYellow);
-                sb.AppendLine($" {string.Join(", ", namedOption.Aliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length))}");
+                sb.Pastel($"  {paddingString} Aliases:", ConsoleColor.DarkYellow);
+                sb.AppendLine($" {string.Join(", ", option.Aliases)}");
             }
 
             var descBuilder = new StringBuilder();
@@ -451,7 +487,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 var lines = CreateLinesByWidth(words, lineLength);
                 foreach (var line in lines)
                 {
-                    sb.AppendLine($"{paddingString} {line}");
+                    sb.AppendLine($"  {paddingString} {line}");
                 }
             }
 
@@ -460,19 +496,83 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 sb.AppendLine();
             }
         }
+    }
 
-        var usages = VerbosityLevel >= VerbosityLevelType.Detailed
-            ? _baseOptions.Select(o => o.Usage)
-            : _baseOptions.Where(o => !AliasExtensions.BuiltInOptionNames.Contains(o.Name)).Select(o => o.Usage);
+    private void BuildValuesHelp(StringBuilder sb)
+    {
+        if (!_baseOptions.Any(o => o is not INamedOption))
+        {
+            return;
+        }
 
-        var usageLines = CreateLinesByWidth(usages, lineLength, true);
-        sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
-        sb.AppendLine(usageLines[0]);
+        var padLength = _baseOptions
+            .Where(o => o is not INamedOption)
+            .Select(n => n.Name.Length).Max() + 2;
 
-        for (var index = 1; index < usageLines.Count; ++index)
-            sb.AppendLine($"       {usageLines[index]}");
+        if (padLength < 10)
+        {
+            padLength = 10;
+        }
 
-        return sb;
+        if (padLength > 24)
+        {
+            padLength = 24;
+        }
+
+        var paddingString = string.Empty.PadRight(padLength, ' ');
+        var lineLength = Settings.HelpDisplayWidth - padLength;
+
+        if (!Settings.NewLineAfterOption)
+        {
+            sb.AppendLine();
+        }
+
+        sb.Pastel("Values:", ConsoleColor.DarkYellow);
+        sb.AppendLine();
+
+        foreach (var option in _baseOptions.Where(o => o is not INamedOption))
+        {
+            if (VerbosityLevel < VerbosityLevelType.Detailed && option.IsHidden)
+            {
+                continue;
+            }
+
+            var name = $"<{option.Name.ToLowerInvariant()}>";
+            sb.Pastel($"  {name.PadRight(padLength, ' ')} ", ConsoleColor.DarkGreen);
+
+            var descBuilder = new StringBuilder();
+            if (option.Description is not null)
+            {
+                descBuilder.Append(option.Description);
+            }
+
+            if (option is IHaveAllowedValues allowedValueOption)
+            {
+                var allowedValues = allowedValueOption.GetAllowedValues();
+                if (allowedValues.Count > 0)
+                {
+                    descBuilder.Append(descBuilder.GetCommaByEndsWith());
+                    descBuilder.Append($"[Allowed-Values: {string.Join(" | ", allowedValues)}]");
+                }
+            }
+
+            if (descBuilder.Length > 0)
+            {
+                var words = descBuilder.ToString().Split(' ');
+                var lines = CreateLinesByWidth(words, lineLength);
+                sb.AppendLine($" {lines[0]}");
+
+                foreach (var line in lines.Skip(1))
+                {
+                    sb.AppendLine($"  {paddingString} {line}");
+                }
+            }
+
+            if (Settings.NewLineAfterOption)
+            {
+                sb.AppendLine();
+            }
+        }
     }
 
     private StringBuilder BuildErrorText(bool enableColoring)
@@ -529,7 +629,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
         if (IsOnlyOption(help))
         {
             RemoveIrrelevantErrors(isAllTokensParsed, nameof(IBuiltInOptions.Help));
-            if(_errors.All(s => s.OptionName != null))
+            if (_errors.All(s => s.OptionName != null))
                 return;
         }
 

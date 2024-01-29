@@ -15,7 +15,7 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Company>$(AssemblyName)</Company>
     <Description>Command Line Argument Parser Library offers to clean and simple API for manipulating command line arguments and related tasks.</Description>
-    <Copyright>Copyright (c) 2023 - 2024</Copyright>
+    <Copyright>Copyright (C) 2023 - 2024</Copyright>
     <LangVersion>10.0</LangVersion>
     <PackageProjectUrl>https://github.com/orakist/Oaksoft.ArgumentParser</PackageProjectUrl>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>

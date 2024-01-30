@@ -576,7 +576,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 var words = descBuilder.ToString().Split(' ');
                 var lines = CreateLinesByWidth(words, lineLength);
-                sb.AppendLine($" {lines[0]}");
+                sb.AppendLine(lines[0]);
 
                 foreach (var line in lines.Skip(1))
                 {

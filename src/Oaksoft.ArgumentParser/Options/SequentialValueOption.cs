@@ -53,6 +53,6 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
     {
         base.Validate();
 
-        IsValid = true;
+        _isValid = true;
     }
 }

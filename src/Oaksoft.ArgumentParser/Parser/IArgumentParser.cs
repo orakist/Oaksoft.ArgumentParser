@@ -52,7 +52,11 @@ public interface IArgumentParser
 
     string GetErrorText(bool? enableColoring = default);
 
+    string GetVersionText();
+
     List<IBaseOption> GetOptions();
+
+    IBaseOption? GetOption(string nameOrAlias);
 
     IBaseOption? GetOptionByName(string name);
 

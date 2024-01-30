@@ -294,7 +294,7 @@ public class ArgumentParsingTests : ArgumentParserTestBase
         // Assert
         sut.IsValid.ShouldBeTrue();
 
-        var option = sut.GetOptionByAlias("-v");
+        var option = sut.GetOption("-v");
         var valueOption = option as IValueOption;
         valueOption.ShouldNotBeNull();
         if (valueOption.IsParsed)
@@ -305,7 +305,7 @@ public class ArgumentParsingTests : ArgumentParserTestBase
             valueOption.InputValues.ShouldContain("10");
         }
 
-        option = sut.GetOptionByAlias("-c");
+        option = sut.GetOption("c");
         valueOption = option as IValueOption;
         valueOption.ShouldNotBeNull();
         if (valueOption.IsParsed)

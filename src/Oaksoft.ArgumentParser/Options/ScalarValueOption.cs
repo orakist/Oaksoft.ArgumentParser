@@ -63,6 +63,6 @@ internal class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
     {
         base.Validate();
 
-        IsValid = true;
+        _isValid = true;
     }
 }

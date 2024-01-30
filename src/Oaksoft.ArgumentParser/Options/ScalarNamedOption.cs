@@ -155,7 +155,7 @@ internal class ScalarNamedOption<TValue>
     {
         base.Validate();
 
-        IsValid = true;
+        _isValid = true;
     }
 
     public override void ApplyOptionResult(object appOptions, PropertyInfo keyProperty)

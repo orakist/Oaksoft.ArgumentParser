@@ -13,11 +13,9 @@ internal static class Program
     {
         try
         {
-            var parser = CommandLine.CreateParser<CalculatorOptions>()
+            CommandLine.CreateParser<CalculatorOptions>()
                 .ConfigureOptions()
-                .Build();
-
-            parser.Run(EvaluateOptions, args);
+                .Run(EvaluateOptions, args);
         }
         catch (Exception ex)
         {
@@ -75,23 +73,15 @@ internal static class Program
         Console.WriteLine();
     }
 
-    private static IArgumentParserBuilder<CalculatorOptions> ConfigureOptions(this IArgumentParserBuilder<CalculatorOptions> builder)
+    private static IArgumentParser<CalculatorOptions> ConfigureOptions(this IArgumentParserBuilder<CalculatorOptions> builder)
     {
         return builder
-            .AddNamedOption(p => p.LeftOperand,
-                o => o.WithDescription("Left operand of the operation."))
-
-            .AddNamedOption(p => p.RightOperand,
-                o => o.WithDescription("Right operand of the operation."))
-
-            .AddNamedOption(p => p.Numbers,
-                o => o.WithDescription("Defines numbers for the operation."))
-
             .AddValueOption(p => p.Integers)
             .AddValueOption(p => p.Decimals)
-
-            .AddNamedOption(o => o.Operator,
-                o => o.WithDescription("Sets the operator type."),
-                mandatoryOption: true);
+            .AddNamedOption(p => p.LeftOperand, o => o.WithDescription("Left operand of the operation."))
+            .AddNamedOption(p => p.RightOperand, o => o.WithDescription("Right operand of the operation."))
+            .AddNamedOption(p => p.Numbers, o => o.WithDescription("Defines numbers for the operation."))
+            .AddNamedOption(o => o.Operator, o => o.WithDescription("Sets the operator type."), mandatoryOption: true)
+            .Build();
     }
 }

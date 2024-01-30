@@ -60,12 +60,22 @@ internal abstract class BaseArgumentParser : IArgumentParser
         _reader = Console.In;
     }
 
+    public string GetVersionText()
+    {
+        return AssemblyHelper.GetAssemblyVersion() ?? string.Empty;
+    }
+
     public List<IBaseOption> GetOptions()
     {
         return _baseOptions
             .Where(o => !AliasExtensions.BuiltInOptionNames.Contains(o.Name))
             .Cast<IBaseOption>()
             .ToList();
+    }
+
+    public IBaseOption? GetOption(string nameOrAlias)
+    {
+        return GetOptionByName(nameOrAlias) ?? GetOptionByAlias(nameOrAlias);
     }
 
     public IBaseOption? GetOptionByName(string name)
@@ -80,7 +90,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
         var flag = CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
         return _baseOptions.OfType<INamedOption>()
-            .FirstOrDefault(o => o.Aliases.Any(a => a.Equals(alias, flag)));
+            .FirstOrDefault(o => o.Aliases.Any(a => a.Equals(alias, flag)) || 
+                                 ((BaseOption)o).GetAliases().Any(a => a.Equals(alias, flag)));
     }
 
     public void SetTextReader(TextReader reader)

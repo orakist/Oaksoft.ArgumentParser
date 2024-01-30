@@ -21,9 +21,7 @@ internal abstract class BaseOption : IBaseOption
 
     public (int Min, int Max) ValueArity { get; protected set; }
 
-    public bool IsValid { get; protected set; }
-
-    public bool IsParsed => IsValid && OptionCount + ValueCount > 0;
+    public bool IsParsed => _isValid && OptionCount + ValueCount > 0;
 
     public bool IsHidden { get; private set; }
 
@@ -33,6 +31,7 @@ internal abstract class BaseOption : IBaseOption
 
     public PropertyInfo KeyProperty { get; private set; } = default!;
 
+    protected bool _isValid; 
     protected IArgumentParser? _parser;
 
     public void SetKeyProperty(PropertyInfo property)
@@ -139,7 +138,7 @@ internal abstract class BaseOption : IBaseOption
 
     public virtual void Clear()
     {
-        IsValid = false;
+        _isValid = false;
     }
 
     protected void ParserInitializedGuard()

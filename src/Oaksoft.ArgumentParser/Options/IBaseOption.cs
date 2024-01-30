@@ -16,8 +16,6 @@ public interface IBaseOption
 
     int ValueCount { get; }
 
-    bool IsValid { get; }
-
     bool IsParsed { get; }
 
     bool IsHidden { get; }

@@ -167,7 +167,7 @@ internal sealed class SequentialNamedOption<TValue>
     {
         base.Validate();
 
-        IsValid = true;
+        _isValid = true;
     }
 
     public override void Clear()

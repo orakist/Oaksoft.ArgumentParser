@@ -14,5 +14,7 @@ internal class CalculatorOptions
 
     public IEnumerable<int>? Integers { get; set; }
 
+    public IEnumerable<decimal>? Decimals { get; set; }
+
     public OperatorType? Operator { get; set; }
 }

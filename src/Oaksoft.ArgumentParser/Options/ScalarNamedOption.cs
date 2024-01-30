@@ -12,9 +12,9 @@ internal class ScalarNamedOption<TValue>
     : BaseScalarValueOption<TValue>, IScalarNamedOption<TValue>
     where TValue : IComparable
 {
-    public string Alias => _prefixAliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length).First();
+    public string Alias => Aliases.First();
 
-    public List<string> Aliases => _prefixAliases.ToList();
+    public List<string> Aliases => _prefixAliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length).ToList();
 
     public List<string> OptionTokens => _optionTokens.ToList();
 
@@ -155,7 +155,7 @@ internal class ScalarNamedOption<TValue>
     {
         base.Validate();
 
-        IsValid = true;
+        _isValid = true;
     }
 
     public override void ApplyOptionResult(object appOptions, PropertyInfo keyProperty)

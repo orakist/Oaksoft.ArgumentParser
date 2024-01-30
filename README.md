@@ -38,6 +38,9 @@ static class Program
 
         var options = parser.Parse(args);
 
+        if (!parser.IsParsed)
+            return;
+
         var result = options.Operator switch
         {
             OperatorType.Add => $"{options.Left} + {options.Right} = {options.Left + options.Right}",
@@ -52,36 +55,39 @@ static class Program
 }
 ```
 
-Sample Command line output for the above console application
+Sample Command line output for the preceding quick start example.
 
 ```console
 ./> -l 13 -r 8 -o MUL
 Result: 13 * 8 = 104
 
 ./> --help
-These are command line options of this application.
+Description:
+  This console application calculates given numbers.
 
--l       Usage: -l <value>
-         Aliases: -l, --left, /l, /left
-         Performs 'Left' option.
+Usage:
+  appname [options]
 
--r       Usage: -r <value>
-         Aliases: -r, --right, /r, /right
-         Performs 'Right' option.
+Options:
+  -l       Usage: -l <value>
+           Aliases: -l, --left, /l, /left
+           Performs 'Left' option.
 
--o       Usage: -o <value>
-         Aliases: -o, --operator, /o, /operator
-         Performs 'Operator' option. [Allowed-Values: Add | Sub | Mul | Div]
+  -r       Usage: -r <value>
+           Aliases: -r, --right, /r, /right
+           Performs 'Right' option.
 
--h       Usage: -h
-         Aliases: -h, -?, --help, /h, /?, /help
-         Shows help and usage information.
+  -o       Usage: -o <value>
+           Aliases: -o, --operator, /o, /operator
+           Performs 'Operator' option. [Allowed-Values: Add | Sub | Mul | Div]
 
---vn     Usage: --vn
-         Aliases: --vn, --version, /vn, /version
-         Shows version-number of the application.
+  -h       Usage: -h
+           Aliases: -h, -?, --help, /h, /?, /help
+           Shows help and usage information.
 
-Usage: [-l <value>] [-r <value>] [-o <value>]
+  --vn     Usage: --vn
+           Aliases: --vn, --version, /vn, /version
+           Shows version-number of the application.
 ```
 
 ## Library Features & Overview
@@ -611,12 +617,12 @@ As you can see in the preceding output;
 ### 8.2 Version Number option
 
 *Oaksoft.ArgumentParser* typically offer a --version (or --vn) option that shows the version of the application. 
-Version is read from AssemblyInformationalVersionAttribute. If you configure version of the application in the .csproj file with this setting "<Version>0.9.0-beta</Version>".\
+Version is read from AssemblyInformationalVersionAttribute. If you configure version of the application in the .csproj file with this setting "<Version>0.9.1</Version>".\
 Here is the example version output.
 
 ```console
 ./> --version
-0.9.0-beta
+0.9.1
 ```
 
 ### 8.3 Help option
@@ -629,58 +635,60 @@ Example help output:
 
 ```console
 ./> --help
-Command Line Arguments Parser Tester v0.9.0-beta, Oaksoft Tech.
-This Console App tests Oaksoft.ArgumentParser library. Copyright (C) 2023 All Rights Reserved
-These are command line options of this application.
+Description:
+  This console application calculates given numbers.
 
--n       Usage: -n (value)
-         Aliases: -n, --numbers, /n, /numbers
-         Performs 'Numbers' option.
+Usage:
+  appname [options]
 
--c       Usage: -c <value>
-         Aliases: -c, --calculate, /c, /calculate
-         Performs 'Calculate' option. [Allowed-Values: Add | Sub | Mul | Div]
+Options:
+  -n       Usage: -n (value)
+           Aliases: -n, --numbers, /n, /numbers
+           Performs 'Numbers' option.
 
--h       Usage: -h
-         Aliases: -h, -?, --help, /h, /?, /help
-         Shows help and usage information.
+  -c       Usage: -c <value>
+           Aliases: -c, --calculate, /c, /calculate
+           Performs 'Calculate' option. [Allowed-Values: Add | Sub | Mul | Div]
 
---vn     Usage: --vn
-         Aliases: --vn, --version, /vn, /version
-         Shows version-number of the application.
+  -h       Usage: -h
+           Aliases: -h, -?, --help, /h, /?, /help
+           Shows help and usage information.
 
-Usage: [-n (value)] [-c <value>]
+  --vn     Usage: --vn
+           Aliases: --vn, --version, /vn, /version
+           Shows version-number of the application.
 ```
 
 To print hidden options too, set verbosity level to detailed or trace. See the following help output with hidden options:
 
 ```console
 ./> --help --vl:detailed
-Command Line Arguments Parser Tester v0.9.0-beta, Oaksoft Tech.
-This Console App tests Oaksoft.ArgumentParser library. Copyright (C) 2023 All Rights Reserved
-These are command line options of this application.
+Description:
+  This console application calculates given numbers.
 
--n       Usage: -n (value)
-         Aliases: -n, --numbers, /n, /numbers
-         Performs 'Numbers' option.
+Usage:
+  appname [options]
 
--c       Usage: -c <value>
-         Aliases: -c, --calculate, /c, /calculate
-         Performs 'Calculate' option. [Allowed-Values: Add | Sub | Mul | Div]
+Options:
+  -n       Usage: -n (value)
+           Aliases: -n, --numbers, /n, /numbers
+           Performs 'Numbers' option.
 
--h       Usage: -h
-         Aliases: -h, -?, --help, /h, /?, /help
-         Shows help and usage information.
+  -c       Usage: -c <value>
+           Aliases: -c, --calculate, /c, /calculate
+           Performs 'Calculate' option. [Allowed-Values: Add | Sub | Mul | Div]
 
---vn     Usage: --vn
-         Aliases: --vn, --version, /vn, /version
-         Shows version-number of the application.
+  -h       Usage: -h
+           Aliases: -h, -?, --help, /h, /?, /help
+           Shows help and usage information.
 
---vl     Usage: --vl (value)
-         Aliases: --vl, --verbosity, /vl, /verbosity
-         Sets verbosity-level that specifies how much output is sent to the
-         console. [Allowed-Values: Quiet | Minimal | Normal | Detailed | Trace],
-         [Default: Minimal]
+  --vn     Usage: --vn
+           Aliases: --vn, --version, /vn, /version
+           Shows version-number of the application.
 
-Usage: [-n (value)] [-c <value>] [-h] [--vn] [--vl (value)]
+  --vl     Usage: --vl (value)
+           Aliases: --vl, --verbosity, /vl, /verbosity
+           Sets verbosity-level that specifies how much output is sent to the
+           console. [Allowed-Values: Quiet | Minimal | Normal | Detailed | Trace],
+           [Default: Minimal]
 ```

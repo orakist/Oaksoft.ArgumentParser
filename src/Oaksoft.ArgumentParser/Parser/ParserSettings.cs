@@ -16,8 +16,6 @@ internal class ParserSettings : IParserSettings
 
     public bool NewLineAfterOption { get; init; }
 
-    public bool ShowTitle { get; init; }
-
     public bool ShowDescription { get; init; }
 
     public bool EnableColoring { get; init; }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Oaksoft.ArgumentParser.Builder;
-using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Parser;
 
@@ -14,11 +13,9 @@ internal static class Program
     {
         try
         {
-            var parser = CommandLine.CreateParser<CalculatorOptions>()
+            CommandLine.CreateParser<CalculatorOptions>()
                 .ConfigureOptions()
-                .Build();
-
-            parser.Run(EvaluateOptions, args);
+                .Run(EvaluateOptions, args);
         }
         catch (Exception ex)
         {
@@ -28,7 +25,7 @@ internal static class Program
 
     private static void EvaluateOptions(IArgumentParser<CalculatorOptions> parser, CalculatorOptions options)
     {
-        if (!parser.IsValid || options.Operator == null)
+        if (!parser.IsParsed || options.Operator == null)
             return;
 
         var numbers = new List<double>();
@@ -39,13 +36,22 @@ internal static class Program
             if (options.RightOperand.HasValue)
                 numbers.Add(options.RightOperand.Value);
         }
-        else if (options.Numbers?.Any() == true)
+        else
         {
-            numbers.AddRange(options.Numbers);
-        }
-        else if (options.Integers?.Any() == true)
-        {
-            numbers.AddRange(options.Integers.Select(i => (double)i));
+            if (options.Numbers?.Any() == true)
+            {
+                numbers.AddRange(options.Numbers);
+            }
+
+            if (options.Integers?.Any() == true)
+            {
+                numbers.AddRange(options.Integers.Select(i => (double)i));
+            }
+
+            if (options.Decimals?.Any() == true)
+            {
+                numbers.AddRange(options.Decimals.Select(i => (double)i));
+            }
         }
 
         if (numbers.Count < 1)
@@ -67,25 +73,15 @@ internal static class Program
         Console.WriteLine();
     }
 
-    private static IArgumentParserBuilder<CalculatorOptions> ConfigureOptions(this IArgumentParserBuilder<CalculatorOptions> builder)
+    private static IArgumentParser<CalculatorOptions> ConfigureOptions(this IArgumentParserBuilder<CalculatorOptions> builder)
     {
         return builder
-            .AddNamedOption(p => p.LeftOperand,
-                o => o.WithDescription("Left operand of the operation."))
-
-            .AddNamedOption(p => p.RightOperand,
-                o => o.WithDescription("Right operand of the operation."))
-
-            .AddNamedOption(p => p.Numbers,
-                o => o.WithDescription("Defines numbers for the operation."),
-                ArityType.OneOrMore)
-
-            .AddNamedOption(p => p.Integers,
-                o => o.WithDescription("Defines integers for the operation."),
-                ArityType.OneOrMore)
-
-            .AddNamedOption(o => o.Operator,
-                o => o.WithDescription("Sets the operator type."),
-                mandatoryOption: true);
+            .AddValueOption(p => p.Integers)
+            .AddValueOption(p => p.Decimals)
+            .AddNamedOption(p => p.LeftOperand, o => o.WithDescription("Left operand of the operation."))
+            .AddNamedOption(p => p.RightOperand, o => o.WithDescription("Right operand of the operation."))
+            .AddNamedOption(p => p.Numbers, o => o.WithDescription("Defines numbers for the operation."))
+            .AddNamedOption(o => o.Operator, o => o.WithDescription("Sets the operator type."), mandatoryOption: true)
+            .Build();
     }
 }

@@ -13,9 +13,9 @@ internal sealed class SequentialNamedOption<TValue>
 {
     public bool EnableSequentialValues { get; private set; }
 
-    public string Alias => _prefixAliases.OrderBy(k => k.Length).First();
+    public string Alias => Aliases.First();
 
-    public List<string> Aliases => _prefixAliases.ToList();
+    public List<string> Aliases => _prefixAliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length).ToList();
 
     public List<string> OptionTokens => _optionTokens.ToList();
 
@@ -167,7 +167,7 @@ internal sealed class SequentialNamedOption<TValue>
     {
         base.Validate();
 
-        IsValid = true;
+        _isValid = true;
     }
 
     public override void Clear()

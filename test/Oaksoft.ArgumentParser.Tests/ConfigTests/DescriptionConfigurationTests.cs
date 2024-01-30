@@ -14,6 +14,7 @@ public class DescriptionConfigurationTests : ArgumentParserTestBase
         // Arrange
         const string description = "Cats have an adorable face with a tiny nose.";
         var sut = CommandLine.CreateParser<IntAppOptions>()
+            .ConfigureSettings(s => s.Description = "Test description!")
             .AddNamedOption(s => s.NullValue, o => o.WithDescription(description))
             .AddCounterOption(s => s.NullValueCount, o => o.WithDescription(description))
             .AddNamedOption(s => s.Values, o => o.WithDescription(description))
@@ -23,10 +24,14 @@ public class DescriptionConfigurationTests : ArgumentParserTestBase
 
         // Act
         var parser = sut.Build();
+        var text = parser.GetHelpText(false);
+        var header = parser.GetHeaderText();
 
         // Assert
         parser.GetOptions().Count.ShouldBe(6);
-        var text = parser.GetHelpText(false);
+
+        text.ShouldContain(parser.Settings.Description!);
+        header.ShouldContain(parser.Settings.Description!);
 
         var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
@@ -77,24 +82,24 @@ public class DescriptionConfigurationTests : ArgumentParserTestBase
         parser.GetOptions().Count.ShouldBe(5);
         var text = parser.GetHelpText(false);
 
-        var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
+        var option = parser.GetOption(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
         option.Description.ShouldBe($"Performs '{option.Name}' option.");
         text.ShouldContain(option.Description!);
 
-        option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
+        option = parser.GetOption(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Description.ShouldBe($"Performs '{option.Name}' option.");
         text.ShouldContain(option.Description!);
 
-        option = parser.GetOptionByName(nameof(IntAppOptions.Values));
+        option = parser.GetOption(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Description.ShouldBe($"Performs '{option.Name}' option.");
         text.ShouldContain(option.Description!);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
-        option.Description.ShouldBe($"Captures value for '{option.Name}' option.");
+        option.Description.ShouldBe($"Captures values for '{option.Name}' option.");
         text.ShouldContain(option.Description!);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));

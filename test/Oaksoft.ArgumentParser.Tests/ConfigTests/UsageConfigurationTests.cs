@@ -16,22 +16,18 @@ public class UsageConfigurationTests : ArgumentParserTestBase
         const string usage1 = "-n <integer-value>";
         const string usage2 = " -v     <flag-value>   ";
         const string usage2Trimmed = "-v <flag-value>";
-        const string usage3 = "type    integer     value";
-        const string usage3Trimmed = "type integer value";
         const string usage4 = "--abc";
         var sut = CommandLine.CreateParser<IntAppOptions>()
             .AddNamedOption(s => s.NullValue, o => o.WithUsage(usage1))
             .AddSwitchOption(s => s.NullValueFlag, o => o.WithUsage(usage2))
             .AddNamedOption(s => s.Values, o => o.WithUsage(usage2))
-            .AddValueOption(s => s.NullValues, o => o.WithUsage(usage3))
-            .AddValueOption(s => s.Value, o => o.WithUsage(usage3))
             .AddCounterOption(s => s.ValueCount, o => o.WithUsage(usage4));
 
         // Act
         var parser = sut.Build();
 
         // Assert
-        parser.GetOptions().Count.ShouldBe(6);
+        parser.GetOptions().Count.ShouldBe(4);
         var text = parser.GetHelpText(false);
 
         var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
@@ -47,16 +43,6 @@ public class UsageConfigurationTests : ArgumentParserTestBase
         option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage2Trimmed);
-        text.ShouldContain(option.Usage);
-
-        option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
-        option.ShouldNotBeNull();
-        option.Usage.ShouldBe(usage3Trimmed);
-        text.ShouldContain(option.Usage);
-
-        option = parser.GetOptionByName(nameof(IntAppOptions.Value));
-        option.ShouldNotBeNull();
-        option.Usage.ShouldBe(usage3Trimmed);
         text.ShouldContain(option.Usage);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueCount));
@@ -123,13 +109,11 @@ public class UsageConfigurationTests : ArgumentParserTestBase
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
-        option.Usage.ShouldBe($"value for '{nameof(IntAppOptions.NullValues)}' option");
-        text.ShouldContain(option.Usage);
+        option.Usage.ShouldBeNullOrEmpty();
 
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
-        option.Usage.ShouldBe($"value for '{nameof(IntAppOptions.ValueFlag)}' option");
-        text.ShouldContain(option.Usage);
+        option.Usage.ShouldBeNullOrEmpty();
     }
 
     [Fact]
@@ -167,13 +151,11 @@ public class UsageConfigurationTests : ArgumentParserTestBase
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
-        option.Usage.ShouldBe($"value for '{nameof(IntAppOptions.NullValues)}' option");
-        text.ShouldContain(option.Usage);
+        option.Usage.ShouldBeNullOrEmpty();
 
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
-        option.Usage.ShouldBe($"value for '{nameof(IntAppOptions.ValueFlag)}' option");
-        text.ShouldContain(option.Usage);
+        option.Usage.ShouldBeNullOrEmpty();
     }
 
     [Fact]

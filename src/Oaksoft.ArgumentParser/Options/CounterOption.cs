@@ -10,9 +10,9 @@ namespace Oaksoft.ArgumentParser.Options;
 
 internal class CounterOption : BaseValueOption, ICounterOption
 {
-    public string Alias => _prefixAliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length).First();
+    public string Alias => Aliases.First();
 
-    public List<string> Aliases => _prefixAliases.ToList();
+    public List<string> Aliases => _prefixAliases.OrderBy(n => n[0] == '/').ThenBy(n => n.Length).ToList();
 
     public List<string> OptionTokens => _optionTokens.ToList();
 
@@ -143,7 +143,7 @@ internal class CounterOption : BaseValueOption, ICounterOption
     {
         base.Validate();
 
-        IsValid = true;
+        _isValid = true;
     }
 
     public override void ApplyOptionResult(object appOptions, PropertyInfo keyProperty)

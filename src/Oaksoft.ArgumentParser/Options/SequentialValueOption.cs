@@ -19,14 +19,9 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
     {
         base.Initialize();
 
-        if (string.IsNullOrWhiteSpace(Usage))
-        {
-            Usage = $"value for '{Name}' option";
-        }
-
         if (string.IsNullOrWhiteSpace(Description))
         {
-            Description = $"Captures value for '{Name}' option.";
+            Description = $"Captures values for '{Name}' option.";
         }
     }
 
@@ -58,6 +53,6 @@ internal sealed class SequentialValueOption<TValue> : BaseSequentialValueOption<
     {
         base.Validate();
 
-        IsValid = true;
+        _isValid = true;
     }
 }

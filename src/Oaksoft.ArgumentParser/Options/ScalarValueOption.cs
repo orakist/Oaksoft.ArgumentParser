@@ -19,11 +19,6 @@ internal class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
     {
         base.Initialize();
 
-        if (string.IsNullOrWhiteSpace(Usage))
-        {
-            Usage = $"value for '{Name}' option";
-        }
-
         if (string.IsNullOrWhiteSpace(Description))
         {
             Description = $"Captures value for '{Name}' option.";
@@ -68,6 +63,6 @@ internal class ScalarValueOption<TValue> : BaseScalarValueOption<TValue>
     {
         base.Validate();
 
-        IsValid = true;
+        _isValid = true;
     }
 }

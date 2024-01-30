@@ -20,6 +20,11 @@ public interface IArgumentParser
     IParserSettings Settings { get; }
 
     /// <summary>
+    /// Indicates that at least one valid user option parsed. 
+    /// </summary>
+    bool IsParsed { get; }
+
+    /// <summary>
     /// Indicates that the argument parsing result is valid. 
     /// </summary>
     bool IsValid { get; }
@@ -52,7 +57,11 @@ public interface IArgumentParser
 
     string GetErrorText(bool? enableColoring = default);
 
+    string GetVersionText();
+
     List<IBaseOption> GetOptions();
+
+    IBaseOption? GetOption(string nameOrAlias);
 
     IBaseOption? GetOptionByName(string name);
 

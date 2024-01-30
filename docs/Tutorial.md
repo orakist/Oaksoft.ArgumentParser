@@ -97,30 +97,33 @@ Following is the default help option output of the parser for this configuration
 
 ```
 Inputs: --help
-Oaksoft.ArgumentParser.Tutorial v1.0.0
-These are command line options of this application.
+Description:
+  This console application calculates given numbers.
 
--l       Usage: -l <value>
-         Aliases: -l, --left, /l, /left
-         Performs 'Left' option.
+Usage:
+  appname [options]
 
--r       Usage: -r <value>
-         Aliases: -r, --right, /r, /right
-         Performs 'Right' option.
+Options:
+  -l       Usage: -l <value>
+           Aliases: -l, --left, /l, /left
+           Performs 'Left' option.
 
--c       Usage: -c <value>
-         Aliases: -c, --calculate, /c, /calculate
-         Performs 'Calculate' option.
+  -r       Usage: -r <value>
+           Aliases: -r, --right, /r, /right
+           Performs 'Right' option.
 
--h       Usage: -h
-         Aliases: -h, -?, --help, /h, /?, /help
-         Shows help and usage information.
+  -c       Usage: -c <value>
+           Aliases: -c, --calculate, /c, /calculate
+           Performs 'Calculate' option.
 
---vn     Usage: --vn
-         Aliases: --vn, --version, /vn, /version
-         Shows version-number of the application.
+  -h       Usage: -h
+           Aliases: -h, -?, --help, /h, /?, /help
+           Shows help and usage information.
 
-Usage: [-l <value>] [-r <value>] [-c <value>]
+  --vn     Usage: --vn
+           Aliases: --vn, --version, /vn, /version
+           Shows version-number of the application.
+
 Result: Invalid argument!
 ```
 
@@ -143,7 +146,7 @@ public static void Parse(IArgumentParser<CalculatorOptions> parser, string[] arg
     var options = parser.Parse(args);
 
     // Add these two lines
-    if (!parser.IsValid || parser.IsEmpty || parser.IsHelpOption || parser.IsVersionOption)
+    if (!parser.IsParsed)
         return;
 
     var result = options.Calculate?.ToUpperInvariant() switch
@@ -267,31 +270,33 @@ This is the new help output. See the customized descriptions, allowed values and
 
 ```
 Inputs: --help
-Oaksoft.ArgumentParser.Tutorial v1.0.0
-These are command line options of this application.
+Description:
+  This console application calculates given numbers.
 
--l       Usage: -l <value>
-         Aliases: -l, --left, /l, /left
-         Left operand of the operation.
+Usage:
+  appname [options]
 
--r       Usage: -r <value>
-         Aliases: -r, --right, /r, /right
-         Right operand of the operation.
+Options:
+  -l       Usage: -l <value>
+           Aliases: -l, --left, /l, /left
+           Left operand of the operation.
 
--c       Usage: -c (value)
-         Aliases: -c, --calculate, /c, /calculate
-         Defines operator type of the calculation. [Allowed-Values: add | sub |
-         mul | div | pow], [Default: add]
+  -r       Usage: -r <value>
+           Aliases: -r, --right, /r, /right
+           Right operand of the operation.
 
--h       Usage: -h
-         Aliases: -h, -?, --help, /h, /?, /help
-         Shows help and usage information.
+  -c       Usage: -c (value)
+           Aliases: -c, --calculate, /c, /calculate
+           Defines operator type of the calculation. [Allowed-Values: add | sub |
+           mul | div | pow], [Default: add]
 
---vn     Usage: --vn
-         Aliases: --vn, --version, /vn, /version
-         Shows version-number of the application.
+  -h       Usage: -h
+           Aliases: -h, -?, --help, /h, /?, /help
+           Shows help and usage information.
 
-Usage: [-l <value>] [-r <value>] [-c (value)]
+  --vn     Usage: --vn
+           Aliases: --vn, --version, /vn, /version
+           Shows version-number of the application.
 ```
 
 ### Tutorial Step 5
@@ -523,27 +528,29 @@ Result: 5.1 + 3.1 = 8.2
 This is the new --help output. See the aliases of the "numbers" option.
 
 ```
-Oaksoft.ArgumentParser.Tutorial v1.0.0
-These are command line options of this application.
+Description:
+  This console application calculates given numbers.
 
--n       Usage: -n <value>
-         Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
-         Defines the numbers to be calculated.
+Usage:
+  appname [options]
 
--c       Usage: -c (value)
-         Aliases: -c, --calculate, /c, /calculate
-         Defines operator type of the calculation. [Allowed-Values: add | sub |
-         mul | div | pow], [Default: add]
+Options:
+  -n       Usage: -n <value>
+           Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
+           Defines the numbers to be calculated.
 
--h       Usage: -h
-         Aliases: -h, -?, --help, /h, /?, /help
-         Shows help and usage information.
+  -c       Usage: -c (value)
+           Aliases: -c, --calculate, /c, /calculate
+           Defines operator type of the calculation. [Allowed-Values: add | sub |
+           mul | div | pow], [Default: add]
 
---vn     Usage: --vn
-         Aliases: --vn, --version, /vn, /version
-         Shows version-number of the application.
+  -h       Usage: -h
+           Aliases: -h, -?, --help, /h, /?, /help
+           Shows help and usage information.
 
-Usage: [-n <value>] [-c (value)]
+  --vn     Usage: --vn
+           Aliases: --vn, --version, /vn, /version
+           Shows version-number of the application.
 ```
 
 ### Tutorial Step 8
@@ -621,27 +628,29 @@ public static void Parse(IArgumentParser<CalculatorOptions> parser, string[] arg
 This is the new --help output. See the "calculate" option.
 
 ```
-Oaksoft.ArgumentParser.Tutorial v1.0.0
-These are command line options of this application.
+Description:
+  This console application calculates given numbers.
 
--n       Usage: -n <value>
-         Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
-         Defines the numbers to be calculated.
+Usage:
+  appname [options]
 
--c       Usage: -c (value)
-         Aliases: -c, --calculate, /c, /calculate
-         Defines operator type of the calculation. [Allowed-Values: Add | Sub |
-         Mul | Div | Pow | Rem], [Default: Add]
+Options:
+  -n       Usage: -n <value>
+           Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
+           Defines the numbers to be calculated.
 
--h       Usage: -h
-         Aliases: -h, -?, --help, /h, /?, /help
-         Shows help and usage information.
+  -c       Usage: -c (value)
+           Aliases: -c, --calculate, /c, /calculate
+           Defines operator type of the calculation. [Allowed-Values: Add | Sub |
+           Mul | Div | Pow | Rem], [Default: Add]
 
---vn     Usage: --vn
-         Aliases: --vn, --version, /vn, /version
-         Shows version-number of the application.
+  -h       Usage: -h
+           Aliases: -h, -?, --help, /h, /?, /help
+           Shows help and usage information.
 
-Usage: [-n <value>] [-c (value)]
+  --vn     Usage: --vn
+           Aliases: --vn, --version, /vn, /version
+           Shows version-number of the application.
 ```
 
 #### to be continued ...

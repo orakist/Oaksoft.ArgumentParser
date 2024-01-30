@@ -25,6 +25,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public abstract IParserSettings Settings { get; }
 
+    public bool IsParsed => IsValid && !IsEmpty && !IsHelpOption && !IsVersionOption;
+
     public bool IsValid => _errors.Count < 1;
 
     public bool IsEmpty { get; private set; }
@@ -408,7 +410,10 @@ internal abstract class BaseArgumentParser : IArgumentParser
         TextColoring.SetEnabled(enableColoring);
 
         var sb = BuildHeaderText(false, Settings.ShowDescription, true);
-        sb.AppendLine();
+        if (sb.Length > 0)
+        {
+            sb.AppendLine();
+        }
 
         sb.Pastel("Usage:", ConsoleColor.DarkYellow);
         sb.AppendLine();

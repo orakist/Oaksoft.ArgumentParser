@@ -24,7 +24,7 @@ internal static class Tutorial02
 
         var options = parser.Parse(args);
 
-        if (!parser.IsValid || parser.IsEmpty || parser.IsHelpOption || parser.IsVersionOption)
+        if (!parser.IsParsed)
             return;
 
         var result = options.Calculate?.ToUpperInvariant() switch

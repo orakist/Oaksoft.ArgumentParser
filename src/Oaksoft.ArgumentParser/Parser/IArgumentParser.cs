@@ -20,6 +20,11 @@ public interface IArgumentParser
     IParserSettings Settings { get; }
 
     /// <summary>
+    /// Indicates that at least one valid user option parsed. 
+    /// </summary>
+    bool IsParsed { get; }
+
+    /// <summary>
     /// Indicates that the argument parsing result is valid. 
     /// </summary>
     bool IsValid { get; }

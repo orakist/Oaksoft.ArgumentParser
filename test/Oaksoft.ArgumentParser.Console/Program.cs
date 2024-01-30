@@ -25,7 +25,7 @@ internal static class Program
 
     private static void EvaluateOptions(IArgumentParser<CalculatorOptions> parser, CalculatorOptions options)
     {
-        if (!parser.IsValid || options.Operator == null)
+        if (!parser.IsParsed || options.Operator == null)
             return;
 
         var numbers = new List<double>();

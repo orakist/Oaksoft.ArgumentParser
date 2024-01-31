@@ -106,7 +106,7 @@ public class AllowedValuesConfigurationTests : ArgumentParserTestBase
             sut.AddNamedOption(s => s.Value, o => o.WithAllowedValues(valueStrings)));
         var info = exception.Error;
 
-        info.Error.Code.ShouldBe(BuilderErrors.EmptyAllowedValue.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.EmptyAllowedValue");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(StringAppOptions.Value));
     }
@@ -128,7 +128,7 @@ public class AllowedValuesConfigurationTests : ArgumentParserTestBase
         var exception = Should.Throw<OptionBuilderException>(() => option1.WithAllowedValues(2));
         var info = exception.Error;
 
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }

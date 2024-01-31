@@ -125,19 +125,19 @@ public class SequentialValueConfigurationTests : ArgumentParserTestBase
 
         var exception = Should.Throw<OptionBuilderException>(() => option1.WithEnableSequentialValues(true));
         var info = exception.Error;
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.Values));
 
         exception = Should.Throw<OptionBuilderException>(() => option1.WithEnableValueTokenSplitting(true));
         info = exception.Error;
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.Values));
 
         exception = Should.Throw<OptionBuilderException>(() => option2.WithEnableValueTokenSplitting(true));
         info = exception.Error;
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.NullValues));
     }

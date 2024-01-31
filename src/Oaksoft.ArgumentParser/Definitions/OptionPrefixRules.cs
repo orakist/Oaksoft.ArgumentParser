@@ -2,6 +2,9 @@
 
 namespace Oaksoft.ArgumentParser.Definitions;
 
+/// <summary>
+/// Represents option alias prefix rules. 
+/// </summary>
 [Flags]
 public enum OptionPrefixRules
 {

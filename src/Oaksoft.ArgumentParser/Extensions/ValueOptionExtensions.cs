@@ -9,7 +9,10 @@ using Oaksoft.ArgumentParser.Options;
 namespace Oaksoft.ArgumentParser.Extensions;
 
 public static partial class OptionExtensions
-{ 
+{
+    /// <summary>
+    /// Registers a scalar value option.
+    /// </summary>
     public static IArgumentParserBuilder<TSource> AddValueOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder, 
         Expression<Func<TSource, TValue?>> keyPropExpr,
@@ -26,6 +29,9 @@ public static partial class OptionExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Registers a scalar value option.
+    /// </summary>
     public static IArgumentParserBuilder<TSource> AddValueOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, TValue?>> keyPropExpr,
@@ -42,6 +48,9 @@ public static partial class OptionExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Registers a sequential value option.
+    /// </summary>
     public static IArgumentParserBuilder<TSource> AddValueOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, IEnumerable<TValue?>?>> keyPropExpr,
@@ -58,6 +67,9 @@ public static partial class OptionExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Registers a sequential value option.
+    /// </summary>
     public static IArgumentParserBuilder<TSource> AddValueOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, IEnumerable<TValue?>?>> keyPropExpr,

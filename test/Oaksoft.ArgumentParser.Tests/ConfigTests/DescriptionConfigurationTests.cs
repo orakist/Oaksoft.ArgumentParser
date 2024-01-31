@@ -125,7 +125,7 @@ public class DescriptionConfigurationTests : ArgumentParserTestBase
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithDescription("test"));
         var info = exception.Error;
 
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }

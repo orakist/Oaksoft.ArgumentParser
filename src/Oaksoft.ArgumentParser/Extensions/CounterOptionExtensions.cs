@@ -9,6 +9,9 @@ namespace Oaksoft.ArgumentParser.Extensions;
 
 public static partial class OptionExtensions
 {
+    /// <summary>
+    /// Registers a counter option.
+    /// </summary>
     public static IArgumentParserBuilder<TSource> AddCounterOption<TSource>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, int>> keyPropExpr,
@@ -24,6 +27,9 @@ public static partial class OptionExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Registers a counter option.
+    /// </summary>
     public static IArgumentParserBuilder<TSource> AddCounterOption<TSource>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, int?>> keyPropExpr,

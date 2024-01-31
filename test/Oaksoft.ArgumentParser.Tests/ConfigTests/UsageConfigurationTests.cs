@@ -63,7 +63,7 @@ public class UsageConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.EmptyValue");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(name);
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
@@ -175,7 +175,7 @@ public class UsageConfigurationTests : ArgumentParserTestBase
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithUsage("test"));
         var info = exception.Error;
 
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }

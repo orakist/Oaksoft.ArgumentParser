@@ -435,7 +435,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.InvalidAlias.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.InvalidAlias");
         info.Values.ShouldNotBeEmpty();
         info.Values.ShouldContain(alias);
         info.Values.ShouldContain(symbols);
@@ -457,7 +457,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.EmptyValue");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(value);
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
@@ -478,7 +478,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.ReservedAlias.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.ReservedAlias");
         info.Values.ShouldNotBeEmpty();
         info.Values.ShouldContain(alias);
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
@@ -499,7 +499,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.TooLongAlias.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.TooLongAlias");
         info.Values.ShouldNotBeEmpty();
         info.Values.ShouldContain(alias);
         info.Values.ShouldContain(length);
@@ -522,7 +522,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.TooLongAlias.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.TooLongAlias");
         info.Values.ShouldNotBeEmpty();
         info.Values.ShouldContain(validAlias);
         info.Values.ShouldContain(32);
@@ -545,7 +545,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.AliasAlreadyInUse.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.AliasAlreadyInUse");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(alias);
         info.OptionName.ShouldBe(nameof(IntAppOptions.NullValues));
@@ -566,7 +566,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.NotAllowedAlias.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.NotAllowedAlias");
         info.Values.ShouldNotBeEmpty();
         info.Values.ShouldContain("Short");
         info.Values.ShouldContain(aliases[0]);
@@ -588,7 +588,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.NotAllowedAlias.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.NotAllowedAlias");
         info.Values.ShouldNotBeEmpty();
         info.Values.ShouldContain("Long");
         info.Values.ShouldContain(aliases[1]);
@@ -614,7 +614,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.AddAliases("s"));
         var info = exception.Error;
 
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }

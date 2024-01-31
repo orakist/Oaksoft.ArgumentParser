@@ -1,6 +1,6 @@
 ﻿namespace Oaksoft.ArgumentParser.Errors.Parser;
 
-public static class ParserErrors
+internal static class ParserErrors
 {
     public const string Name = nameof(ParserErrors);
 

@@ -8,6 +8,9 @@ namespace Oaksoft.ArgumentParser.Extensions;
 
 public static partial class OptionExtensions
 {
+    /// <summary>
+    /// Registers a switch option.
+    /// </summary>
     public static IArgumentParserBuilder<TSource> AddSwitchOption<TSource>(
         this IArgumentParserBuilder<TSource> builder, 
         Expression<Func<TSource, bool>> keyPropExpr, 
@@ -23,6 +26,9 @@ public static partial class OptionExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Registers a switch option.
+    /// </summary>
     public static IArgumentParserBuilder<TSource> AddSwitchOption<TSource>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, bool?>> keyPropExpr,

@@ -3,7 +3,7 @@ using Oaksoft.ArgumentParser.Extensions;
 
 namespace Oaksoft.ArgumentParser.Errors.Builder;
 
-public static class BuilderErrors
+internal static class BuilderErrors
 {
     public const string Name = nameof(BuilderErrors);
 

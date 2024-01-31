@@ -1,4 +1,3 @@
-using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.TestModels;
@@ -78,7 +77,7 @@ public class OptionValuePredicateTests : ArgumentParserTestBase
         option.ResultValue.ShouldBeNull();
 
         sut.Errors.ShouldHaveSingleItem();
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.PredicateFailure.Code);
+        sut.Errors[0].Error.Code.ShouldBe("ParserErrors.PredicateFailure");
         sut.Errors[0].Message.ShouldStartWith(string.Format(sut.Errors[0].Error.Format, option.ValueTokens[0]));
     }
 
@@ -154,7 +153,7 @@ public class OptionValuePredicateTests : ArgumentParserTestBase
         option.ResultValues.ShouldBeEmpty();
 
         sut.Errors.ShouldNotBeEmpty();
-        sut.Errors[0].Error.Code.ShouldBeOneOf(ParserErrors.PredicateFailure.Code, ParserErrors.ListPredicateFailure.Code);
+        sut.Errors[0].Error.Code.ShouldBeOneOf("ParserErrors.PredicateFailure", "ParserErrors.ListPredicateFailure");
         sut.Errors[0].Message.ShouldStartWith(string.Format(sut.Errors[0].Error.Format, option.InputValues[0]));
     }
 

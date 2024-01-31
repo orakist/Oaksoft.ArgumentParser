@@ -2,6 +2,9 @@
 
 namespace Oaksoft.ArgumentParser.Definitions;
 
+/// <summary>
+/// Represents value delimiter rules. This rule lets to configure a ',', ';', or '|' as the delimiter between option values.
+/// </summary>
 [Flags]
 public enum ValueDelimiterRules
 {

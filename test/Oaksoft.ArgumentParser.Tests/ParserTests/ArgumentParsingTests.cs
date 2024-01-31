@@ -1,6 +1,5 @@
 using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Definitions;
-using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.TestModels;
@@ -117,14 +116,14 @@ public class ArgumentParsingTests : ArgumentParserTestBase
         sut.Errors.ShouldNotBeEmpty();
 
         var isDoubleDash = args[0].StartsWith("--");
-        sut.Errors[0].Error.Code.ShouldBe(isDoubleDash ? ParserErrors.InvalidDoubleDashToken.Code : ParserErrors.InvalidSingleDashToken.Code);
+        sut.Errors[0].Error.Code.ShouldBe(isDoubleDash ? "ParserErrors.InvalidDoubleDashToken" : "ParserErrors.InvalidSingleDashToken");
         sut.Errors[0].Message.ShouldBe(string.Format(sut.Errors[0].Error.Format, args[0]));
 
         if (args.Length < 3)
             return;
 
         isDoubleDash = args[2].StartsWith("--");
-        sut.Errors[1].Error.Code.ShouldBe(isDoubleDash ? ParserErrors.InvalidDoubleDashToken.Code : ParserErrors.InvalidSingleDashToken.Code);
+        sut.Errors[1].Error.Code.ShouldBe(isDoubleDash ? "ParserErrors.InvalidDoubleDashToken" : "ParserErrors.InvalidSingleDashToken");
         sut.Errors[1].Message.ShouldBe(string.Format(sut.Errors[1].Error.Format, args[2]));
     }
 

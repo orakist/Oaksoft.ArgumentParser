@@ -1,6 +1,5 @@
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Errors.Builder;
-using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
@@ -21,7 +20,7 @@ public class OptionRegistrationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.ReservedProperty.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.ReservedProperty");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(nameof(SampleOptionNames.Help));
         info.OptionName.ShouldBeNull();
@@ -38,7 +37,7 @@ public class OptionRegistrationTests : ArgumentParserTestBase
         // Act & Assert
         var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Value.ToString()));
 
-        exception.Error.Error.Code.ShouldBe(BuilderErrors.InvalidPropertyExpression.Code);
+        exception.Error.Error.Code.ShouldBe("BuilderErrors.InvalidPropertyExpression");
     }
 
     [Fact]
@@ -50,7 +49,7 @@ public class OptionRegistrationTests : ArgumentParserTestBase
         // Act & Assert
         var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.WithoutSet));
 
-        exception.Error.Error.Code.ShouldBe(BuilderErrors.PropertyWithoutSetMethod.Code);
+        exception.Error.Error.Code.ShouldBe("BuilderErrors.PropertyWithoutSetMethod");
     }
 
     [Fact]
@@ -62,7 +61,7 @@ public class OptionRegistrationTests : ArgumentParserTestBase
         // Act & Assert
         var exception = Should.Throw<OptionBuilderException>(() => sut.AddNamedOption(s => s.Unknown));
 
-        exception.Error.Error.Code.ShouldBe(BuilderErrors.UnsupportedPropertyType.Code);
+        exception.Error.Error.Code.ShouldBe("BuilderErrors.UnsupportedPropertyType");
     }
 
     [Fact]
@@ -94,7 +93,7 @@ public class OptionRegistrationTests : ArgumentParserTestBase
 
         var builtInOpts = parser.GetBuiltInOptions();
         parser.Errors.Count.ShouldBe(1);
-        parser.Errors[0].Error.Code.ShouldBe(ParserErrors.InvalidSingleOptionUsage.Code);
+        parser.Errors[0].Error.Code.ShouldBe("ParserErrors.InvalidSingleOptionUsage");
 
         builtInOpts.Help.ShouldBeNull();
         parser.IsHelpOption.ShouldBeFalse();
@@ -129,7 +128,7 @@ public class OptionRegistrationTests : ArgumentParserTestBase
 
         var builtInOpts = parser.GetBuiltInOptions();
         parser.Errors.Count.ShouldBe(1);
-        parser.Errors[0].Error.Code.ShouldBe(ParserErrors.InvalidSingleOptionUsage.Code);
+        parser.Errors[0].Error.Code.ShouldBe("ParserErrors.InvalidSingleOptionUsage");
 
         builtInOpts.Help.ShouldBeNull();
         parser.IsHelpOption.ShouldBeFalse();
@@ -168,7 +167,7 @@ public class OptionRegistrationTests : ArgumentParserTestBase
 
         parser.Errors.Count.ShouldBe(2);
         var errors = parser.GetErrorText(false);
-        errors.ShouldContain(nameof(ParserErrors.UnknownToken));
+        errors.ShouldContain("ParserErrors.UnknownToken");
     }
 
     [Fact]
@@ -185,7 +184,7 @@ public class OptionRegistrationTests : ArgumentParserTestBase
 
         parser.Errors.Count.ShouldBe(2);
         var errors = parser.GetErrorText(false);
-        errors.ShouldContain(nameof(ParserErrors.UnknownToken));
+        errors.ShouldContain("ParserErrors.UnknownToken");
     }
 
     [Fact]
@@ -202,7 +201,7 @@ public class OptionRegistrationTests : ArgumentParserTestBase
 
         parser.Errors.Count.ShouldBe(2);
         var errors = parser.GetErrorText(false);
-        errors.ShouldNotContain(nameof(ParserErrors.UnknownToken));
+        errors.ShouldNotContain("ParserErrors.UnknownToken");
     }
 
     [Fact]

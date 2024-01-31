@@ -142,7 +142,7 @@ public class NameConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.EmptyValue.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.EmptyValue");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(value);
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
@@ -162,7 +162,7 @@ public class NameConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.InvalidName.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.InvalidName");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(name);
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
@@ -183,7 +183,7 @@ public class NameConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.ReservedOptionName.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.ReservedOptionName");
         info.Values.ShouldNotBeEmpty();
         info.Values.ShouldContain(name);
         info.Values.ShouldContain(reservedNames);
@@ -206,7 +206,7 @@ public class NameConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.NameAlreadyInUse.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.NameAlreadyInUse");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(name);
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
@@ -228,7 +228,7 @@ public class NameConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.NameAlreadyInUse.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.NameAlreadyInUse");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(name);
         info.OptionName.ShouldBe(nameof(IntAppOptions.ValueCount));
@@ -253,7 +253,7 @@ public class NameConfigurationTests : ArgumentParserTestBase
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithName("NewName"));
         var info = exception.Error;
 
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
     }

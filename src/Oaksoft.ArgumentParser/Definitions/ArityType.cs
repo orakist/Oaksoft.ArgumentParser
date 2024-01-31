@@ -1,5 +1,8 @@
 ﻿namespace Oaksoft.ArgumentParser.Definitions;
 
+/// <summary>
+/// Represents option Arity enumeration. 
+/// </summary>
 public enum ArityType
 {
     /// <summary>

@@ -2,6 +2,9 @@
 
 namespace Oaksoft.ArgumentParser.Parser;
 
+/// <summary>
+/// Built-in option properties.
+/// </summary>
 public interface IBuiltInOptions
 {
     /// <summary>

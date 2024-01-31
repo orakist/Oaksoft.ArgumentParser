@@ -1,4 +1,3 @@
-using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
@@ -54,7 +53,7 @@ public class CounterOptionTests : ArgumentParserTestBase
         // Assert
         sut.IsValid.ShouldBeEquivalentTo(errorCount < 1);
         sut.Errors.Count.ShouldBeEquivalentTo(errorCount);
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.TooManyOption.Code);
+        sut.Errors[0].Error.Code.ShouldBe("ParserErrors.TooManyOption");
 
         result.Value.ShouldBe(0);
         result.NullValue.ShouldBeNull();
@@ -81,7 +80,7 @@ public class CounterOptionTests : ArgumentParserTestBase
         // Assert
         sut.IsValid.ShouldBeFalse();
         sut.Errors.Count.ShouldBeEquivalentTo(errorCount);
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.VeryFewOption.Code);
+        sut.Errors[0].Error.Code.ShouldBe("ParserErrors.VeryFewOption");
     }
 
 
@@ -102,6 +101,6 @@ public class CounterOptionTests : ArgumentParserTestBase
         // Assert
         sut.IsValid.ShouldBeFalse();
         sut.Errors.Count.ShouldBeEquivalentTo(errorCount);
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.TooManyValue.Code);
+        sut.Errors[0].Error.Code.ShouldBe("ParserErrors.TooManyValue");
     }
 }

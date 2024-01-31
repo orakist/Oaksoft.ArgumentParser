@@ -1,4 +1,3 @@
-using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
@@ -79,7 +78,7 @@ public class SwitchOptionTests : ArgumentParserTestBase
         // Assert
         sut.IsValid.ShouldBeFalse();
         sut.Errors.ShouldHaveSingleItem();
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.VeryFewOption.Code);
+        sut.Errors[0].Error.Code.ShouldBe("ParserErrors.VeryFewOption");
         result.NullValue.ShouldBe(null);
         result.Value.ShouldBe(false);
     }
@@ -130,7 +129,7 @@ public class SwitchOptionTests : ArgumentParserTestBase
         // Assert
         sut.IsValid.ShouldBeFalse();
         sut.Errors.Count.ShouldBeEquivalentTo(errorCount);
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.VeryFewValue.Code);
+        sut.Errors[0].Error.Code.ShouldBe("ParserErrors.VeryFewValue");
     }
 
     [Theory]
@@ -154,7 +153,7 @@ public class SwitchOptionTests : ArgumentParserTestBase
         // Assert
         sut.IsValid.ShouldBeFalse();
         sut.Errors.Count.ShouldBeEquivalentTo(errorCount);
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.TooManyOption.Code);
+        sut.Errors[0].Error.Code.ShouldBe("ParserErrors.TooManyOption");
     }
 
     [Theory]
@@ -178,7 +177,7 @@ public class SwitchOptionTests : ArgumentParserTestBase
         // Assert
         sut.IsValid.ShouldBeFalse();
         sut.Errors.Count.ShouldBeEquivalentTo(errorCount);
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.TooManyValue.Code);
+        sut.Errors[0].Error.Code.ShouldBe("ParserErrors.TooManyValue");
     }
 
     [Theory]

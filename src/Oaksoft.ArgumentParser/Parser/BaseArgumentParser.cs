@@ -43,6 +43,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
     protected readonly List<BaseOption> _baseOptions;
     protected readonly List<PropertyInfo> _propertyInfos;
     protected readonly List<IErrorMessage> _errors;
+
+    protected readonly BuiltInOptions _builtInOptions;
     private readonly List<string> _allAliases;
 
     protected BaseArgumentParser(
@@ -56,6 +58,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
         _baseOptions = new List<BaseOption>();
         _propertyInfos = new List<PropertyInfo>();
+        _builtInOptions = new BuiltInOptions();
 
         _errors = new List<IErrorMessage>();
         _allAliases = new List<string>();
@@ -94,6 +97,25 @@ internal abstract class BaseArgumentParser : IArgumentParser
         return _baseOptions.OfType<INamedOption>()
             .FirstOrDefault(o => o.Aliases.Any(a => a.Equals(alias, flag)) || 
                                  ((BaseOption)o).GetAliases().Any(a => a.Equals(alias, flag)));
+    }
+
+    public IBuiltInOptions GetBuiltInOptions()
+    {
+        return _builtInOptions;
+    }
+
+    public bool ContainsOption(string nameOrAlias)
+    {
+        var option = GetOptionByName(nameOrAlias) ?? GetOptionByAlias(nameOrAlias);
+
+        return option is not null;
+    }
+
+    public bool IsOptionParsed(string nameOrAlias)
+    {
+        var option = GetOptionByName(nameOrAlias) ?? GetOptionByAlias(nameOrAlias);
+
+        return option?.IsParsed == true;
     }
 
     public void SetTextReader(TextReader reader)

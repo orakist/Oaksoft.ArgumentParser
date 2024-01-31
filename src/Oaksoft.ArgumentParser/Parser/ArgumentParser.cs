@@ -21,7 +21,6 @@ internal sealed class ArgumentParser<TOptions>
     public override VerbosityLevelType VerbosityLevel => GetBuiltInOptions().Verbosity ?? Settings.VerbosityLevel;
 
     private readonly TOptions _appOptions;
-    private readonly BuiltInOptions _builtInOptions;
 
     public ArgumentParser(TOptions options, ArgumentParserBuilder<TOptions> builder)
         : base(builder.CaseSensitive, builder.OptionPrefix, builder.AliasDelimiter, builder.ValueDelimiter)
@@ -29,13 +28,7 @@ internal sealed class ArgumentParser<TOptions>
         Settings = builder.GetSettings();
 
         _appOptions = options;
-        _builtInOptions = new BuiltInOptions();
         _baseOptions.AddRange(builder.GetBaseOptions());
-    }
-
-    public IBuiltInOptions GetBuiltInOptions()
-    {
-        return _builtInOptions;
     }
 
     public TOptions GetApplicationOptions()

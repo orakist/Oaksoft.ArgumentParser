@@ -67,13 +67,17 @@ public interface IArgumentParser
 
     INamedOption? GetOptionByAlias(string alias);
 
+    IBuiltInOptions GetBuiltInOptions();
+
+    bool ContainsOption(string nameOrAlias);
+
+    bool IsOptionParsed(string nameOrAlias);
+
     void SetTextReader(TextReader reader);
 }
 
 public interface IArgumentParser<out TOptions> : IArgumentParser
 {
-    IBuiltInOptions GetBuiltInOptions();
-
     TOptions GetApplicationOptions();
 
     TOptions Parse(params string[] args);

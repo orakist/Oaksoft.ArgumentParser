@@ -1,5 +1,8 @@
 ﻿namespace Oaksoft.ArgumentParser.Options;
 
+/// <summary>
+/// Base option interface
+/// </summary>
 public interface IBaseOption
 {
     /// <summary>

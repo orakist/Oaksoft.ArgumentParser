@@ -26,7 +26,9 @@ public class ByteNamedOptionTests : ArgumentParserTestBase
         var result = sut.Parse(args);
 
         // Assert
-        sut.IsValid.ShouldBeTrue();
+        sut.IsParsed.ShouldBeTrue();
+        sut.IsOptionParsed(nameof(ByteAppOptions.Value)).ShouldBeTrue();
+        sut.IsOptionParsed(nameof(ByteAppOptions.NullValue)).ShouldBeTrue();
         result.Value.ShouldBeEquivalentTo(val1);
         result.NullValue.ShouldBeEquivalentTo(val2);
     }

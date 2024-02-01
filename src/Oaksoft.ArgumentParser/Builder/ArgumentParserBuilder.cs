@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Definitions;
@@ -10,80 +11,22 @@ using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Builder;
 
-internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<TOptions>
+internal sealed class ArgumentParserBuilder<TOptions>
+    : BaseArgumentParserBuilder, IArgumentParserBuilder<TOptions>
+    where TOptions : new()
 {
-    public bool CaseSensitive { get; }
-
-    public OptionPrefixRules OptionPrefix { get; }
-
-    public AliasDelimiterRules AliasDelimiter { get; }
-
-    public ValueDelimiterRules ValueDelimiter { get; }
-
-    private readonly TOptions _appOptions;
-    private readonly IParserSettingsBuilder _settingsBuilder;
-    private readonly List<BaseOption> _baseOptions;
-
     public ArgumentParserBuilder(
-        TOptions options, bool caseSensitive, OptionPrefixRules optionPrefix,
-        AliasDelimiterRules aliasDelimiter, ValueDelimiterRules valueDelimiter)
+        bool caseSensitive, OptionPrefixRules optionPrefix,
+        AliasDelimiterRules aliasDelimiter, ValueDelimiterRules valueDelimiter,
+        TextReader? textReader, TextWriter? textWriter)
+        : base(caseSensitive, optionPrefix, aliasDelimiter, valueDelimiter, textReader, textWriter)
     {
-        CaseSensitive = caseSensitive;
-        OptionPrefix = optionPrefix;
-        AliasDelimiter = aliasDelimiter;
-        ValueDelimiter = valueDelimiter;
-
-        _appOptions = options;
-        _baseOptions = new List<BaseOption>();
-        _settingsBuilder = new ParserSettingsBuilder();
-    }
-
-    public IParserSettings GetSettings()
-    {
-        return new ParserSettings
-        {
-            AutoPrintHeader = _settingsBuilder.AutoPrintHeader ?? true,
-            AutoPrintHelp = _settingsBuilder.AutoPrintHelp ?? true,
-            AutoPrintVersion = _settingsBuilder.AutoPrintVersion ?? true,
-            AutoPrintErrors = _settingsBuilder.AutoPrintErrors ?? true,
-
-            HelpDisplayWidth = _settingsBuilder.HelpDisplayWidth ?? 80,
-            NewLineAfterOption = _settingsBuilder.NewLineAfterOption ?? true,
-            ShowDescription = _settingsBuilder.ShowDescription ?? true,
-            EnableColoring = _settingsBuilder.EnableColoring ??= true,
-            Title = _settingsBuilder.Title,
-            Description = _settingsBuilder.Description,
-            VerbosityLevel = _settingsBuilder.VerbosityLevel ?? VerbosityLevelType.Minimal,
-
-            MaxAliasLength = _settingsBuilder.MaxAliasLength ?? 32,
-            MaxSuggestedAliasWordCount = _settingsBuilder.MaxSuggestedAliasWordCount ?? 4
-        };
-    }
-
-    public List<BaseOption> GetBaseOptions()
-    {
-        return _baseOptions;
-    }
-
-    public TOptions GetApplicationOptions()
-    {
-        return _appOptions;
     }
 
     public IArgumentParserBuilder<TOptions> ConfigureSettings(Action<IParserSettingsBuilder> action)
     {
         action.Invoke(_settingsBuilder);
         return this;
-    }
-
-    public void RegisterOption(BaseOption option)
-    {
-        _baseOptions.Add(option);
-    }
-
-    public List<string> GetRegisteredPropertyNames()
-    {
-        return _baseOptions.Select(o => o.KeyProperty.Name).ToList();
     }
 
     public IArgumentParser<TOptions> AutoBuild()
@@ -94,7 +37,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         BuildDefaultOptions();
 
-        var parser = new ArgumentParser<TOptions>(_appOptions, this);
+        var parser = new ArgumentParser<TOptions>(this);
         parser.Initialize();
 
         return parser;
@@ -103,7 +46,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
     private void AutoBuildApplicationOptions()
     {
         var registeredNames = GetRegisteredPropertyNames();
-        var properties = _appOptions!.GetType().GetProperties()
+        var properties = typeof(TOptions).GetProperties()
             .Where(p => p.SetMethod is not null)
             .Where(p => !AliasExtensions.BuiltInOptionNames.Any(r => r.Equals(p.Name, StringComparison.OrdinalIgnoreCase)))
             .Where(p => !registeredNames.Contains(p.Name)).ToList();
@@ -112,26 +55,28 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         {
             var (optionType, isSequential) = property.GetOptionType();
             if (optionType == null)
+            {
                 continue;
+            }
 
             if (isSequential)
             {
                 var genericType = typeof(SequentialNamedOption<>).MakeGenericType(optionType);
                 var option = Activator.CreateInstance(genericType, 0, int.MaxValue, 0, int.MaxValue) as BaseOption;
-                this.RegisterOptionProperty<TOptions>(option!, property);
+                this.RegisterOptionProperty(option!, property);
             }
             else
             {
                 if (optionType == typeof(bool))
                 {
                     var option = new SwitchOption(0, 1);
-                    this.RegisterOptionProperty<TOptions>(option, property);
+                    this.RegisterOptionProperty(option, property);
                 }
                 else
                 {
                     var genericType = typeof(ScalarNamedOption<>).MakeGenericType(optionType);
                     var option = Activator.CreateInstance(genericType, 0, 1, 1, 1) as BaseOption;
-                    this.RegisterOptionProperty<TOptions>(option!, property);
+                    this.RegisterOptionProperty(option!, property);
                 }
             }
         }
@@ -143,66 +88,10 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         BuildDefaultOptions();
 
-        var parser = new ArgumentParser<TOptions>(_appOptions, this);
+        var parser = new ArgumentParser<TOptions>(this);
         parser.Initialize();
 
         return parser;
-    }
-
-    private void BuildDefaultSettings()
-    {
-        if ((OptionPrefix & OptionPrefixRules.All) == 0)
-        {
-            throw BuilderErrors.InvalidEnum.ToException(nameof(OptionPrefixRules), (int)OptionPrefix);
-        }
-
-        if (AliasDelimiter != 0 && (AliasDelimiter & AliasDelimiterRules.All) == 0)
-        {
-            throw BuilderErrors.InvalidEnum.ToException(nameof(AliasDelimiterRules), (int)AliasDelimiter);
-        }
-
-        if (ValueDelimiter != 0 && (ValueDelimiter & ValueDelimiterRules.All) == 0)
-        {
-            throw BuilderErrors.InvalidEnum.ToException(nameof(ValueDelimiterRules), (int)ValueDelimiter);
-        }
-
-        _settingsBuilder.AutoPrintHeader ??= true;
-        _settingsBuilder.AutoPrintHelp ??= true;
-        _settingsBuilder.AutoPrintVersion ??= true;
-        _settingsBuilder.AutoPrintErrors ??= true;
-        _settingsBuilder.HelpDisplayWidth ??= 80;
-        _settingsBuilder.NewLineAfterOption ??= true;
-        _settingsBuilder.ShowCopyright ??= false;
-        _settingsBuilder.ShowDescription ??= true;
-        _settingsBuilder.VerbosityLevel ??= VerbosityLevelType.Minimal;
-        _settingsBuilder.EnableColoring ??= true;
-        _settingsBuilder.MaxAliasLength ??= 32;
-        _settingsBuilder.MaxSuggestedAliasWordCount ??= 4;
-
-        if (_settingsBuilder.HelpDisplayWidth is < 40 or > 320)
-        {
-            throw BuilderErrors.OutOfRange.ToException(nameof(IParserSettings.HelpDisplayWidth), (40, 320));
-        }
-
-        if (_settingsBuilder.MaxAliasLength is < 8 or > 64)
-        {
-            throw BuilderErrors.OutOfRange.ToException(nameof(IParserSettings.MaxAliasLength), (8, 64));
-        }
-
-        if (_settingsBuilder.MaxSuggestedAliasWordCount is < 1 or > 8)
-        {
-            throw BuilderErrors.OutOfRange.ToException(nameof(IParserSettings.MaxSuggestedAliasWordCount), (1, 8));
-        }
-
-        if (string.IsNullOrWhiteSpace(_settingsBuilder.Title))
-        {
-            _settingsBuilder.Title = BuildTitleLine();
-        }
-
-        if (string.IsNullOrWhiteSpace(_settingsBuilder.Description))
-        {
-            _settingsBuilder.Description = BuildDescriptionLine();
-        }
     }
 
     private void BuildDefaultOptions()
@@ -226,7 +115,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         var properties = typeof(BuiltInOptions).GetProperties();
         var keyProperty = properties.First(p => p.Name == nameof(IBuiltInOptions.Version));
-        this.RegisterSwitchOption<TOptions>(keyProperty, false);
+        this.RegisterSwitchOption(keyProperty, false);
 
         string[] aliases = new[] { "VN", "Version" };
         var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
@@ -250,7 +139,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         var properties = typeof(BuiltInOptions).GetProperties();
         var keyProperty = properties.First(p => p.Name == nameof(IBuiltInOptions.Help));
-        this.RegisterSwitchOption<TOptions>(keyProperty, false);
+        this.RegisterSwitchOption(keyProperty, false);
 
         var aliases = new[] { "h", "?", "Help" };
         var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help));
@@ -274,7 +163,7 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
 
         var properties = typeof(BuiltInOptions).GetProperties();
         var keyProperty = properties.First(p => p.Name == nameof(IBuiltInOptions.Verbosity));
-        this.RegisterNamedOption<TOptions, VerbosityLevelType>(keyProperty, false, false);
+        this.RegisterNamedOption<VerbosityLevelType>(keyProperty, false, false);
 
         var aliases = new[] { "VL", "Verbosity" };
         var option = _baseOptions.First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Verbosity));
@@ -292,40 +181,4 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         var scalarOption = option as ScalarNamedOption<VerbosityLevelType>;
         scalarOption!.SetDefaultValue(_settingsBuilder.VerbosityLevel!.Value);
     }
-
-    private string? BuildTitleLine()
-    {
-        var title = AssemblyHelper.GetAssemblyTitle() ?? string.Empty;
-
-        var version = AssemblyHelper.GetAssemblyVersion();
-        if (!string.IsNullOrWhiteSpace(version))
-        {
-            title += string.IsNullOrWhiteSpace(title) ? $"v{version}" : $" v{version}";
-        }
-
-        var company = AssemblyHelper.GetAssemblyCompany();
-        if (!string.IsNullOrWhiteSpace(company))
-        {
-            title += string.IsNullOrWhiteSpace(title) ? company : $", {company}";
-        }
-
-        if (_settingsBuilder.ShowCopyright == true)
-        {
-            var copyright = AssemblyHelper.GetAssemblyCopyright();
-            if (!string.IsNullOrWhiteSpace(copyright))
-            {
-                title += string.IsNullOrWhiteSpace(title) ? copyright : $", {copyright}";
-            }
-        }
-
-        return string.IsNullOrWhiteSpace(title) ? null : title;
-    }
-
-    private static string? BuildDescriptionLine()
-    {
-        var description = AssemblyHelper.GetAssemblyDescription() ?? string.Empty;
-
-        return string.IsNullOrWhiteSpace(description) ? null : description;
-    }
 }
-

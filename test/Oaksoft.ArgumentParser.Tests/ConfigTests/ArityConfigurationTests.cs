@@ -136,7 +136,7 @@ public class ArityConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.InvalidArity.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.InvalidArity");
         info.Values.ShouldNotBeNull();
         info.Values.ShouldContain(nameof(IBaseOption.ValueArity));
         info.Values.ShouldContain((min, max));
@@ -256,7 +256,7 @@ public class ArityConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.InvalidArity.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.InvalidArity");
         info.Values.ShouldNotBeNull();
         info.Values.ShouldContain(nameof(IBaseOption.OptionArity));
         info.Values.ShouldContain((min, max));
@@ -276,7 +276,7 @@ public class ArityConfigurationTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.InvalidEnum.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.InvalidEnum");
         info.Values.ShouldNotBeNull();
         info.Values.ShouldContain(nameof(ArityType));
         info.Values.ShouldContain((ArityType)100);
@@ -304,14 +304,14 @@ public class ArityConfigurationTests : ArgumentParserTestBase
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithValueArity(ArityType.ZeroOrOne));
         var info = exception.Error;
 
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
 
         exception = Should.Throw<OptionBuilderException>(() => namedOption.WithOptionArity(ArityType.ZeroOrOne));
         info = exception.Error;
 
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
     }

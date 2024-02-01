@@ -29,6 +29,12 @@ public class IntNamedOptionTests : ArgumentParserTestBase
         sut.IsValid.ShouldBeTrue();
         result.Value.ShouldBeEquivalentTo(val1);
         result.NullValue.ShouldBeEquivalentTo(val2);
+
+        sut.ContainsOption(nameof(IntAppOptions.Value)).ShouldBeTrue();
+        sut.ContainsOption(nameof(IntAppOptions.NullValue)).ShouldBeTrue();
+
+        sut.IsOptionParsed(nameof(IntAppOptions.Value)).ShouldBeTrue();
+        sut.IsOptionParsed(nameof(IntAppOptions.NullValue)).ShouldBeTrue();
     }
 
     [Theory]
@@ -55,6 +61,9 @@ public class IntNamedOptionTests : ArgumentParserTestBase
         sut.IsValid.ShouldBeTrue();
         result.Value.ShouldBeEquivalentTo(val1);
         result.NullValue.ShouldBeEquivalentTo(val2 != 0 ? val2 : null);
+
+        sut.ContainsOption(nameof(IntAppOptions.Value)).ShouldBeTrue();
+        sut.ContainsOption(nameof(IntAppOptions.NullValue)).ShouldBeTrue();
     }
 
     [Theory]

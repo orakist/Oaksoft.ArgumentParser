@@ -1,6 +1,5 @@
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Errors.Builder;
-using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.TestModels;
@@ -80,7 +79,7 @@ public class OptionValueTryParseCallbackTests : ArgumentParserTestBase
         option.ResultValue.ShouldBeNull();
 
         sut.Errors.ShouldHaveSingleItem();
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.InvalidOptionValue.Code);
+        sut.Errors[0].Error.Code.ShouldBe("ParserErrors.InvalidOptionValue");
         sut.Errors[0].Message.ShouldStartWith(string.Format(sut.Errors[0].Error.Format, option.ValueTokens[0]));
     }
 
@@ -153,7 +152,7 @@ public class OptionValueTryParseCallbackTests : ArgumentParserTestBase
         option.ResultValues.ShouldBeEmpty();
 
         sut.Errors.ShouldNotBeEmpty();
-        sut.Errors[0].Error.Code.ShouldBe(ParserErrors.InvalidOptionValue.Code);
+        sut.Errors[0].Error.Code.ShouldBe("ParserErrors.InvalidOptionValue");
         sut.Errors[0].Message.ShouldStartWith(string.Format(sut.Errors[0].Error.Format, option.InputValues[0]));
     }
 
@@ -235,7 +234,7 @@ public class OptionValueTryParseCallbackTests : ArgumentParserTestBase
         // Act & Assert
         var exception = Should.Throw<OptionBuilderException>(() => sut.Build());
 
-        exception.Error.Error.Code.ShouldBe(BuilderErrors.MissingCallback.Code);
+        exception.Error.Error.Code.ShouldBe("BuilderErrors.MissingCallback");
     }
 
     [Theory]

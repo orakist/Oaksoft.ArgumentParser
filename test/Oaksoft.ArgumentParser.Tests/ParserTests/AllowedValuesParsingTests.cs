@@ -1,4 +1,3 @@
-using Oaksoft.ArgumentParser.Errors.Parser;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Options;
 using Oaksoft.ArgumentParser.Tests.TestModels;
@@ -81,7 +80,7 @@ public class AllowedValuesParsingTests : ArgumentParserTestBase
         // Assert
         sut.IsValid.ShouldBeFalse();
         sut.Errors.Count.ShouldBe(4);
-        sut.Errors.ShouldAllBe(e => e.Error.Code == ParserErrors.ValueMustBeOneOf.Code);
+        sut.Errors.ShouldAllBe(e => e.Error.Code == "ParserErrors.ValueMustBeOneOf");
     }
 
     [Theory]
@@ -153,6 +152,6 @@ public class AllowedValuesParsingTests : ArgumentParserTestBase
         // Assert
         sut.IsValid.ShouldBeFalse();
         sut.Errors.Count.ShouldBe(4);
-        sut.Errors.ShouldAllBe(e => e.Error.Code == ParserErrors.ValueMustBeOneOf.Code);
+        sut.Errors.ShouldAllBe(e => e.Error.Code == "ParserErrors.ValueMustBeOneOf");
     }
 }

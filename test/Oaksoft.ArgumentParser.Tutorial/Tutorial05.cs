@@ -17,7 +17,9 @@ internal static class Tutorial05
     private static bool TryParseCustom(string value, out double result)
     {
         if (value.StartsWith('(') && value.EndsWith(')'))
+        {
             value = value.Substring(1, value.Length - 2);
+        }
 
         return double.TryParse(value, out result);
     }
@@ -50,7 +52,9 @@ internal static class Tutorial05
         var options = parser.Parse(args);
 
         if (!parser.IsParsed)
+        {
             return;
+        }
 
         var result = options.Calculate?.ToUpperInvariant() switch
         {

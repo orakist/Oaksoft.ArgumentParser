@@ -1,5 +1,4 @@
-﻿using Oaksoft.ArgumentParser.Extensions;
-using Oaksoft.ArgumentParser.Parser;
+﻿using Oaksoft.ArgumentParser.Parser;
 
 namespace Oaksoft.ArgumentParser.Tutorial;
 
@@ -26,7 +25,9 @@ internal static class Tutorial03
         var options = parser.Parse(args);
 
         if (!parser.IsParsed)
+        {
             return;
+        }
 
         var result = options.Calculate?.ToUpperInvariant() switch
         {

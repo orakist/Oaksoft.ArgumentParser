@@ -6,23 +6,24 @@
     <AssemblyName>Oaksoft.ArgumentParser</AssemblyName>
     <RootNamespace>Oaksoft.ArgumentParser</RootNamespace>
     <Nullable>enable</Nullable>
-    <VersionPrefix>1.5.1</VersionPrefix>
+    <LangVersion>10.0</LangVersion>
+    <VersionPrefix>1.5.2</VersionPrefix>
     <Version>$(VersionPrefix)</Version>
     <Authors>orakist</Authors>
     <Title>Oaksoft.ArgumentParser</Title>
-    <Product>Oaksoft Command Line Arguments Parser</Product>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Company>$(AssemblyName)</Company>
-    <Description>Command Line Argument Parser Library offers to clean and simple API for manipulating command line arguments and related tasks.</Description>
+    <Product>Oaksoft Command Line Arguments Parser</Product>
     <Copyright>Copyright (C) 2023 - 2024</Copyright>
-    <LangVersion>10.0</LangVersion>
+    <Description>Command Line Argument Parser Library offers to clean and simple API for manipulating command line arguments and related tasks.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/orakist/Oaksoft.ArgumentParser</PackageProjectUrl>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>command line;commandline;argument;option;parser;parsing;cli;commandlineparser;shell</PackageTags>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">

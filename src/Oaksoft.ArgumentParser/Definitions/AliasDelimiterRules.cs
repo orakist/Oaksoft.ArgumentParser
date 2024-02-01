@@ -2,6 +2,10 @@
 
 namespace Oaksoft.ArgumentParser.Definitions;
 
+/// <summary>
+/// Represents alias delimiter rules to parse adjacent aliases and values. This rule lets to configure a
+/// space, '=', or ':' as the delimiter between an option name and its argument.
+/// </summary>
 [Flags]
 public enum AliasDelimiterRules
 {

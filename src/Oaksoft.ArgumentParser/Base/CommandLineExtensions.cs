@@ -50,7 +50,9 @@ internal static class CommandLineExtensions
                 }
 
                 if (justSplitted && lastSplitted && (!lastQuoted || !justQuoted))
+                {
                     j--;
+                }
 
                 lastSplitted = justSplitted;
                 justSplitted = false;
@@ -65,7 +67,9 @@ internal static class CommandLineExtensions
         }
 
         if (lastQuoted)
+        {
             j--;
+        }
 
         return (new string(paramChars, 0, j)).Split(new[] { '\n' });
     }

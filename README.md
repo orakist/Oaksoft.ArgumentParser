@@ -497,7 +497,7 @@ You can manually configure following properties of an option.
 - **EnableSequentialValues:** *.WithEnableSequentialValues(bool enabled)*\
   Sets EnableSequentialValues property of sequential named options. It is true by default.\
   If it is set to true, 'one two three' inputs will be parsed as 3 string values: "myapp --items one two three"\
-  If it is set to false, parser graps only first input "one" as a value.
+  If it is set to false, parser grabs only first input "one" as a value.
   
 - **EnableValueTokenSplitting:** *.WithEnableValueTokenSplitting(bool enabled)*\
   Sets EnableValueTokenSplitting property of sequential named and value options. It is true by default.\
@@ -628,7 +628,7 @@ Here is the example version output.
 ### 8.3 Help option
 
 Command-line apps typically provide an option to display a brief description of the available commands, options, and arguments. *Oaksoft.ArgumentParser* automatically generates help output.
-Help output is configurable by project settings (Version, Product, Company and Description),  ArgumentParser settings and option configuration (name, alias, description etc.). 
+Help output is configurable by Description metadata, ArgumentParser settings and option configuration (name, alias, description etc.). 
 See the [here (source code)](https://github.com/orakist/Oaksoft.ArgumentParser/tree/dev/test/Oaksoft.ArgumentParser.Console) for the project settings.
 
 Example help output:

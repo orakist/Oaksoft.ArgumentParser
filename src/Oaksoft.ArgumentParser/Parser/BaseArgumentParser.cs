@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Oaksoft.ArgumentParser.Base;
+using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Errors;
 using Oaksoft.ArgumentParser.Errors.Builder;
@@ -39,27 +40,49 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     public List<IErrorMessage> Errors => _errors.ToList();
 
-    protected TextReader _reader;
     protected readonly List<BaseOption> _baseOptions;
     protected readonly List<PropertyInfo> _propertyInfos;
     protected readonly List<IErrorMessage> _errors;
+
+    protected readonly BuiltInOptions _builtInOptions;
     private readonly List<string> _allAliases;
 
-    protected BaseArgumentParser(
-        bool caseSensitive, OptionPrefixRules optionPrefix,
-        AliasDelimiterRules aliasDelimiter, ValueDelimiterRules valueDelimiter)
+    protected TextReader _reader;
+    protected TextWriter _writer;
+
+    protected BaseArgumentParser(BaseArgumentParserBuilder builder)
     {
-        CaseSensitive = caseSensitive;
-        OptionPrefix = optionPrefix;
-        AliasDelimiter = aliasDelimiter;
-        ValueDelimiter = valueDelimiter;
+        CaseSensitive = builder.CaseSensitive;
+        OptionPrefix = builder.OptionPrefix;
+        AliasDelimiter = builder.AliasDelimiter;
+        ValueDelimiter = builder.ValueDelimiter;
 
         _baseOptions = new List<BaseOption>();
         _propertyInfos = new List<PropertyInfo>();
+        _builtInOptions = new BuiltInOptions();
 
         _errors = new List<IErrorMessage>();
         _allAliases = new List<string>();
-        _reader = Console.In;
+
+        _reader = builder.TextReader ?? Console.In;
+        _writer = builder.TextWriter ?? Console.Out;
+    }
+
+    public string GetHeaderText()
+    {
+        return BuildHeaderText(true, true).ToString();
+    }
+
+    public string GetHelpText(bool? enableColoring = default)
+    {
+        var coloring = enableColoring ?? Settings.EnableColoring;
+        return BuildHelpText(coloring).ToString();
+    }
+
+    public string GetErrorText(bool? enableColoring = default)
+    {
+        var coloring = enableColoring ?? Settings.EnableColoring;
+        return BuildErrorText(coloring).ToString();
     }
 
     public string GetVersionText()
@@ -96,26 +119,33 @@ internal abstract class BaseArgumentParser : IArgumentParser
                                  ((BaseOption)o).GetAliases().Any(a => a.Equals(alias, flag)));
     }
 
+    public IBuiltInOptions GetBuiltInOptions()
+    {
+        return _builtInOptions;
+    }
+
+    public bool ContainsOption(string nameOrAlias)
+    {
+        var option = GetOptionByName(nameOrAlias) ?? GetOptionByAlias(nameOrAlias);
+
+        return option is not null;
+    }
+
+    public bool IsOptionParsed(string nameOrAlias)
+    {
+        var option = GetOptionByName(nameOrAlias) ?? GetOptionByAlias(nameOrAlias);
+
+        return option?.IsParsed == true;
+    }
+
     public void SetTextReader(TextReader reader)
     {
         _reader = reader;
     }
 
-    public string GetHeaderText()
+    public void SetTextWriter(TextWriter writer)
     {
-        return BuildHeaderText(true, true).ToString();
-    }
-
-    public string GetHelpText(bool? enableColoring = default)
-    {
-        var coloring = enableColoring ?? Settings.EnableColoring;
-        return BuildHelpText(coloring).ToString();
-    }
-
-    public string GetErrorText(bool? enableColoring = default)
-    {
-        var coloring = enableColoring ?? Settings.EnableColoring;
-        return BuildErrorText(coloring).ToString();
+        _writer = writer;
     }
 
     protected void InitializeOptions()
@@ -332,45 +362,45 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     protected void AutoPrintHeaderText()
     {
-        if (CommandLine.DisableConsoleOutput || !Settings.AutoPrintHeader)
+        if (CommandLine.DisableTextWriter || !Settings.AutoPrintHeader)
         {
             return;
         }
 
-        Console.Write(BuildHeaderText(true, true).ToString());
-        Console.WriteLine();
+        _writer.Write(BuildHeaderText(true, true).ToString());
+        _writer.WriteLine();
     }
 
     private void AutoPrintHelpText()
     {
-        if (CommandLine.DisableConsoleOutput || _errors.Count > 0 || !IsHelpOption || !Settings.AutoPrintHelp)
+        if (CommandLine.DisableTextWriter || _errors.Count > 0 || !IsHelpOption || !Settings.AutoPrintHelp)
         {
             return;
         }
 
-        Console.Write(BuildHelpText(Settings.EnableColoring).ToString());
+        _writer.Write(BuildHelpText(Settings.EnableColoring).ToString());
     }
 
     private void AutoPrintVersion()
     {
-        if (CommandLine.DisableConsoleOutput || _errors.Count > 0 || !IsVersionOption || !Settings.AutoPrintVersion)
+        if (CommandLine.DisableTextWriter || _errors.Count > 0 || !IsVersionOption || !Settings.AutoPrintVersion)
         {
             return;
         }
 
-        Console.Write(AssemblyHelper.GetAssemblyVersion());
-        Console.WriteLine();
+        _writer.Write(AssemblyHelper.GetAssemblyVersion());
+        _writer.WriteLine();
     }
 
     protected void AutoPrintErrorText()
     {
-        if (CommandLine.DisableConsoleOutput || _errors.Count < 1 || !Settings.AutoPrintErrors)
+        if (CommandLine.DisableTextWriter || _errors.Count < 1 || !Settings.AutoPrintErrors)
         {
             return;
         }
 
-        Console.Write(BuildErrorText(Settings.EnableColoring).ToString());
-        Console.WriteLine();
+        _writer.Write(BuildErrorText(Settings.EnableColoring).ToString());
+        _writer.WriteLine();
     }
 
     private StringBuilder BuildHeaderText(bool showTitle, bool showDescription, bool showSectionName = false)
@@ -576,7 +606,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 var words = descBuilder.ToString().Split(' ');
                 var lines = CreateLinesByWidth(words, lineLength);
-                sb.AppendLine($" {lines[0]}");
+                sb.AppendLine(lines[0]);
 
                 foreach (var line in lines.Skip(1))
                 {
@@ -631,7 +661,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
 
             if (VerbosityLevel < VerbosityLevelType.Minimal)
+            {
                 break;
+            }
         }
 
         return sb;
@@ -646,7 +678,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             RemoveIrrelevantErrors(isAllTokensParsed, nameof(IBuiltInOptions.Help));
             if (_errors.All(s => s.OptionName != null))
+            {
                 return;
+            }
         }
 
         if (help.OptionTokens.Count > 0)
@@ -662,7 +696,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             RemoveIrrelevantErrors(isAllTokensParsed, nameof(IBuiltInOptions.Version));
             if (_errors.All(s => s.OptionName != null))
+            {
                 return;
+            }
         }
 
         if (version.OptionTokens.Count > 0)

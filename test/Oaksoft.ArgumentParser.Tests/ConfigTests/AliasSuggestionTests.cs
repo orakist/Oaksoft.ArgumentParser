@@ -549,7 +549,7 @@ public class AliasSuggestionTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.UnableToSuggestAlias");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(nameof(SampleOptionNames.Val4_));
         info.OptionName.ShouldBe(nameof(SampleOptionNames.Val4_));
@@ -573,7 +573,7 @@ public class AliasSuggestionTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.UnableToSuggestAlias");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(nameof(SampleOptionNames.Val4));
         info.OptionName.ShouldBe(nameof(SampleOptionNames.Val4));
@@ -595,7 +595,7 @@ public class AliasSuggestionTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.UnableToSuggestAlias");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(nameof(SampleOptionNames.Val4_));
         info.OptionName.ShouldBe(nameof(SampleOptionNames.Val4_));
@@ -617,7 +617,7 @@ public class AliasSuggestionTests : ArgumentParserTestBase
         var info = exception.Error;
 
         // Assert
-        info.Error.Code.ShouldBe(BuilderErrors.UnableToSuggestAlias.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.UnableToSuggestAlias");
         info.Values.ShouldHaveSingleItem();
         info.Values.ShouldContain(nameof(SampleOptionNames.V));
         info.OptionName.ShouldBe(nameof(SampleOptionNames.V));

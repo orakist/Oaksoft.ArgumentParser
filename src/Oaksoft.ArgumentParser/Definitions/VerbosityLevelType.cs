@@ -1,5 +1,8 @@
 ﻿namespace Oaksoft.ArgumentParser.Definitions;
 
+/// <summary>
+/// Represents verbosity level enumeration.
+/// </summary>
 public enum VerbosityLevelType
 {
     /// <summary>

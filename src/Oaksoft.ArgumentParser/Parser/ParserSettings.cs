@@ -12,6 +12,8 @@ internal class ParserSettings : IParserSettings
 
     public bool AutoPrintVersion { get; init; }
 
+    public bool AutoPrintArguments { get; init; }
+
     public int HelpDisplayWidth { get; init; }
 
     public bool NewLineAfterOption { get; init; }

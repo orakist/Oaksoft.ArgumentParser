@@ -18,7 +18,9 @@ internal static class Tutorial08
     private static bool TryParseCustom(string value, out double result)
     {
         if (value.StartsWith('(') && value.EndsWith(')'))
+        {
             value = value.Substring(1, value.Length - 2);
+        }
 
         return double.TryParse(value, out result);
     }
@@ -47,7 +49,9 @@ internal static class Tutorial08
         var options = parser.Parse(args);
 
         if (!parser.IsParsed)
+        {
             return;
+        }
 
         var numbers = options.Numbers!.ToList();
         var equation = options.Calculate switch

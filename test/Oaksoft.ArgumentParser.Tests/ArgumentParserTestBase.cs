@@ -4,6 +4,6 @@ public class ArgumentParserTestBase
 {
     static ArgumentParserTestBase()
     {
-        CommandLine.DisableConsoleOutput = true;
+        CommandLine.DisableTextWriter = true;
     }
 }

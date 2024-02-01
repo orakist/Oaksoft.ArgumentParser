@@ -154,7 +154,7 @@ public class DefaultValueConfigurationTests : ArgumentParserTestBase
         var exception = Should.Throw<OptionBuilderException>(() => namedOption.WithDefaultValue(5));
         var info = exception.Error;
 
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.Value));
 
@@ -162,7 +162,7 @@ public class DefaultValueConfigurationTests : ArgumentParserTestBase
         exception = Should.Throw<OptionBuilderException>(() => switchOption.WithDefaultValue(false));
         info = exception.Error;
 
-        info.Error.Code.ShouldBe(BuilderErrors.CannotBeModified.Code);
+        info.Error.Code.ShouldBe("BuilderErrors.CannotBeModified");
         info.Values.ShouldBeNull();
         info.OptionName.ShouldBe(nameof(IntAppOptions.ValueFlag));
     }

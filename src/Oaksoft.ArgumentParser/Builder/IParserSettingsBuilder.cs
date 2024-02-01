@@ -13,19 +13,24 @@ public interface IParserSettingsBuilder
     bool? AutoPrintHeader { get; set; }
 
     /// <summary>
-    /// If true, automatically prints parsing errors to console. Default is true.
+    /// If true, automatically prints parsing errors to the text writer. Default is true.
     /// </summary>
     bool? AutoPrintErrors { get; set; }
 
     /// <summary>
-    /// If true, automatically prints help text to console. Default is true.
+    /// If true, automatically prints help text to the text writer. Default is true.
     /// </summary>
     bool? AutoPrintHelp { get; set; }
 
     /// <summary>
-    /// If true, automatically prints version text to console. Default is true.
+    /// If true, automatically prints version text to the text writer. Default is true.
     /// </summary>
     bool? AutoPrintVersion { get; set; }
+
+    /// <summary>
+    /// If true, automatically prints given arguments to the text writer. Default is false.
+    /// </summary>
+    bool? AutoPrintArguments { get; set; }
 
     /// <summary>
     /// Represents help text width. Default is 80 chars.

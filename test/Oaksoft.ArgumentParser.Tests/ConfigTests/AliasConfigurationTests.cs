@@ -34,6 +34,8 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         namedOption.Aliases.ShouldContain("/v");
         namedOption.Aliases.ShouldContain("/value");
 
+        parser.ContainsOption(namedOption.Alias).ShouldBeTrue();
+
         option = parser.GetOptionByName(nameof(StringAppOptions.NullValues));
         namedOption = option as INamedOption;
         namedOption.ShouldNotBeNull();
@@ -42,6 +44,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         namedOption.Aliases.ShouldContain("--null-value");
         namedOption.Aliases.ShouldContain("/n");
         namedOption.Aliases.ShouldContain("/null-value");
+        parser.ContainsOption(namedOption.Alias).ShouldBeTrue();
 
         option = parser.GetOptionByName(nameof(StringAppOptions.NullValueFlag));
         namedOption = option as INamedOption;
@@ -51,6 +54,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         namedOption.Aliases.ShouldContain("--null-value-flag");
         namedOption.Aliases.ShouldContain("/f");
         namedOption.Aliases.ShouldContain("/null-value-flag");
+        parser.ContainsOption(namedOption.Alias).ShouldBeTrue();
 
         option = parser.GetOptionByName(nameof(StringAppOptions.ValueCount));
         namedOption = option as INamedOption;
@@ -60,6 +64,7 @@ public class AliasConfigurationTests : ArgumentParserTestBase
         namedOption.Aliases.ShouldContain("--value-count");
         namedOption.Aliases.ShouldContain("/c");
         namedOption.Aliases.ShouldContain("/value-count");
+        parser.ContainsOption(namedOption.Alias).ShouldBeTrue();
     }
 
     [Fact]

@@ -17,10 +17,11 @@ public static partial class OptionExtensions
         Expression<Func<TSource, int>> keyPropExpr,
         Action<ICounterOption>? configure = null,
         ArityType optionArity = ArityType.ZeroOrMore)
+        where TSource : new()
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(int).ToString());
+        var keyProperty = keyPropExpr.ValidateExpression(typeof(int).ToString());
 
-        var option = builder.RegisterCounterOption<TSource>(keyProperty, optionArity);
+        var option = builder.RegisterCounterOption(keyProperty, optionArity);
 
         configure?.Invoke(option);
 
@@ -35,10 +36,11 @@ public static partial class OptionExtensions
         Expression<Func<TSource, int?>> keyPropExpr,
         Action<ICounterOption>? configure = null,
         ArityType optionArity = ArityType.ZeroOrMore)
+        where TSource : new()
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(int).ToString());
+        var keyProperty = keyPropExpr.ValidateExpression(typeof(int).ToString());
 
-        var option = builder.RegisterCounterOption<TSource>(keyProperty, optionArity);
+        var option = builder.RegisterCounterOption(keyProperty, optionArity);
 
         configure?.Invoke(option);
 

@@ -8,24 +8,29 @@ namespace Oaksoft.ArgumentParser.Parser;
 public interface IParserSettings
 {
     /// <summary>
-    /// If true, automatically prints application header to console. Default is true.
+    /// If true, automatically prints application header to the text writer. Default is true.
     /// </summary>
     bool AutoPrintHeader { get; }
 
     /// <summary>
-    /// If true, automatically prints parsing errors to console. Default is true.
+    /// If true, automatically prints parsing errors to the text writer. Default is true.
     /// </summary>
     bool AutoPrintErrors { get; }
 
     /// <summary>
-    /// If true, automatically prints help text to console. Default is true.
+    /// If true, automatically prints help text to the text writer. Default is true.
     /// </summary>
     bool AutoPrintHelp { get; }
 
     /// <summary>
-    /// If true, automatically prints version text to console. Default is true.
+    /// If true, automatically prints version text to the text writer. Default is true.
     /// </summary>
     bool AutoPrintVersion { get; }
+
+    /// <summary>
+    /// If true, automatically prints given arguments to the text writer. Default is false.
+    /// </summary>
+    bool AutoPrintArguments { get; }
 
     /// <summary>
     /// Represents help text width. Default is 80 chars.

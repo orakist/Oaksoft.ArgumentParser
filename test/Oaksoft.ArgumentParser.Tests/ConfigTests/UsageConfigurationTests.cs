@@ -29,7 +29,7 @@ public class UsageConfigurationTests : ArgumentParserTestBase
         // Assert
         parser.GetOptions().Count.ShouldBe(4);
         var text = parser.GetHelpText(false);
-
+   
         var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Usage.ShouldBe(usage1);

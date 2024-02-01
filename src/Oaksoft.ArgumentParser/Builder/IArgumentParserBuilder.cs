@@ -33,6 +33,7 @@ public interface IArgumentParserBuilder
 /// <inheritdoc cref="IArgumentParserBuilder"/>
 /// <typeparam name="TOptions">Type of the 'Application Options' class</typeparam>
 public interface IArgumentParserBuilder<out TOptions> : IArgumentParserBuilder
+    where TOptions : new()
 {
     /// <summary>
     /// Configures parser by various configuration settings.

@@ -19,10 +19,11 @@ public static partial class OptionExtensions
         Action<IScalarNamedOption<TValue>>? configure = null,
         bool mustHaveOneValue = true, bool mandatoryOption = false)
         where TValue : IComparable
+        where TSource : new()
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
+        var keyProperty = keyPropExpr.ValidateExpression(typeof(TValue).ToString());
 
-        var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, mustHaveOneValue, mandatoryOption);
+        var option = builder.RegisterNamedOption<TValue>(keyProperty, mustHaveOneValue, mandatoryOption);
 
         configure?.Invoke(option);
 
@@ -38,10 +39,11 @@ public static partial class OptionExtensions
         Action<IScalarNamedOption<TValue>>? configure = null,
         bool mustHaveOneValue = true, bool mandatoryOption = false)
         where TValue : struct, IComparable
+        where TSource : new()
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
+        var keyProperty = keyPropExpr.ValidateExpression(typeof(TValue).ToString());
 
-        var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, mustHaveOneValue, mandatoryOption);
+        var option = builder.RegisterNamedOption<TValue>(keyProperty, mustHaveOneValue, mandatoryOption);
 
         configure?.Invoke(option);
 
@@ -57,10 +59,11 @@ public static partial class OptionExtensions
         Action<ISequentialNamedOption<TValue>>? configure = null, 
         ArityType valueArity = ArityType.ZeroOrMore, ArityType optionArity = ArityType.ZeroOrMore)
         where TValue : IComparable
+        where TSource : new()
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
+        var keyProperty = keyPropExpr.ValidateExpression(typeof(TValue).ToString());
 
-        var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, valueArity, optionArity);
+        var option = builder.RegisterNamedOption<TValue>(keyProperty, valueArity, optionArity);
 
         configure?.Invoke(option);
 
@@ -76,10 +79,11 @@ public static partial class OptionExtensions
         Action<ISequentialNamedOption<TValue>>? configure = null,
         ArityType valueArity = ArityType.ZeroOrMore, ArityType optionArity = ArityType.ZeroOrMore)
         where TValue : struct, IComparable
+        where TSource : new()
     {
-        var keyProperty = builder.ValidateExpression(keyPropExpr, typeof(TValue).ToString());
+        var keyProperty = keyPropExpr.ValidateExpression(typeof(TValue).ToString());
 
-        var option = builder.RegisterNamedOption<TSource, TValue>(keyProperty, valueArity, optionArity);
+        var option = builder.RegisterNamedOption<TValue>(keyProperty, valueArity, optionArity);
 
         configure?.Invoke(option);
 

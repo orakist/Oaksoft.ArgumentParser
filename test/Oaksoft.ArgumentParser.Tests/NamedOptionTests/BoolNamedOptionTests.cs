@@ -26,7 +26,7 @@ public class BoolNamedOptionTests : ArgumentParserTestBase
         var result = sut.Parse(args);
 
         // Assert
-        sut.IsValid.ShouldBeTrue();
+        sut.IsParsed.ShouldBeTrue();
         result.Value.ShouldBeEquivalentTo(val1);
         result.NullValue.ShouldBeEquivalentTo(val2);
     }
@@ -51,10 +51,33 @@ public class BoolNamedOptionTests : ArgumentParserTestBase
         var result = sut.Parse(args);
 
         // Assert
-        sut.IsValid.ShouldBeTrue();
+        sut.IsParsed.ShouldBeTrue();
         result.Value.ShouldBeEquivalentTo(val1);
         result.NullValue.ShouldBeEquivalentTo(val2);
     }
+
+    [Theory]
+    [InlineData(false, null)]
+    [InlineData(false, null, "")]
+    [InlineData(false, null, "", "", default, "")]
+    public void ParseScalarOption_WhenArgumentsValid_WithEmptyArgs(bool val1, bool? val2, params string?[] args)
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<BoolAppOptions>()
+            .AddNamedOption(s => s.Value, o => o.WithDefaultValue(false), mustHaveOneValue: false)
+            .AddNamedOption(s => s.NullValue, o => o.WithDefaultValue(true), mustHaveOneValue: false)
+            .Build();
+
+        // Act
+        var result = sut.Parse(args.Select(d => d!).ToArray());
+
+        // Assert
+        sut.IsValid.ShouldBeTrue();
+        sut.IsEmpty.ShouldBeTrue();
+        result.Value.ShouldBeEquivalentTo(val1);
+        result.NullValue.ShouldBeEquivalentTo(val2);
+    }
+
 
     [Theory]
     [InlineData(false, true, "-v", "-n")]
@@ -62,7 +85,6 @@ public class BoolNamedOptionTests : ArgumentParserTestBase
     [InlineData(false, true, "--value:false", "--null-value:TRUE")]
     [InlineData(false, true, "-n")]
     [InlineData(false, null, "-v")]
-    [InlineData(false, null)]
     [InlineData(true, null, "/v=true")]
     [InlineData(false, true, "/null-value", "TRUE")]
     public void ParseScalarOption_WhenArgumentsValid_WithFlagPropsAndDefaultValue(bool val1, bool? val2, params string[] args)
@@ -77,7 +99,7 @@ public class BoolNamedOptionTests : ArgumentParserTestBase
         var result = sut.Parse(args);
 
         // Assert
-        sut.IsValid.ShouldBeTrue();
+        sut.IsParsed.ShouldBeTrue();
         result.Value.ShouldBeEquivalentTo(val1);
         result.NullValue.ShouldBeEquivalentTo(val2);
     }

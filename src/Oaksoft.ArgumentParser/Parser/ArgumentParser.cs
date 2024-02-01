@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Oaksoft.ArgumentParser.Base;
 using Oaksoft.ArgumentParser.Builder;
 using Oaksoft.ArgumentParser.Definitions;
@@ -11,6 +12,7 @@ namespace Oaksoft.ArgumentParser.Parser;
 
 internal sealed class ArgumentParser<TOptions>
     : BaseArgumentParser, IArgumentParser<TOptions>
+    where TOptions : new()
 {
     public override IParserSettings Settings { get; }
 
@@ -22,12 +24,12 @@ internal sealed class ArgumentParser<TOptions>
 
     private readonly TOptions _appOptions;
 
-    public ArgumentParser(TOptions options, ArgumentParserBuilder<TOptions> builder)
-        : base(builder.CaseSensitive, builder.OptionPrefix, builder.AliasDelimiter, builder.ValueDelimiter)
+    public ArgumentParser(BaseArgumentParserBuilder builder)
+        : base(builder)
     {
         Settings = builder.GetSettings();
 
-        _appOptions = options;
+        _appOptions = new TOptions();
         _baseOptions.AddRange(builder.GetBaseOptions());
     }
 
@@ -65,11 +67,30 @@ internal sealed class ArgumentParser<TOptions>
         });
     }
 
+    public async Task RunAsync(Func<TOptions, Task> callback, params string[] args)
+    {
+        await RunInnerAsync("Type the options or type 'q' to quit; press enter.", args, async () =>
+        {
+            if (IsValid && !IsHelpOption && !IsVersionOption)
+            {
+                await callback.Invoke(_appOptions);
+            }
+        });
+    }
+
     public void Run(Action<IArgumentParser, TOptions> callback, params string[] args)
     {
         RunInner("Type the options or type 'q' to quit; press enter.", args, () =>
         {
             callback.Invoke(this, _appOptions);
+        });
+    }
+
+    public async Task RunAsync(Func<IArgumentParser, TOptions, Task> callback, params string[] args)
+    {
+        await RunInnerAsync("Type the options or type 'q' to quit; press enter.", args, async () =>
+        {
+            await callback.Invoke(this, _appOptions);
         });
     }
 
@@ -84,11 +105,30 @@ internal sealed class ArgumentParser<TOptions>
         });
     }
 
+    public async Task RunAsync(string? comment, Func<TOptions, Task> callback, params string[] args)
+    {
+        await RunInnerAsync(comment, args, async () =>
+        {
+            if (IsValid && !IsHelpOption && !IsVersionOption)
+            {
+                await callback.Invoke(_appOptions);
+            }
+        });
+    }
+
     public void Run(string? comment, Action<IArgumentParser, TOptions> callback, params string[] args)
     {
         RunInner(comment, args, () =>
         {
             callback.Invoke(this, _appOptions);
+        });
+    }
+
+    public async Task RunAsync(string? comment, Func<IArgumentParser, TOptions, Task> callback, params string[] args)
+    {
+        await RunInnerAsync(comment, args, async () =>
+        {
+            await callback.Invoke(this, _appOptions);
         });
     }
 
@@ -103,11 +143,30 @@ internal sealed class ArgumentParser<TOptions>
         });
     }
 
+    public async Task RunOnceAsync(Func<TOptions, Task> callback, params string[] args)
+    {
+        await RunOnceInnerAsync("Type the options; press enter.", args, async () =>
+        {
+            if (IsValid && !IsHelpOption && !IsVersionOption)
+            {
+                await callback.Invoke(_appOptions);
+            }
+        });
+    }
+
     public void RunOnce(Action<IArgumentParser, TOptions> callback, params string[] args)
     {
         RunOnceInner("Type the options; press enter.", args, () =>
         {
             callback.Invoke(this, _appOptions);
+        });
+    }
+
+    public async Task RunOnceAsync(Func<IArgumentParser, TOptions, Task> callback, params string[] args)
+    {
+        await RunOnceInnerAsync("Type the options; press enter.", args, async () =>
+        {
+            await callback.Invoke(this, _appOptions);
         });
     }
 
@@ -122,6 +181,17 @@ internal sealed class ArgumentParser<TOptions>
         });
     }
 
+    public async Task RunOnceAsync(string? comment, Func<TOptions, Task> callback, params string[] args)
+    {
+        await RunOnceInnerAsync(comment, args, async () =>
+        {
+            if (IsValid && !IsHelpOption && !IsVersionOption)
+            {
+                await callback.Invoke(_appOptions);
+            }
+        });
+    }
+
     public void RunOnce(string? comment, Action<IArgumentParser, TOptions> callback, params string[] args)
     {
         RunOnceInner(comment, args, () =>
@@ -130,11 +200,17 @@ internal sealed class ArgumentParser<TOptions>
         });
     }
 
+    public async Task RunOnceAsync(string? comment, Func<IArgumentParser, TOptions, Task> callback, params string[] args)
+    {
+        await RunOnceInnerAsync(comment, args, async () =>
+        {
+            await callback.Invoke(this, _appOptions);
+        });
+    }
+
     private void RunInner(string? comment, string[]? args, Action callback)
     {
-        WriteComment(comment);
-
-        args = InitializeArguments(args);
+        args = InitializeArguments(comment, args);
 
         while (!IsQuitArgument(args))
         {
@@ -144,38 +220,77 @@ internal sealed class ArgumentParser<TOptions>
         }
     }
 
+    private async Task RunInnerAsync(string? comment, string[]? args, Func<Task> callback)
+    {
+        args = await InitializeArgumentsAsync(comment, args);
+
+        while (!IsQuitArgument(args))
+        {
+            await EvaluateArgumentsAsync(args, callback);
+
+            args = await GetInputArgumentsAsync();
+        }
+    }
+
     private void RunOnceInner(string? comment, string[]? args, Action callback)
     {
-        WriteComment(comment);
-
-        args = InitializeArguments(args);
+        args = InitializeArguments(comment, args);
 
         EvaluateArguments(args, callback);
     }
 
-    private static void WriteComment(string? comment)
+    private async Task RunOnceInnerAsync(string? comment, string[]? args, Func<Task> callback)
+    {
+        args = await InitializeArgumentsAsync(comment, args);
+
+        await EvaluateArgumentsAsync(args, callback);
+    }
+
+    private string[] InitializeArguments(string? comment, string[]? args)
     {
         if (!string.IsNullOrWhiteSpace(comment))
         {
-            if (!CommandLine.DisableConsoleOutput)
+            if (!CommandLine.DisableTextWriter)
             {
-                Console.WriteLine(comment);
+                _writer.WriteLine(comment);
             }
         }
-    }
 
-    private string[] InitializeArguments(string[]? args)
-    {
         if (args?.Length > 0)
         {
-            if (!CommandLine.DisableConsoleOutput)
+            if (!CommandLine.DisableTextWriter && Settings.AutoPrintArguments)
             {
-                Console.WriteLine($"./> {string.Join(' ', args)}");
+                _writer.WriteLine($"./> {string.Join(' ', args)}");
             }
         }
         else
         {
             args = GetInputArguments();
+        }
+
+        return args;
+    }
+
+    private async Task<string[]> InitializeArgumentsAsync(string? comment, string[]? args)
+    {
+        if (!string.IsNullOrWhiteSpace(comment))
+        {
+            if (!CommandLine.DisableTextWriter)
+            {
+                await _writer.WriteLineAsync(comment);
+            }
+        }
+
+        if (args?.Length > 0)
+        {
+            if (!CommandLine.DisableTextWriter && Settings.AutoPrintArguments)
+            {
+                await _writer.WriteLineAsync($"./> {string.Join(' ', args)}");
+            }
+        }
+        else
+        {
+            args = await GetInputArgumentsAsync();
         }
 
         return args;
@@ -206,6 +321,31 @@ internal sealed class ArgumentParser<TOptions>
         AutoPrintErrorText();
     }
 
+    private async Task EvaluateArgumentsAsync(string[] args, Func<Task> callback)
+    {
+        ParseTokens(args);
+
+        try
+        {
+            if (!IsEmpty)
+            {
+                await callback.Invoke();
+            }
+        }
+        catch (Exception ex)
+        {
+            var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
+            _errors.Add(error.WithException(ex));
+
+            if (!Settings.AutoPrintErrors)
+            {
+                throw;
+            }
+        }
+
+        AutoPrintErrorText();
+    }
+
     private static bool IsQuitArgument(string[] args)
     {
         if (args.Length != 1)
@@ -219,15 +359,42 @@ internal sealed class ArgumentParser<TOptions>
 
     private string[] GetInputArguments()
     {
-        if (!CommandLine.DisableConsoleOutput)
+        if (!CommandLine.DisableTextWriter)
         {
-            Console.Write("./> ");
+            _writer.Write("./> ");
         }
 
         var commandLine = _reader.ReadLine();
 
-        return commandLine?.SplitToArguments().ToArray() ??
+        var result = commandLine?.SplitToArguments().ToArray() ??
                Array.Empty<string>();
+
+        if (!CommandLine.DisableTextWriter && Settings.AutoPrintArguments)
+        {
+            _writer.WriteLine($"./> {commandLine}");
+        }
+
+        return result;
+    }
+
+    private async Task<string[]> GetInputArgumentsAsync()
+    {
+        if (!CommandLine.DisableTextWriter)
+        {
+            await _writer.WriteAsync("./> ");
+        }
+
+        var commandLine = await _reader.ReadLineAsync();
+
+        var result = commandLine?.SplitToArguments().ToArray() ??
+                     Array.Empty<string>();
+
+        if (!CommandLine.DisableTextWriter && Settings.AutoPrintArguments)
+        {
+            await _writer.WriteLineAsync($"./> {commandLine}");
+        }
+
+        return result;
     }
 
     private void InitializePropertyInfos()

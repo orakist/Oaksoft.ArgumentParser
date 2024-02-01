@@ -3,11 +3,31 @@ using Oaksoft.ArgumentParser.Errors.Builder;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
+using System.Reflection;
 
 namespace Oaksoft.ArgumentParser.Tests.ConfigTests;
 
 public class OptionRegistrationTests : ArgumentParserTestBase
 {
+    [Fact]
+    public void ShouldBuild_WithValidVersionText()
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<IntAppOptions>()
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values);
+
+        // Act
+        var parser = sut.Build();
+        var assembly = Assembly.GetEntryAssembly();
+        var value = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+        // Assert
+        parser.GetOptions().Count.ShouldBe(2);
+        var version = parser.GetVersionText();
+        version.ShouldBe(value);
+    }
+
     [Fact]
     public void ShouldThrowException_WhenTryToAddReservedProperty()
     {
@@ -240,87 +260,341 @@ public class OptionRegistrationTests : ArgumentParserTestBase
     [Theory]
     [InlineData("--value ^5 \"--values 1,3,5\"\n-f -c -c -c\nq")]
     [InlineData("--value ^5 --values 1,3,5\n-f -c -c -c\nquit")]
-    public async Task ShouldRun1_WhenTryToPassInputsByReader(string argument)
+    public void ShouldRun1_WhenTryToPassInputsByReader(string argument)
     {
         // Arrange
-        var sut = CommandLine.CreateParser<StringAppOptions>()
-            .ConfigureSettings(s => s.AutoPrintErrors = false)
+        CommandLine.DisableTextWriter = false;
+        var reader = new StringReader(argument);
+        var writer = new StringWriter();
+
+        var sut = CommandLine.CreateParser<StringAppOptions>(textReader: reader, textWriter: writer)
+            .ConfigureSettings(s =>
+            {
+                s.AutoPrintErrors = false; // to throw user errors
+                s.AutoPrintArguments = true;
+            })
             .AddNamedOption(s => s.Value)
             .AddNamedOption(s => s.Values)
             .AddSwitchOption(s => s.ValueFlag)
             .AddCounterOption(s => s.ValueCount);
 
+        // Act & Assert
+        var loopIndex = 0;
+        var parser = sut.Build();
+
+        parser.Run(opts =>
+        {
+            if (loopIndex == 0)
+            {
+                opts.Value.ShouldBe("5");
+                opts.Values.ShouldBe(new List<string> { "1", "3", "5" });
+            }
+            else
+            {
+                opts.Values.ShouldBeNull();
+                opts.ValueFlag.ShouldBeTrue();
+                opts.ValueCount.ShouldBe(3);
+            }
+
+            ++loopIndex;
+        });
+
+        writer.ToString().ShouldContain("Type the options");
+        writer.ToString().ShouldContain("-value");
+    }
+
+    [Theory]
+    [InlineData("--value ^5 \"--values 1,3,5\"\n-f -c -c -c\nq")]
+    [InlineData("--value ^5 --values 1,3,5\n-f -c -c -c\nquit")]
+    public async Task ShouldRunAsync1_WhenTryToPassInputsByReader(string argument)
+    {
+        // Arrange
+        CommandLine.DisableTextWriter = false;
         var reader = new StringReader(argument);
+        var writer = new StringWriter();
+
+        var sut = CommandLine.CreateParser<StringAppOptions>(textReader: reader, textWriter: writer)
+            .ConfigureSettings(s =>
+            {
+                s.AutoPrintErrors = false; // to throw user errors
+                s.AutoPrintArguments = true;
+            })
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values)
+            .AddSwitchOption(s => s.ValueFlag)
+            .AddCounterOption(s => s.ValueCount);
 
         // Act & Assert
         var loopIndex = 0;
         var parser = sut.Build();
-        parser.SetTextReader(reader);
 
-        var task = Task.Run(() =>
+        await parser.RunAsync(opts =>
         {
-            parser.Run(opts =>
+            if (loopIndex == 0)
             {
-                if (loopIndex == 0)
-                {
-                    opts.Value.ShouldBe("5");
-                    opts.Values.ShouldBe(new List<string> { "1", "3", "5" });
-                }
-                else
-                {
-                    opts.Values.ShouldBeNull();
-                    opts.ValueFlag.ShouldBeTrue();
-                    opts.ValueCount.ShouldBe(3);
-                }
+                opts.Value.ShouldBe("5");
+                opts.Values.ShouldBe(new List<string> { "1", "3", "5" });
+            }
+            else
+            {
+                opts.Values.ShouldBeNull();
+                opts.ValueFlag.ShouldBeTrue();
+                opts.ValueCount.ShouldBe(3);
+            }
 
-                ++loopIndex;
-            });
+            ++loopIndex;
+
+            return Task.CompletedTask;
         });
 
-        await Should.NotThrowAsync(() => task.WaitAsync(TimeSpan.FromSeconds(1)));
+        writer.ToString().ShouldContain("Type the options");
+        writer.ToString().ShouldContain("-value");
+    }
+
+    [Theory]
+    [InlineData("--value 5")]
+    [InlineData("--values 1,3,5")]
+    [InlineData("--null-value-flag")]
+    public void ShouldRunOnce1_WhenTryToPassInputsByReader(string argument)
+    {
+        // Arrange
+        CommandLine.DisableTextWriter = false;
+        var reader = new StringReader(argument);
+        var writer = new StringWriter();
+
+        var sut = CommandLine.CreateParser<StringAppOptions>(textReader: reader, textWriter: writer)
+            .ConfigureSettings(s =>
+            {
+                s.AutoPrintErrors = false; // to throw user errors
+                s.AutoPrintArguments = true;
+            })
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values)
+            .AddSwitchOption(s => s.NullValueFlag);
+
+        // Act & Assert
+        var parser = sut.Build();
+        parser.RunOnce(opts =>
+        {
+            opts.Value.ShouldBeOneOf("5", null);
+            opts.Values?.ShouldBe(new List<string> { "1", "3", "5" });
+        });
+
+        parser.IsParsed.ShouldBeTrue();
+        writer.ToString().ShouldContain("Type the options");
+        writer.ToString().ShouldContain("-value");
+    }
+
+    [Theory]
+    [InlineData("--value 5")]
+    [InlineData("--values 1,3,5")]
+    [InlineData("--null-value-flag")]
+    public async Task ShouldRunOnceAsync1_WhenTryToPassInputsByReader(string argument)
+    {
+        // Arrange
+        CommandLine.DisableTextWriter = false;
+        var reader = new StringReader(argument);
+        var writer = new StringWriter();
+
+        var sut = CommandLine.CreateParser<StringAppOptions>(textReader: reader, textWriter: writer)
+            .ConfigureSettings(s =>
+            {
+                s.AutoPrintErrors = false; // to throw user errors
+                s.AutoPrintArguments = true;
+            })
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values)
+            .AddSwitchOption(s => s.NullValueFlag);
+
+        // Act & Assert
+        var parser = sut.Build();
+        await parser.RunOnceAsync(opts =>
+        {
+            opts.Value.ShouldBeOneOf("5", null);
+            opts.Values?.ShouldBe(new List<string> { "1", "3", "5" });
+            return Task.CompletedTask;
+        });
+
+        parser.IsParsed.ShouldBeTrue();
+        writer.ToString().ShouldContain("Type the options");
+        writer.ToString().ShouldContain("-value");
     }
 
     [Theory]
     [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nq")]
     [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nquit")]
-    public async Task ShouldRun1_WhenTryToPassInputsByReaderWithComment(string argument)
+    public void ShouldRun1_WhenTryToPassInputsByReaderWithComment(string argument)
     {
         // Arrange
+        CommandLine.DisableTextWriter = false;
         var sut = CommandLine.CreateParser<DoubleAppOptions>()
-            .ConfigureSettings(s => s.AutoPrintErrors = false)
+            .ConfigureSettings(s =>
+            {
+                s.AutoPrintErrors = false; // to throw user errors
+                s.AutoPrintArguments = true;
+            })
             .AddNamedOption(s => s.Value)
             .AddNamedOption(s => s.Values)
             .AddSwitchOption(s => s.ValueFlag)
             .AddCounterOption(s => s.ValueCount);
 
         var reader = new StringReader(argument);
+        var writer = new StringWriter();
 
         // Act & Assert
         var loopIndex = 0;
         var parser = sut.Build();
         parser.SetTextReader(reader);
+        parser.SetTextWriter(writer);
 
-        var task = Task.Run(() =>
+        parser.Run("Dummy Comment", opts =>
         {
-            parser.Run("Dummy Comment", opts =>
+            if (loopIndex == 0)
             {
-                if (loopIndex == 0)
-                {
-                    opts.Value.ShouldBe(5);
-                    opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
-                }
-                else
-                {
-                    opts.Values.ShouldBeNull();
-                    opts.ValueFlag.ShouldBeTrue();
-                    opts.ValueCount.ShouldBe(3);
-                }
+                opts.Value.ShouldBe(5);
+                opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
+            }
+            else
+            {
+                opts.Values.ShouldBeNull();
+                opts.ValueFlag.ShouldBeTrue();
+                opts.ValueCount.ShouldBe(3);
+            }
 
-                ++loopIndex;
-            });
+            ++loopIndex;
         });
 
-        await Should.NotThrowAsync(() => task.WaitAsync(TimeSpan.FromSeconds(1)));
+        writer.ToString().ShouldContain("Dummy Comment");
+        writer.ToString().ShouldContain("-value");
+    }
+
+    [Theory]
+    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nq")]
+    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nquit")]
+    public async Task ShouldRunAsync1_WhenTryToPassInputsByReaderWithComment(string argument)
+    {
+        // Arrange
+        CommandLine.DisableTextWriter = false;
+        var sut = CommandLine.CreateParser<DoubleAppOptions>()
+            .ConfigureSettings(s =>
+            {
+                s.AutoPrintErrors = false; // to throw user errors
+                s.AutoPrintArguments = true;
+            })
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values)
+            .AddSwitchOption(s => s.ValueFlag)
+            .AddCounterOption(s => s.ValueCount);
+
+        var reader = new StringReader(argument);
+        var writer = new StringWriter();
+
+        // Act & Assert
+        var loopIndex = 0;
+        var parser = sut.Build();
+        parser.SetTextReader(reader);
+        parser.SetTextWriter(writer);
+
+        await parser.RunAsync("Dummy Comment", opts =>
+        {
+            if (loopIndex == 0)
+            {
+                opts.Value.ShouldBe(5);
+                opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
+            }
+            else
+            {
+                opts.Values.ShouldBeNull();
+                opts.ValueFlag.ShouldBeTrue();
+                opts.ValueCount.ShouldBe(3);
+            }
+
+            ++loopIndex;
+
+            return Task.CompletedTask;
+        });
+
+        writer.ToString().ShouldContain("Dummy Comment");
+        writer.ToString().ShouldContain("-value");
+    }
+
+    [Theory]
+    [InlineData("--null-value 5")]
+    [InlineData("--values 1,3,5")]
+    [InlineData("--null-value-flag")]
+    public void ShouldRunOnce1_WhenTryToPassInputsByReaderWithComment(string argument)
+    {
+        // Arrange
+        CommandLine.DisableTextWriter = false;
+        var sut = CommandLine.CreateParser<DoubleAppOptions>()
+            .ConfigureSettings(s =>
+            {
+                s.AutoPrintErrors = false; // to throw user errors
+                s.AutoPrintArguments = true;
+            })
+            .AddNamedOption(s => s.NullValue)
+            .AddNamedOption(s => s.Values)
+            .AddSwitchOption(s => s.NullValueFlag);
+
+        var reader = new StringReader(argument);
+        var writer = new StringWriter();
+
+        // Act & Assert
+        var parser = sut.Build();
+        parser.SetTextReader(reader);
+        parser.SetTextWriter(writer);
+
+        parser.RunOnce("Dummy Comment", opts =>
+        {
+            opts.NullValue.ShouldBeOneOf(5, null);
+            if (opts.Values is null)
+                return;
+
+            opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
+        });
+
+        parser.IsParsed.ShouldBeTrue();
+        writer.ToString().ShouldContain("Dummy Comment");
+        writer.ToString().ShouldContain("-value");
+    }
+
+    [Theory]
+    [InlineData("--null-value 5")]
+    [InlineData("--values 1,3,5")]
+    [InlineData("--null-value-flag")]
+    public async Task ShouldRunOnceAsync1_WhenTryToPassInputsByReaderWithComment(string argument)
+    {
+        // Arrange
+        CommandLine.DisableTextWriter = false;
+        var sut = CommandLine.CreateParser<DoubleAppOptions>()
+            .ConfigureSettings(s =>
+            {
+                s.AutoPrintErrors = false; // to throw user errors
+                s.AutoPrintArguments = true;
+            })
+            .AddNamedOption(s => s.NullValue)
+            .AddNamedOption(s => s.Values)
+            .AddSwitchOption(s => s.NullValueFlag);
+
+        var reader = new StringReader(argument);
+        var writer = new StringWriter();
+
+        // Act & Assert
+        var parser = sut.Build();
+        parser.SetTextReader(reader);
+        parser.SetTextWriter(writer);
+
+        await parser.RunOnceAsync("Dummy Comment", opts =>
+        {
+            opts.NullValue.ShouldBeOneOf(5, null);
+            opts.Values?.ShouldBe(new List<double> { 1, 3, 5 });
+
+            return Task.CompletedTask;
+        });
+
+        parser.IsParsed.ShouldBeTrue();
+        writer.ToString().ShouldContain("Dummy Comment");
+        writer.ToString().ShouldContain("-value");
     }
 
     [Theory]
@@ -472,6 +746,115 @@ public class OptionRegistrationTests : ArgumentParserTestBase
     [Theory]
     [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nq")]
     [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nquit")]
+    public async Task ShouldRunAsync2_WhenTryToPassInputsByReaderWithComment(string argument)
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<DoubleAppOptions>()
+            .ConfigureSettings(s => s.AutoPrintErrors = false)
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values)
+            .AddSwitchOption(s => s.ValueFlag)
+            .AddCounterOption(s => s.ValueCount);
+
+        var reader = new StringReader(argument);
+
+        // Act & Assert
+        var loopIndex = 0;
+        var parser = sut.Build();
+        parser.SetTextReader(reader);
+
+        var task = parser.RunAsync("Dummy Comment", (prsr, opts) =>
+        {
+            prsr.IsValid.ShouldBeTrue();
+            if (loopIndex == 0)
+            {
+                opts.Value.ShouldBe(5);
+                opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
+            }
+            else
+            {
+                opts.Values.ShouldBeNull();
+                opts.ValueFlag.ShouldBeTrue();
+                opts.ValueCount.ShouldBe(3);
+            }
+
+            ++loopIndex;
+            return Task.CompletedTask;
+        });
+
+        await Should.NotThrowAsync(() => task.WaitAsync(TimeSpan.FromSeconds(1)));
+
+        var opts = parser.GetApplicationOptions();
+        opts.Values.ShouldBeNull();
+        opts.ValueFlag.ShouldBeTrue();
+        opts.ValueCount.ShouldBe(3);
+    }
+
+    [Theory]
+    [InlineData("--values=1,3,5 --value=5")]
+    [InlineData("--value 5 --values 1,3,5")]
+    public void ShouldRunOnce2_WhenTryToPassInputsByReaderWithComment(string argument)
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<DoubleAppOptions>()
+            .ConfigureSettings(s => s.AutoPrintErrors = false)
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values);
+
+        var reader = new StringReader(argument);
+
+        // Act & Assert
+        var parser = sut.Build();
+        parser.SetTextReader(reader);
+
+        parser.RunOnce("Dummy Comment", (prsr, opts) =>
+        {
+            prsr.IsValid.ShouldBeTrue();
+            opts.Value.ShouldBe(5);
+            opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
+        });
+
+        var opts = parser.GetApplicationOptions();
+        parser.IsParsed.ShouldBeTrue();
+        opts.Value.ShouldBe(5);
+        opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
+    }
+
+    [Theory]
+    [InlineData("--values=1,3,5 --value=5")]
+    [InlineData("--value 5 --values 1,3,5")]
+    public async Task ShouldRunOnceAsync2_WhenTryToPassInputsByReaderWithComment(string argument)
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<DoubleAppOptions>()
+            .ConfigureSettings(s => s.AutoPrintErrors = false)
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values);
+
+        var reader = new StringReader(argument);
+
+        // Act & Assert
+        var parser = sut.Build();
+        parser.SetTextReader(reader);
+
+        await parser.RunOnceAsync("Dummy Comment", (prsr, opts) =>
+        {
+            prsr.IsValid.ShouldBeTrue();
+            opts.Value.ShouldBe(5);
+            opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
+
+            return Task.CompletedTask;
+        });
+
+        var opts = parser.GetApplicationOptions();
+        parser.IsParsed.ShouldBeTrue();
+        opts.Value.ShouldBe(5);
+        opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
+    }
+
+    [Theory]
+    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nq")]
+    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nquit")]
     public async Task ShouldRun2_WhenTryToPassInputsByReaderAndArguments(string argument)
     {
         // Arrange
@@ -546,6 +929,90 @@ public class OptionRegistrationTests : ArgumentParserTestBase
         {
             parser.Run((_, _) => throw new NotImplementedException(), "-v3", "--values:1,2,3");
         });
+
+        await Should.ThrowAsync<Exception>(() => task.WaitAsync(TimeSpan.FromSeconds(1)));
+
+        parser.IsValid.ShouldBeFalse();
+        parser.Errors.Count.ShouldBe(1);
+    }
+
+    [Theory]
+    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nq")]
+    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nquit")]
+    public async Task ShouldRunAsync2_WhenThrowingException(string argument)
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<DoubleAppOptions>()
+            .ConfigureSettings(s => s.AutoPrintErrors = false)
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values)
+            .AddSwitchOption(s => s.ValueFlag)
+            .AddCounterOption(s => s.ValueCount);
+
+        var reader = new StringReader(argument);
+
+        // Act & Assert
+        var parser = sut.Build();
+        parser.SetTextReader(reader);
+
+        var task = parser.RunAsync((_, _) => throw new NotImplementedException(), "-v3", "--values:1,2,3");
+
+        await Should.ThrowAsync<Exception>(() => task.WaitAsync(TimeSpan.FromSeconds(1)));
+
+        parser.IsValid.ShouldBeFalse();
+        parser.Errors.Count.ShouldBe(1);
+    }
+
+    [Theory]
+    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nq")]
+    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nquit")]
+    public async Task ShouldRunOnce2_WhenThrowingException(string argument)
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<DoubleAppOptions>()
+            .ConfigureSettings(s => s.AutoPrintErrors = false)
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values)
+            .AddSwitchOption(s => s.ValueFlag)
+            .AddCounterOption(s => s.ValueCount);
+
+        var reader = new StringReader(argument);
+
+        // Act & Assert
+        var parser = sut.Build();
+        parser.SetTextReader(reader);
+
+        var task = Task.Run(() =>
+        {
+            parser.RunOnce((_, _) => throw new NotImplementedException(), "-v3", "--values:1,2,3");
+        });
+
+        await Should.ThrowAsync<Exception>(() => task.WaitAsync(TimeSpan.FromSeconds(1)));
+
+        parser.IsValid.ShouldBeFalse();
+        parser.Errors.Count.ShouldBe(1);
+    }
+
+    [Theory]
+    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nq")]
+    [InlineData("--value 5 --values 1,3,5\n-f -c -c -c\nquit")]
+    public async Task ShouldRunOnceAsync2_WhenThrowingException(string argument)
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<DoubleAppOptions>()
+            .ConfigureSettings(s => s.AutoPrintErrors = false)
+            .AddNamedOption(s => s.Value)
+            .AddNamedOption(s => s.Values)
+            .AddSwitchOption(s => s.ValueFlag)
+            .AddCounterOption(s => s.ValueCount);
+
+        var reader = new StringReader(argument);
+
+        // Act & Assert
+        var parser = sut.Build();
+        parser.SetTextReader(reader);
+
+        var task = parser.RunOnceAsync((_, _) => throw new NotImplementedException(), "-v3", "--values:1,2,3");
 
         await Should.ThrowAsync<Exception>(() => task.WaitAsync(TimeSpan.FromSeconds(1)));
 

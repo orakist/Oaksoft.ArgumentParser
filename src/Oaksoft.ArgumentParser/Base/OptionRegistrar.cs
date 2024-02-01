@@ -150,19 +150,27 @@ internal static class OptionRegistrar
         {
             var genericType = typeof(List<>).MakeGenericType(valueType);
             if (propType.IsAssignableFrom(genericType))
+            {
                 return (optionType, true);
+            }
 
             genericType = valueType.MakeArrayType();
             if (propType.IsAssignableFrom(genericType))
+            {
                 return (optionType, true);
+            }
 
             genericType = typeof(Collection<>).MakeGenericType(valueType);
             if (propType.IsAssignableFrom(genericType))
+            {
                 return (optionType, true);
+            }
 
             genericType = typeof(HashSet<>).MakeGenericType(valueType);
             if (propType.IsAssignableFrom(genericType))
+            {
                 return (optionType, true);
+            }
 
             return (null, true);
         }
@@ -173,13 +181,19 @@ internal static class OptionRegistrar
     private static bool IsSequentialPropertyType(Type propType)
     {
         if (propType == typeof(string))
+        {
             return false;
+        }
 
         if (propType.IsGenericType && propType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+        {
             return true;
+        }
 
         if (propType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+        {
             return true;
+        }
 
         return false;
     }

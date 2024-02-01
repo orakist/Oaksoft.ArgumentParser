@@ -38,7 +38,9 @@ internal static class Tutorial04
         var options = parser.Parse(args);
 
         if (!parser.IsParsed)
+        {
             return;
+        }
 
         var result = options.Calculate?.ToUpperInvariant() switch
         {

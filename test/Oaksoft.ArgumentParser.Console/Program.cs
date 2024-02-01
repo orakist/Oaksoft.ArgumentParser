@@ -26,15 +26,22 @@ internal static class Program
     private static void EvaluateOptions(IArgumentParser parser, CalculatorOptions options)
     {
         if (!parser.IsParsed || options.Operator == null)
+        {
             return;
+        }
 
         var numbers = new List<double>();
         if (options.LeftOperand.HasValue || options.RightOperand.HasValue)
         {
             if (options.LeftOperand.HasValue)
+            {
                 numbers.Add(options.LeftOperand.Value);
+            }
+
             if (options.RightOperand.HasValue)
+            {
                 numbers.Add(options.RightOperand.Value);
+            }
         }
         else
         {

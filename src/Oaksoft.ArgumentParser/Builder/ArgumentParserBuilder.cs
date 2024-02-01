@@ -55,7 +55,9 @@ internal sealed class ArgumentParserBuilder<TOptions>
         {
             var (optionType, isSequential) = property.GetOptionType();
             if (optionType == null)
+            {
                 continue;
+            }
 
             if (isSequential)
             {

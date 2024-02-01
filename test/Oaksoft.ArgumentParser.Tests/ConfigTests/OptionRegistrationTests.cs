@@ -548,7 +548,9 @@ public class OptionRegistrationTests : ArgumentParserTestBase
         {
             opts.NullValue.ShouldBeOneOf(5, null);
             if (opts.Values is null)
+            {
                 return;
+            }
 
             opts.Values.ShouldBe(new List<double> { 1, 3, 5 });
         });

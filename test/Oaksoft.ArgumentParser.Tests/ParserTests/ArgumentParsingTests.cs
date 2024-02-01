@@ -74,7 +74,9 @@ public class ArgumentParsingTests : ArgumentParserTestBase
             }
 
             if (args.Length < 3)
+            {
                 return;
+            }
 
             if (isSecondValid)
             {
@@ -120,7 +122,9 @@ public class ArgumentParsingTests : ArgumentParserTestBase
         sut.Errors[0].Message.ShouldBe(string.Format(sut.Errors[0].Error.Format, args[0]));
 
         if (args.Length < 3)
+        {
             return;
+        }
 
         isDoubleDash = args[2].StartsWith("--");
         sut.Errors[1].Error.Code.ShouldBe(isDoubleDash ? "ParserErrors.InvalidDoubleDashToken" : "ParserErrors.InvalidSingleDashToken");
@@ -162,7 +166,9 @@ public class ArgumentParsingTests : ArgumentParserTestBase
         valueOption.ValueTokens.ShouldContain(args[1]);
 
         if (args.Length < 3)
+        {
             return;
+        }
 
         option = sut.GetOptionByAlias(args[2]);
         option.ShouldNotBeNull();

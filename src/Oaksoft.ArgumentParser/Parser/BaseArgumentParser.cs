@@ -661,7 +661,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
             }
 
             if (VerbosityLevel < VerbosityLevelType.Minimal)
+            {
                 break;
+            }
         }
 
         return sb;
@@ -676,7 +678,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             RemoveIrrelevantErrors(isAllTokensParsed, nameof(IBuiltInOptions.Help));
             if (_errors.All(s => s.OptionName != null))
+            {
                 return;
+            }
         }
 
         if (help.OptionTokens.Count > 0)
@@ -692,7 +696,9 @@ internal abstract class BaseArgumentParser : IArgumentParser
         {
             RemoveIrrelevantErrors(isAllTokensParsed, nameof(IBuiltInOptions.Version));
             if (_errors.All(s => s.OptionName != null))
+            {
                 return;
+            }
         }
 
         if (version.OptionTokens.Count > 0)

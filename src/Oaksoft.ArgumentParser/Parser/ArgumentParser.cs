@@ -349,10 +349,14 @@ internal sealed class ArgumentParser<TOptions>
     private static bool IsQuitArgument(string[] args)
     {
         if (args.Length != 1)
+        {
             return false;
+        }
 
         if (args[0].Equals("q", StringComparison.OrdinalIgnoreCase))
+        {
             return true;
+        }
 
         return args[0].Equals("quit", StringComparison.OrdinalIgnoreCase);
     }

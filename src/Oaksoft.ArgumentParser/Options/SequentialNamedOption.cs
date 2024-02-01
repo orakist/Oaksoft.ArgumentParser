@@ -91,7 +91,7 @@ internal sealed class SequentialNamedOption<TValue>
 
         if (string.IsNullOrWhiteSpace(Usage))
         {
-            Usage = $"{Alias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
+            Usage = $"{Alias}{(ValueArity.Min > 0 ? " <values>" : " (values)")}";
         }
 
         if (string.IsNullOrWhiteSpace(Description))

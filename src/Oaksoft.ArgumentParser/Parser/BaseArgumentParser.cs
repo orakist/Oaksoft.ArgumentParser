@@ -491,14 +491,26 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 continue;
             }
 
+            var lineCount = 0;
             sb.Pastel($"  {option.Alias.PadRight(padLength, ' ')} ", ConsoleColor.DarkGreen);
-            sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
-            sb.AppendLine(option.Usage);
+
+            if (option.Usage != option.Alias)
+            {
+                sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
+                sb.AppendLine(option.Usage);
+                ++lineCount;
+            }
 
             if (option.Aliases.Count > 1)
             {
-                sb.Pastel($"  {paddingString} Aliases:", ConsoleColor.DarkYellow);
-                sb.AppendLine($" {string.Join(", ", option.Aliases)}");
+                if (lineCount > 0)
+                {
+                    sb.Append($"  {paddingString} ");
+                }
+
+                sb.Pastel("Aliases: ", ConsoleColor.DarkYellow);
+                sb.AppendLine(string.Join(", ", option.Aliases));
+                ++lineCount;
             }
 
             var descBuilder = new StringBuilder();
@@ -531,7 +543,15 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 var words = descBuilder.ToString().Split(' ');
                 var lines = CreateLinesByWidth(words, lineLength);
-                foreach (var line in lines)
+
+                if (lineCount > 0)
+                {
+                    sb.Append($"  {paddingString} ");
+                }
+
+                sb.AppendLine(lines[0]);
+
+                foreach (var line in lines.Skip(1))
                 {
                     sb.AppendLine($"  {paddingString} {line}");
                 }

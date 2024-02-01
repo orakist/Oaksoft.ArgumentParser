@@ -148,7 +148,7 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
     TOptions Parse(params string[] args);
 
     /// <summary>
-    /// Runs a parser loop to parse given arguments. At each step of the loop,
+    /// Runs a parser loop to parse given 'args' or console inputs. At each step of the loop,
     /// after arguments are parsed successfully, invokes the given callback function by passing parsed option values. 
     /// </summary>
     /// <param name="callback">Parser invokes this callback after each successful parsing.</param>
@@ -156,15 +156,15 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
     void Run(Action<TOptions> callback, params string[] args);
 
     /// <summary>
-    /// Runs a parser loop to parse given arguments. At each step of the loop,
+    /// Runs a parser loop to parse given 'args' or console inputs. At each step of the loop,
     /// after arguments are parsed, it invokes the given callback delegate by passing parsed option values. 
     /// </summary>
     /// <param name="callback">Parser invokes this callback after each parsing.</param>
     /// <param name="args">Arguments to parse</param>
-    void Run(Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args);
+    void Run(Action<IArgumentParser, TOptions> callback, params string[] args);
 
     /// <summary>
-    /// Runs a parser loop to parse given arguments. At each step of the loop,
+    /// Runs a parser loop to parse given 'args' or console inputs. At each step of the loop,
     /// after arguments are parsed successfully, invokes the given callback function by passing parsed option values. 
     /// </summary>
     /// <param name="comment">Prompted text</param>
@@ -173,11 +173,45 @@ public interface IArgumentParser<out TOptions> : IArgumentParser
     void Run(string? comment, Action<TOptions> callback, params string[] args);
 
     /// <summary>
-    /// Runs a parser loop to parse given arguments. At each step of the loop,
+    /// Runs a parser loop to parse given 'args' or console inputs. At each step of the loop,
     /// after arguments are parsed, it invokes the given callback delegate by passing parsed option values. 
     /// </summary>
     /// <param name="comment">Prompted text</param>
     /// <param name="callback">Parser invokes this callback after each parsing.</param>
     /// <param name="args">Arguments to parse</param>
-    void Run(string? comment, Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args);
+    void Run(string? comment, Action<IArgumentParser, TOptions> callback, params string[] args);
+
+    /// <summary>
+    /// Runs parser only once to parse given 'args' or console inputs. After arguments are parsed successfully,
+    /// invokes the given callback function by passing parsed option values. 
+    /// </summary>
+    /// <param name="callback">Parser invokes this callback after each successful parsing.</param>
+    /// <param name="args">Arguments to parse</param>
+    void RunOnce(Action<TOptions> callback, params string[] args);
+
+    /// <summary>
+    /// Runs parser only once to parse given 'args' or console inputs. After arguments are parsed,
+    /// it invokes the given callback delegate by passing parsed option values. 
+    /// </summary>
+    /// <param name="callback">Parser invokes this callback after each parsing.</param>
+    /// <param name="args">Arguments to parse</param>
+    void RunOnce(Action<IArgumentParser, TOptions> callback, params string[] args);
+
+    /// <summary>
+    /// Runs parser only once to parse given 'args' or console inputs. After arguments are parsed successfully,
+    /// invokes the given callback function by passing parsed option values. 
+    /// </summary>
+    /// <param name="comment">Prompted text</param>
+    /// <param name="callback">Parser invokes this callback after each successful parsing.</param>
+    /// <param name="args">Arguments to parse</param>
+    void RunOnce(string? comment, Action<TOptions> callback, params string[] args);
+
+    /// <summary>
+    /// Runs parser only once to parse given 'args' or console inputs. After arguments are parsed,
+    /// it invokes the given callback delegate by passing parsed option values.
+    /// </summary>
+    /// <param name="comment">Prompted text</param>
+    /// <param name="callback">Parser invokes this callback after each parsing.</param>
+    /// <param name="args">Arguments to parse</param>
+    void RunOnce(string? comment, Action<IArgumentParser, TOptions> callback, params string[] args);
 }

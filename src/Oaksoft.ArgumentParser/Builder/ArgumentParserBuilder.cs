@@ -328,4 +328,3 @@ internal sealed class ArgumentParserBuilder<TOptions> : IArgumentParserBuilder<T
         return string.IsNullOrWhiteSpace(description) ? null : description;
     }
 }
-

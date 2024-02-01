@@ -23,7 +23,7 @@ internal static class Program
         }
     }
 
-    private static void EvaluateOptions(IArgumentParser<CalculatorOptions> parser, CalculatorOptions options)
+    private static void EvaluateOptions(IArgumentParser parser, CalculatorOptions options)
     {
         if (!parser.IsParsed || options.Operator == null)
             return;

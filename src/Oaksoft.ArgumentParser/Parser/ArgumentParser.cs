@@ -65,7 +65,7 @@ internal sealed class ArgumentParser<TOptions>
         });
     }
 
-    public void Run(Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args)
+    public void Run(Action<IArgumentParser, TOptions> callback, params string[] args)
     {
         RunInner("Type the options or type 'q' to quit; press enter.", args, () =>
         {
@@ -84,7 +84,7 @@ internal sealed class ArgumentParser<TOptions>
         });
     }
 
-    public void Run(string? comment, Action<IArgumentParser<TOptions>, TOptions> callback, params string[] args)
+    public void Run(string? comment, Action<IArgumentParser, TOptions> callback, params string[] args)
     {
         RunInner(comment, args, () =>
         {
@@ -92,7 +92,68 @@ internal sealed class ArgumentParser<TOptions>
         });
     }
 
+    public void RunOnce(Action<TOptions> callback, params string[] args)
+    {
+        RunOnceInner("Type the options; press enter.", args, () =>
+        {
+            if (IsValid && !IsHelpOption && !IsVersionOption)
+            {
+                callback.Invoke(_appOptions);
+            }
+        });
+    }
+
+    public void RunOnce(Action<IArgumentParser, TOptions> callback, params string[] args)
+    {
+        RunOnceInner("Type the options; press enter.", args, () =>
+        {
+            callback.Invoke(this, _appOptions);
+        });
+    }
+
+    public void RunOnce(string? comment, Action<TOptions> callback, params string[] args)
+    {
+        RunOnceInner(comment, args, () =>
+        {
+            if (IsValid && !IsHelpOption && !IsVersionOption)
+            {
+                callback.Invoke(_appOptions);
+            }
+        });
+    }
+
+    public void RunOnce(string? comment, Action<IArgumentParser, TOptions> callback, params string[] args)
+    {
+        RunOnceInner(comment, args, () =>
+        {
+            callback.Invoke(this, _appOptions);
+        });
+    }
+
     private void RunInner(string? comment, string[]? args, Action callback)
+    {
+        WriteComment(comment);
+
+        args = InitializeArguments(args);
+
+        while (!IsQuitArgument(args))
+        {
+            EvaluateArguments(args, callback);
+
+            args = GetInputArguments();
+        }
+    }
+
+    private void RunOnceInner(string? comment, string[]? args, Action callback)
+    {
+        WriteComment(comment);
+
+        args = InitializeArguments(args);
+
+        EvaluateArguments(args, callback);
+    }
+
+    private static void WriteComment(string? comment)
     {
         if (!string.IsNullOrWhiteSpace(comment))
         {
@@ -101,7 +162,10 @@ internal sealed class ArgumentParser<TOptions>
                 Console.WriteLine(comment);
             }
         }
+    }
 
+    private string[] InitializeArguments(string[]? args)
+    {
         if (args?.Length > 0)
         {
             if (!CommandLine.DisableConsoleOutput)
@@ -114,32 +178,32 @@ internal sealed class ArgumentParser<TOptions>
             args = GetInputArguments();
         }
 
-        while (!IsQuitArgument(args))
+        return args;
+    }
+
+    private void EvaluateArguments(string[] args, Action callback)
+    {
+        ParseTokens(args);
+
+        try
         {
-            ParseTokens(args);
-
-            try
+            if (!IsEmpty)
             {
-                if (!IsEmpty)
-                {
-                    callback.Invoke();
-                }
+                callback.Invoke();
             }
-            catch (Exception ex)
-            {
-                var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
-                _errors.Add(error.WithException(ex));
-
-                if (!Settings.AutoPrintErrors)
-                {
-                    throw;
-                }
-            }
-
-            AutoPrintErrorText();
-
-            args = GetInputArguments();
         }
+        catch (Exception ex)
+        {
+            var error = new ErrorInfo($"{ParserErrors.Name}.RunCallbackError", ex.Message);
+            _errors.Add(error.WithException(ex));
+
+            if (!Settings.AutoPrintErrors)
+            {
+                throw;
+            }
+        }
+
+        AutoPrintErrorText();
     }
 
     private static bool IsQuitArgument(string[] args)

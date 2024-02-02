@@ -14,13 +14,14 @@ namespace Oaksoft.ArgumentParser.Base;
 
 internal static class OptionRegistrar
 {
-    public static ISwitchOption RegisterSwitchOption(
+    public static IScalarNamedOption<bool> RegisterSwitchOption(
         this IArgumentParserBuilder builder, PropertyInfo keyProperty, bool mandatoryOption)
     {
         var optionLimits = mandatoryOption.GetLimits();
-        var option = new SwitchOption(optionLimits.Min, optionLimits.Max);
+        var option = new ScalarNamedOption<bool>(optionLimits.Min, optionLimits.Max, 0, 0);
 
         builder.RegisterOptionProperty(option, keyProperty);
+        option.SetDefaultValue(true);
 
         return option;
     }

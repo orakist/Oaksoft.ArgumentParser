@@ -290,9 +290,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private void ParseOptions(TokenItem[] tokens)
     {
         var orderedOptions = new List<BaseOption>();
-        orderedOptions.AddRange(_baseOptions.Where(o => o is ISwitchOption));
         orderedOptions.AddRange(_baseOptions.Where(o => o is ICounterOption));
-        orderedOptions.AddRange(_baseOptions.Where(o => o is IScalarNamedOption and not ISwitchOption));
+        orderedOptions.AddRange(_baseOptions.Where(o => o is IScalarNamedOption));
         orderedOptions.AddRange(_baseOptions.Where(o => o is ISequentialNamedOption));
         orderedOptions.AddRange(_baseOptions.Where(o => o is not INamedOption));
 
@@ -368,7 +367,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
 
         _writer.Write(BuildHeaderText(true, true).ToString());
-        _writer.WriteLine();
     }
 
     private void AutoPrintHelpText()
@@ -388,8 +386,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
         }
 
-        _writer.Write(AssemblyHelper.GetAssemblyVersion());
-        _writer.WriteLine();
+        _writer.WriteLine(AssemblyHelper.GetAssemblyVersion());
     }
 
     protected void AutoPrintErrorText()
@@ -400,7 +397,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
 
         _writer.Write(BuildErrorText(Settings.EnableColoring).ToString());
-        _writer.WriteLine();
     }
 
     private StringBuilder BuildHeaderText(bool showTitle, bool showDescription, bool showSectionName = false)
@@ -491,14 +487,26 @@ internal abstract class BaseArgumentParser : IArgumentParser
                 continue;
             }
 
+            var lineCount = 0;
             sb.Pastel($"  {option.Alias.PadRight(padLength, ' ')} ", ConsoleColor.DarkGreen);
-            sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
-            sb.AppendLine(option.Usage);
 
-            if (option.Aliases.Count > 1)
+            if (VerbosityLevel >= VerbosityLevelType.Detailed || option.Usage != option.Alias)
             {
-                sb.Pastel($"  {paddingString} Aliases:", ConsoleColor.DarkYellow);
-                sb.AppendLine($" {string.Join(", ", option.Aliases)}");
+                sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
+                sb.AppendLine(option.Usage);
+                ++lineCount;
+            }
+
+            if (VerbosityLevel >= VerbosityLevelType.Detailed || option.Aliases.Count > 1)
+            {
+                if (lineCount > 0)
+                {
+                    sb.Append($"  {paddingString} ");
+                }
+
+                sb.Pastel("Aliases: ", ConsoleColor.DarkYellow);
+                sb.AppendLine(string.Join(", ", option.Aliases));
+                ++lineCount;
             }
 
             var descBuilder = new StringBuilder();
@@ -531,7 +539,15 @@ internal abstract class BaseArgumentParser : IArgumentParser
             {
                 var words = descBuilder.ToString().Split(' ');
                 var lines = CreateLinesByWidth(words, lineLength);
-                foreach (var line in lines)
+
+                if (lineCount > 0)
+                {
+                    sb.Append($"  {paddingString} ");
+                }
+
+                sb.AppendLine(lines[0]);
+
+                foreach (var line in lines.Skip(1))
                 {
                     sb.AppendLine($"  {paddingString} {line}");
                 }
@@ -671,7 +687,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void ValidateBuiltInTokens(bool isAllTokensParsed)
     {
-        var help = _baseOptions.OfType<SwitchOption>().
+        var help = _baseOptions.OfType<ScalarNamedOption<bool>>().
             First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help));
 
         if (IsOnlyOption(help))
@@ -689,7 +705,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
         }
 
-        var version = _baseOptions.OfType<SwitchOption>().
+        var version = _baseOptions.OfType<ScalarNamedOption<bool>>().
             First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
 
         if (IsOnlyOption(version))

@@ -33,7 +33,7 @@ public interface IParserSettingsBuilder
     bool? AutoPrintArguments { get; set; }
 
     /// <summary>
-    /// Represents help text width. Default is 80 chars.
+    /// Represents help text width. Default is 90 chars.
     /// </summary>
     int? HelpDisplayWidth { get; set; }
 

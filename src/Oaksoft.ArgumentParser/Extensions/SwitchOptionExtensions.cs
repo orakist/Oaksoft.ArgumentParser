@@ -14,7 +14,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddSwitchOption<TSource>(
         this IArgumentParserBuilder<TSource> builder, 
         Expression<Func<TSource, bool>> keyPropExpr, 
-        Action<ISwitchOption>? configure = null,
+        Func<IScalarNamedOption<bool>, IScalarNamedOption<bool>>? configure = null,
         bool mandatoryOption = false)
         where TSource : new()
     {
@@ -33,7 +33,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddSwitchOption<TSource>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, bool?>> keyPropExpr,
-        Action<ISwitchOption>? configure = null,
+        Func<IScalarNamedOption<bool>, IScalarNamedOption<bool>>? configure = null,
         bool mandatoryOption = false)
         where TSource : new()
     {

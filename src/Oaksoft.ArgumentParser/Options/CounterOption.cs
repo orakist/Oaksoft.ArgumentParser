@@ -84,7 +84,7 @@ internal class CounterOption : BaseValueOption, ICounterOption
 
         if (string.IsNullOrWhiteSpace(Description))
         {
-            Description = $"Performs '{Name}' option.";
+            Description = $"Counts '{Name}' option.";
         }
     }
 

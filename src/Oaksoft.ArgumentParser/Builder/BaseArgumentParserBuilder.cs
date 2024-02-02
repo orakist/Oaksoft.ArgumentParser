@@ -53,7 +53,7 @@ internal abstract class BaseArgumentParserBuilder : IArgumentParserBuilder
             AutoPrintErrors = _settingsBuilder.AutoPrintErrors ?? true,
             AutoPrintArguments = _settingsBuilder.AutoPrintArguments ?? false,
 
-            HelpDisplayWidth = _settingsBuilder.HelpDisplayWidth ?? 80,
+            HelpDisplayWidth = _settingsBuilder.HelpDisplayWidth ?? 90,
             NewLineAfterOption = _settingsBuilder.NewLineAfterOption ?? true,
             ShowDescription = _settingsBuilder.ShowDescription ?? true,
             EnableColoring = _settingsBuilder.EnableColoring ??= true,
@@ -103,7 +103,7 @@ internal abstract class BaseArgumentParserBuilder : IArgumentParserBuilder
         _settingsBuilder.AutoPrintVersion ??= true;
         _settingsBuilder.AutoPrintErrors ??= true;
         _settingsBuilder.AutoPrintArguments ??= false;
-        _settingsBuilder.HelpDisplayWidth ??= 80;
+        _settingsBuilder.HelpDisplayWidth ??= 90;
         _settingsBuilder.NewLineAfterOption ??= true;
         _settingsBuilder.ShowCopyright ??= false;
         _settingsBuilder.ShowDescription ??= true;

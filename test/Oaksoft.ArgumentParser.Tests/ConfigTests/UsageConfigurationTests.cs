@@ -104,7 +104,7 @@ public class UsageConfigurationTests : ArgumentParserTestBase
 
         option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
-        option.Usage.ShouldBe("-a (value)");
+        option.Usage.ShouldBe("-a (values)");
         text.ShouldContain(option.Usage);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
@@ -146,7 +146,7 @@ public class UsageConfigurationTests : ArgumentParserTestBase
 
         option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
-        option.Usage.ShouldBe("/a (value)");
+        option.Usage.ShouldBe("/a (values)");
         text.ShouldContain(option.Usage);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));

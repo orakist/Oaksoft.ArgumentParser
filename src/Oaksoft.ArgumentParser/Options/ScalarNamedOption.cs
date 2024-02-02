@@ -91,7 +91,18 @@ internal class ScalarNamedOption<TValue>
 
         if (string.IsNullOrWhiteSpace(Usage))
         {
-            Usage = $"{Alias}{(ValueArity.Min > 0 ? " <value>" : ValueArity.Max > 0 ? " (value)" : string.Empty)}";
+            if (ValueArity.Max < 1)
+            {
+                Usage = Alias;
+            }
+            else if (this is IScalarNamedOption<bool>)
+            {
+                Usage = $"{Alias}{(ValueArity.Min > 0 ? " <true|false>" : " (true|false)")}";
+            }
+            else
+            {
+                Usage = $"{Alias}{(ValueArity.Min > 0 ? " <value>" : " (value)")}";
+            }
         }
 
         if (string.IsNullOrWhiteSpace(Description))

@@ -53,14 +53,6 @@ public interface ICounterOption : INamedOption, IValueOption
 {
 }
 
-/// <summary>
-/// Switch option is a boolean type. It is a shorthand scalar named option for boolean types.
-/// If it is passed in the command-line, its default value will be true.
-/// </summary>
-public interface ISwitchOption : IScalarNamedOption, IHaveResultValue<bool>, IHaveDefaultValue<bool>
-{
-}
-
 /// <inheritdoc cref="IScalarNamedOption" />
 /// <typeparam name="TValue">Type of the value</typeparam>
 public interface IScalarNamedOption<TValue> : IScalarNamedOption, IScalarValueOption<TValue>, IHaveDefaultValue<TValue>

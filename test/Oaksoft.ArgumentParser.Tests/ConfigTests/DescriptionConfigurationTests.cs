@@ -89,7 +89,7 @@ public class DescriptionConfigurationTests : ArgumentParserTestBase
 
         option = parser.GetOption(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
-        option.Description.ShouldBe($"Performs '{option.Name}' option.");
+        option.Description.ShouldBe($"Counts '{option.Name}' option.");
         text.ShouldContain(option.Description!);
 
         option = parser.GetOption(nameof(IntAppOptions.Values));

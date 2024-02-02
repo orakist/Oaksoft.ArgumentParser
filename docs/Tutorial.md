@@ -116,12 +116,10 @@ Options:
            Aliases: -c, --calculate, /c, /calculate
            Performs 'Calculate' option.
 
-  -h       Usage: -h
-           Aliases: -h, -?, --help, /h, /?, /help
+  -h       Aliases: -h, -?, --help, /h, /?, /help
            Shows help and usage information.
 
-  --vn     Usage: --vn
-           Aliases: --vn, --version, /vn, /version
+  --vn     Aliases: --vn, --version, /vn, /version
            Shows version-number of the application.
 
 Result: Invalid argument!
@@ -290,12 +288,10 @@ Options:
            Defines operator type of the calculation. [Allowed-Values: add | sub |
            mul | div | pow], [Default: add]
 
-  -h       Usage: -h
-           Aliases: -h, -?, --help, /h, /?, /help
+  -h       Aliases: -h, -?, --help, /h, /?, /help
            Shows help and usage information.
 
-  --vn     Usage: --vn
-           Aliases: --vn, --version, /vn, /version
+  --vn     Aliases: --vn, --version, /vn, /version
            Shows version-number of the application.
 ```
 
@@ -535,7 +531,7 @@ Usage:
   appname [options]
 
 Options:
-  -n       Usage: -n <value>
+  -n       Usage: -n <values>
            Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
            Defines the numbers to be calculated.
 
@@ -544,12 +540,10 @@ Options:
            Defines operator type of the calculation. [Allowed-Values: add | sub |
            mul | div | pow], [Default: add]
 
-  -h       Usage: -h
-           Aliases: -h, -?, --help, /h, /?, /help
+  -h       Aliases: -h, -?, --help, /h, /?, /help
            Shows help and usage information.
 
-  --vn     Usage: --vn
-           Aliases: --vn, --version, /vn, /version
+  --vn     Aliases: --vn, --version, /vn, /version
            Shows version-number of the application.
 ```
 
@@ -635,7 +629,7 @@ Usage:
   appname [options]
 
 Options:
-  -n       Usage: -n <value>
+  -n       Usage: -n <values>
            Aliases: -n, -l, -r, --left, --right, --numbers, /n, /l, /r, /left, /right, /numbers
            Defines the numbers to be calculated.
 
@@ -644,12 +638,10 @@ Options:
            Defines operator type of the calculation. [Allowed-Values: Add | Sub |
            Mul | Div | Pow | Rem], [Default: Add]
 
-  -h       Usage: -h
-           Aliases: -h, -?, --help, /h, /?, /help
+  -h       Aliases: -h, -?, --help, /h, /?, /help
            Shows help and usage information.
 
-  --vn     Usage: --vn
-           Aliases: --vn, --version, /vn, /version
+  --vn     Aliases: --vn, --version, /vn, /version
            Shows version-number of the application.
 ```
 

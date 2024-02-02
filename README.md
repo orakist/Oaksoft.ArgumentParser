@@ -81,12 +81,10 @@ Options:
            Aliases: -o, --operator, /o, /operator
            Performs 'Operator' option. [Allowed-Values: Add | Sub | Mul | Div]
 
-  -h       Usage: -h
-           Aliases: -h, -?, --help, /h, /?, /help
+  -h       Aliases: -h, -?, --help, /h, /?, /help
            Shows help and usage information.
 
-  --vn     Usage: --vn
-           Aliases: --vn, --version, /vn, /version
+  --vn     Aliases: --vn, --version, /vn, /version
            Shows version-number of the application.
 ```
 
@@ -642,7 +640,7 @@ Usage:
   appname [options]
 
 Options:
-  -n       Usage: -n (value)
+  -n       Usage: -n (values)
            Aliases: -n, --numbers, /n, /numbers
            Performs 'Numbers' option.
 
@@ -650,12 +648,10 @@ Options:
            Aliases: -c, --calculate, /c, /calculate
            Performs 'Calculate' option. [Allowed-Values: Add | Sub | Mul | Div]
 
-  -h       Usage: -h
-           Aliases: -h, -?, --help, /h, /?, /help
+  -h       Aliases: -h, -?, --help, /h, /?, /help
            Shows help and usage information.
 
-  --vn     Usage: --vn
-           Aliases: --vn, --version, /vn, /version
+  --vn     Aliases: --vn, --version, /vn, /version
            Shows version-number of the application.
 ```
 
@@ -670,7 +666,7 @@ Usage:
   appname [options]
 
 Options:
-  -n       Usage: -n (value)
+  -n       Usage: -n (values)
            Aliases: -n, --numbers, /n, /numbers
            Performs 'Numbers' option.
 

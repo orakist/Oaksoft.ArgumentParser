@@ -16,7 +16,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddNamedOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, TValue?>> keyPropExpr,
-        Action<IScalarNamedOption<TValue>>? configure = null,
+        Func<IScalarNamedOption<TValue>, IScalarNamedOption<TValue>>? configure = null,
         bool mustHaveOneValue = true, bool mandatoryOption = false)
         where TValue : IComparable
         where TSource : new()
@@ -36,7 +36,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddNamedOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, TValue?>> keyPropExpr,
-        Action<IScalarNamedOption<TValue>>? configure = null,
+        Func<IScalarNamedOption<TValue>, IScalarNamedOption<TValue>>? configure = null,
         bool mustHaveOneValue = true, bool mandatoryOption = false)
         where TValue : struct, IComparable
         where TSource : new()
@@ -56,7 +56,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddNamedOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, IEnumerable<TValue?>?>> keyPropExpr,
-        Action<ISequentialNamedOption<TValue>>? configure = null, 
+        Func<ISequentialNamedOption<TValue>, ISequentialNamedOption<TValue>>? configure = null, 
         ArityType valueArity = ArityType.ZeroOrMore, ArityType optionArity = ArityType.ZeroOrMore)
         where TValue : IComparable
         where TSource : new()
@@ -76,7 +76,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddNamedOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, IEnumerable<TValue?>?>> keyPropExpr,
-        Action<ISequentialNamedOption<TValue>>? configure = null,
+        Func<ISequentialNamedOption<TValue>, ISequentialNamedOption<TValue>>? configure = null,
         ArityType valueArity = ArityType.ZeroOrMore, ArityType optionArity = ArityType.ZeroOrMore)
         where TValue : struct, IComparable
         where TSource : new()

@@ -13,15 +13,6 @@ public static partial class OptionExtensions
 {
     #region Option Name Configuration
     /// <summary>
-    /// Configures name of the ISwitchOption.
-    /// </summary>
-    public static ISwitchOption WithName(this ISwitchOption option, string name)
-    {
-        ((SwitchOption)option).SetName(name);
-        return option;
-    }
-
-    /// <summary>
     /// Configures name of the ICounterOption.
     /// </summary>
     public static ICounterOption WithName(this ICounterOption option, string name)
@@ -72,15 +63,6 @@ public static partial class OptionExtensions
     #endregion
 
     #region Option Hidden Configuration
-    /// <summary>
-    /// Configures Hidden property of the ISwitchOption.
-    /// </summary>
-    public static ISwitchOption WithHidden(this ISwitchOption option, bool hidden)
-    {
-        ((SwitchOption)option).SetHidden(hidden);
-        return option;
-    }
-
     /// <summary>
     /// Configures Hidden property of the ICounterOption.
     /// </summary>
@@ -133,15 +115,6 @@ public static partial class OptionExtensions
 
     #region Option Usage Configuration
     /// <summary>
-    /// Configures Usage text of the ISwitchOption.
-    /// </summary>
-    public static ISwitchOption WithUsage(this ISwitchOption option, string usage)
-    {
-        ((SwitchOption)option).SetUsage(usage);
-        return option;
-    }
-
-    /// <summary>
     /// Configures Usage text of the ICounterOption.
     /// </summary>
     public static ICounterOption WithUsage(this ICounterOption option, string usage)
@@ -172,15 +145,6 @@ public static partial class OptionExtensions
     #endregion
 
     #region Option Description Configuration
-    /// <summary>
-    /// Configures Description of the ISwitchOption.
-    /// </summary>
-    public static ISwitchOption WithDescription(this ISwitchOption option, string description)
-    {
-        ((SwitchOption)option).SetDescription(description);
-        return option;
-    }
-
     /// <summary>
     /// Configures Description of the ICounterOption.
     /// </summary>
@@ -233,15 +197,6 @@ public static partial class OptionExtensions
 
     #region Option Alias Configuration
     /// <summary>
-    /// Configures aliases of the ISwitchOption.
-    /// </summary>
-    public static ISwitchOption AddAliases(this ISwitchOption option, params string[] aliases)
-    {
-        ((SwitchOption)option).AddAliases(aliases);
-        return option;
-    }
-
-    /// <summary>
     /// Configures aliases of the ICounterOption.
     /// </summary>
     public static ICounterOption AddAliases(this ICounterOption option, params string[] aliases)
@@ -272,24 +227,6 @@ public static partial class OptionExtensions
     #endregion
 
     #region Value Arity Configuration
-    /// <summary>
-    /// Configures ValueArity of the ISwitchOption.
-    /// </summary>
-    public static ISwitchOption WithValueArity(this ISwitchOption option, ArityType valueArity)
-    {
-        ((SwitchOption)option).SetValueArity(valueArity);
-        return option;
-    }
-
-    /// <summary>
-    /// Configures ValueArity of the ISwitchOption.
-    /// </summary>
-    public static ISwitchOption WithValueArity(this ISwitchOption option, int requiredOptionCount, int maximumOptionCount)
-    {
-        ((SwitchOption)option).SetValueArity(requiredOptionCount, maximumOptionCount);
-        return option;
-    }
-
     /// <summary>
     /// Configures ValueArity of the IScalarNamedOption.
     /// </summary>
@@ -373,24 +310,6 @@ public static partial class OptionExtensions
 
     #region Option Arity Configuration
     /// <summary>
-    /// Configures OptionArity of the ISwitchOption.
-    /// </summary>
-    public static ISwitchOption WithOptionArity(this ISwitchOption option, ArityType optionArity)
-    {
-        ((SwitchOption)option).SetOptionArity(optionArity);
-        return option;
-    }
-    
-    /// <summary>
-    /// Configures OptionArity of the ISwitchOption.
-    /// </summary>
-    public static ISwitchOption WithOptionArity(this ISwitchOption option, int requiredOptionCount, int maximumOptionCount)
-    {
-        ((SwitchOption)option).SetOptionArity(requiredOptionCount, maximumOptionCount);
-        return option;
-    }
-
-    /// <summary>
     /// Configures OptionArity of the ICounterOption.
     /// </summary>
     public static ICounterOption WithOptionArity(this ICounterOption option, ArityType optionArity)
@@ -450,15 +369,6 @@ public static partial class OptionExtensions
     #endregion
 
     #region Default Value Configuration
-    /// <summary>
-    /// Configures DefaultValue of the ISwitchOption.
-    /// </summary>
-    public static ISwitchOption WithDefaultValue(this ISwitchOption option, bool defaultValue)
-    {
-        ((SwitchOption)option).SetDefaultValue(defaultValue);
-        return option;
-    }
-
     /// <summary>
     /// Configures DefaultValue of the IScalarNamedOption.
     /// </summary>

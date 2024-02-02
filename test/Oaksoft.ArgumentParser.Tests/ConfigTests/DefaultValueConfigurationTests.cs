@@ -35,7 +35,7 @@ public class DefaultValueConfigurationTests : ArgumentParserTestBase
         namedOption.DefaultValue.Value.ShouldBe(-6);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
-        var switchOption = option as ISwitchOption;
+        var switchOption = option as IScalarNamedOption<bool>;
         switchOption.ShouldNotBeNull();
         switchOption.DefaultValue.ShouldNotBeNull();
         switchOption.DefaultValue.Value.ShouldBe(false);
@@ -68,7 +68,7 @@ public class DefaultValueConfigurationTests : ArgumentParserTestBase
         namedOption.DefaultValue.Value.ShouldBe(" ");
 
         option = parser.GetOptionByName(nameof(StringAppOptions.ValueFlag));
-        var switchOption = option as ISwitchOption;
+        var switchOption = option as IScalarNamedOption<bool>;
         switchOption.ShouldNotBeNull();
         switchOption.DefaultValue.ShouldNotBeNull();
         switchOption.DefaultValue.Value.ShouldBe(true);
@@ -99,9 +99,10 @@ public class DefaultValueConfigurationTests : ArgumentParserTestBase
         namedOption.DefaultValue.ShouldBeNull();
 
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
-        var switchOption = option as ISwitchOption;
+        var switchOption = option as IScalarNamedOption<bool>;
         switchOption.ShouldNotBeNull();
-        switchOption.DefaultValue.ShouldBeNull();
+        switchOption.DefaultValue.ShouldNotBeNull();
+        switchOption.DefaultValue.Value.ShouldBeTrue();
     }
 
     [Fact]
@@ -129,9 +130,10 @@ public class DefaultValueConfigurationTests : ArgumentParserTestBase
         namedOption.DefaultValue.ShouldBeNull();
 
         option = parser.GetOptionByName(nameof(StringAppOptions.ValueFlag));
-        var switchOption = option as ISwitchOption;
+        var switchOption = option as IScalarNamedOption<bool>;
         switchOption.ShouldNotBeNull();
-        switchOption.DefaultValue.ShouldBeNull();
+        switchOption.DefaultValue.ShouldNotBeNull();
+        switchOption.DefaultValue.Value.ShouldBeTrue();
     }
 
     [Fact]
@@ -147,7 +149,7 @@ public class DefaultValueConfigurationTests : ArgumentParserTestBase
         var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         var namedOption = option as IScalarNamedOption<int>;
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
-        var switchOption = option as ISwitchOption;
+        var switchOption = option as IScalarNamedOption<bool>;
 
         // Assert
         namedOption.ShouldNotBeNull();

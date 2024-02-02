@@ -493,14 +493,14 @@ internal abstract class BaseArgumentParser : IArgumentParser
             var lineCount = 0;
             sb.Pastel($"  {option.Alias.PadRight(padLength, ' ')} ", ConsoleColor.DarkGreen);
 
-            if (option.Usage != option.Alias)
+            if (VerbosityLevel >= VerbosityLevelType.Detailed || option.Usage != option.Alias)
             {
                 sb.Pastel("Usage: ", ConsoleColor.DarkYellow);
                 sb.AppendLine(option.Usage);
                 ++lineCount;
             }
 
-            if (option.Aliases.Count > 1)
+            if (VerbosityLevel >= VerbosityLevelType.Detailed || option.Aliases.Count > 1)
             {
                 if (lineCount > 0)
                 {

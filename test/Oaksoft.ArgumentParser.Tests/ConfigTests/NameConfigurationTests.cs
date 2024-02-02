@@ -246,7 +246,7 @@ public class NameConfigurationTests : ArgumentParserTestBase
         // Act
         var parser = sut.Build();
         var option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
-        var namedOption = option as ISwitchOption;
+        var namedOption = option as IScalarNamedOption<bool>;
 
         // Assert
         namedOption.ShouldNotBeNull();

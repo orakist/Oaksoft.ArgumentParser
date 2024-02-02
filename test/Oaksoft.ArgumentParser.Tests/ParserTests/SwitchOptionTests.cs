@@ -1,3 +1,4 @@
+using Oaksoft.ArgumentParser.Definitions;
 using Oaksoft.ArgumentParser.Extensions;
 using Oaksoft.ArgumentParser.Tests.TestModels;
 using Shouldly;
@@ -8,14 +9,10 @@ public class SwitchOptionTests : ArgumentParserTestBase
 {
     [Theory]
     [InlineData(true, true, "-v", "-n")]
-    [InlineData(false, true, "-vfalse", "-ntrue")]
     [InlineData(true, true, "--value", "--null-value")]
-    [InlineData(true, false, "-n:False", "-v:true")]
-    [InlineData(true, true, "-v=true", "-n=true")]
-    [InlineData(true, false, "--value:true", "--null-value=FALSE")]
-    [InlineData(false, true, "/v=false", "/null-value:TRUE")]
-    [InlineData(false, true, "/null-value", "TRUE", "/v", "FALSE")]
-    public void ParseSwitchOption_WhenArgumentsValid(bool val1, bool val2, params string[] args)
+    [InlineData(true, null, "/value")]
+    [InlineData(false, true, "/null-value")]
+    public void ParseSwitchOption_WhenArgumentsValid(bool val1, bool? val2, params string[] args)
     {
         // Arrange
         var sut = CommandLine.CreateParser<BoolAppOptions>()
@@ -33,11 +30,37 @@ public class SwitchOptionTests : ArgumentParserTestBase
     }
 
     [Theory]
+    [InlineData(true, true, "-v", "-n")]
+    [InlineData(false, true, "-vfalse", "-ntrue")]
+    [InlineData(true, true, "--value", "--null-value")]
+    [InlineData(true, false, "-n:False", "-v:true")]
+    [InlineData(true, true, "-v=true", "-n=true")]
+    [InlineData(true, false, "--value:true", "--null-value=FALSE")]
+    [InlineData(false, true, "/v=false", "/null-value:TRUE")]
+    [InlineData(false, true, "/null-value", "TRUE", "/v", "FALSE")]
+    public void ParseSwitchOption_WhenArityIsOneArgumentsValid(bool val1, bool val2, params string[] args)
+    {
+        // Arrange
+        var sut = CommandLine.CreateParser<BoolAppOptions>()
+            .AddSwitchOption(s => s.Value, s => s.WithValueArity(ArityType.ZeroOrOne))
+            .AddSwitchOption(s => s.NullValue, s => s.WithValueArity(ArityType.ZeroOrOne))
+            .Build();
+
+        // Act
+        var result = sut.Parse(args);
+
+        // Assert
+        sut.IsValid.ShouldBeTrue();
+        result.Value.ShouldBeEquivalentTo(val1);
+        result.NullValue.ShouldBeEquivalentTo(val2);
+    }
+
+    [Theory]
     [InlineData("--v", "--n")]
     [InlineData("-value", "-null-value")]
     [InlineData("--v:true", "--n:true")]
     [InlineData("--v=true", "--n=true")]
-    [InlineData("-value:true", "-null-value=true")]
+    [InlineData("--value:true", "--null-value=true")]
     [InlineData("/vtrue", "/null-valuex")]
     public void ParseSwitchOption_WhenArgumentsInvalid(params string[] args)
     {
@@ -68,8 +91,8 @@ public class SwitchOptionTests : ArgumentParserTestBase
     {
         // Arrange
         var sut = CommandLine.CreateParser<BoolAppOptions>()
-            .AddSwitchOption(s => s.Value, mandatoryOption: true)
-            .AddSwitchOption(s => s.NullValue, mandatoryOption: true)
+            .AddSwitchOption(s => s.Value, s => s.WithValueArity(ArityType.ZeroOrOne), mandatoryOption: true)
+            .AddSwitchOption(s => s.NullValue, s => s.WithValueArity(ArityType.ZeroOrOne), mandatoryOption: true)
             .Build();
 
         // Act
@@ -94,7 +117,7 @@ public class SwitchOptionTests : ArgumentParserTestBase
     {
         // Arrange
         var sut = CommandLine.CreateParser<BoolAppOptions>()
-            .AddSwitchOption(s => s.Value, o => o.WithOptionArity(1, 3))
+            .AddSwitchOption(s => s.Value, o => o.WithOptionArity(1, 3).WithValueArity(0, 1))
             .AddSwitchOption(s => s.NullValue, o => o.WithOptionArity(1, 3).WithValueArity(2, 3))
             .Build();
 
@@ -193,8 +216,8 @@ public class SwitchOptionTests : ArgumentParserTestBase
     {
         // Arrange
         var sut = CommandLine.CreateParser<BoolAppOptions>()
-            .AddSwitchOption(s => s.Value, o => o.WithDefaultValue(true))
-            .AddSwitchOption(s => s.NullValue, o => o.WithDefaultValue(false))
+            .AddSwitchOption(s => s.Value, o => o.WithDefaultValue(true).WithValueArity(ArityType.ZeroOrOne))
+            .AddSwitchOption(s => s.NullValue, o => o.WithDefaultValue(false).WithValueArity(ArityType.ZeroOrOne))
             .Build();
 
         // Act

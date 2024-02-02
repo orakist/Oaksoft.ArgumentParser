@@ -69,8 +69,7 @@ internal sealed class ArgumentParserBuilder<TOptions>
             {
                 if (optionType == typeof(bool))
                 {
-                    var option = new SwitchOption(0, 1);
-                    this.RegisterOptionProperty(option, property);
+                    this.RegisterSwitchOption(property, false);
                 }
                 else
                 {
@@ -127,7 +126,6 @@ internal sealed class ArgumentParserBuilder<TOptions>
         option.SetName(nameof(IBuiltInOptions.Version), false);
         option.SetValidAliases(validAliases);
         option.SetDescription("Shows version-number of the application.");
-        ((BaseValueOption)option).SetValueArity(ArityType.Zero);
     }
 
     private void BuildHelpOption()
@@ -151,7 +149,6 @@ internal sealed class ArgumentParserBuilder<TOptions>
         option.SetName(nameof(IBuiltInOptions.Help), false);
         option.SetValidAliases(validAliases);
         option.SetDescription("Shows help and usage information.");
-        ((BaseValueOption)option).SetValueArity(ArityType.Zero);
     }
 
     private void BuildVerbosityOption()

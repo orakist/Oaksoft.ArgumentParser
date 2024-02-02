@@ -15,7 +15,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddCounterOption<TSource>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, int>> keyPropExpr,
-        Action<ICounterOption>? configure = null,
+        Func<ICounterOption, ICounterOption>? configure = null,
         ArityType optionArity = ArityType.ZeroOrMore)
         where TSource : new()
     {
@@ -34,7 +34,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddCounterOption<TSource>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, int?>> keyPropExpr,
-        Action<ICounterOption>? configure = null,
+        Func<ICounterOption, ICounterOption>? configure = null,
         ArityType optionArity = ArityType.ZeroOrMore)
         where TSource : new()
     {

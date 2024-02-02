@@ -160,14 +160,17 @@ public class OptionRegistrationTests : ArgumentParserTestBase
         // Arrange
         var parser = CommandLine.AutoBuild<IntAppOptions>();
         var header = parser.GetHeaderText();
+        var help = parser.GetHelpText(false);
 
         // Act & Assert
-        var options = parser.Parse("-v:5", "-l:true");
+        var options = parser.Parse("-v:5", "-l", "-n:10");
 
         parser.GetOptions().Count.ShouldBe(8);
         var builtInOpts = parser.GetBuiltInOptions();
         builtInOpts.Help.ShouldBeNull();
         parser.IsHelpOption.ShouldBeFalse();
+        options.Value.ShouldBe(5);
+        options.NullValue.ShouldBe(10);
         options.NullValueFlag.ShouldBeTrue();
         header.ShouldNotBeEmpty();
     }

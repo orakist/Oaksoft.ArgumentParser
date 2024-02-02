@@ -95,7 +95,7 @@ internal class ScalarNamedOption<TValue>
             {
                 Usage = Alias;
             }
-            else if (this is ISwitchOption)
+            else if (this is IScalarNamedOption<bool>)
             {
                 Usage = $"{Alias}{(ValueArity.Min > 0 ? " <true|false>" : " (true|false)")}";
             }

@@ -290,9 +290,8 @@ internal abstract class BaseArgumentParser : IArgumentParser
     private void ParseOptions(TokenItem[] tokens)
     {
         var orderedOptions = new List<BaseOption>();
-        orderedOptions.AddRange(_baseOptions.Where(o => o is ISwitchOption));
         orderedOptions.AddRange(_baseOptions.Where(o => o is ICounterOption));
-        orderedOptions.AddRange(_baseOptions.Where(o => o is IScalarNamedOption and not ISwitchOption));
+        orderedOptions.AddRange(_baseOptions.Where(o => o is IScalarNamedOption));
         orderedOptions.AddRange(_baseOptions.Where(o => o is ISequentialNamedOption));
         orderedOptions.AddRange(_baseOptions.Where(o => o is not INamedOption));
 
@@ -691,7 +690,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
 
     private void ValidateBuiltInTokens(bool isAllTokensParsed)
     {
-        var help = _baseOptions.OfType<SwitchOption>().
+        var help = _baseOptions.OfType<ScalarNamedOption<bool>>().
             First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Help));
 
         if (IsOnlyOption(help))
@@ -709,7 +708,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
         }
 
-        var version = _baseOptions.OfType<SwitchOption>().
+        var version = _baseOptions.OfType<ScalarNamedOption<bool>>().
             First(o => o.KeyProperty.Name == nameof(IBuiltInOptions.Version));
 
         if (IsOnlyOption(version))

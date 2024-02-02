@@ -16,7 +16,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddValueOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder, 
         Expression<Func<TSource, TValue?>> keyPropExpr,
-        Action<IScalarValueOption<TValue>>? configure = null,
+        Func<IScalarValueOption<TValue>, IScalarValueOption<TValue>>? configure = null,
         bool mustHaveOneValue = false)
         where TValue : IComparable
         where TSource : new()
@@ -36,7 +36,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddValueOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, TValue?>> keyPropExpr,
-        Action<IScalarValueOption<TValue>>? configure = null,
+        Func<IScalarValueOption<TValue>, IScalarValueOption<TValue>>? configure = null,
         bool mustHaveOneValue = false)
         where TValue : struct, IComparable
         where TSource : new()
@@ -56,7 +56,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddValueOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, IEnumerable<TValue?>?>> keyPropExpr,
-        Action<ISequentialValueOption<TValue>>? configure = null,
+        Func<ISequentialValueOption<TValue>, ISequentialValueOption<TValue>>? configure = null,
         ArityType valueArity = ArityType.ZeroOrMore)
         where TValue : IComparable
         where TSource : new()
@@ -76,7 +76,7 @@ public static partial class OptionExtensions
     public static IArgumentParserBuilder<TSource> AddValueOption<TSource, TValue>(
         this IArgumentParserBuilder<TSource> builder,
         Expression<Func<TSource, IEnumerable<TValue?>?>> keyPropExpr,
-        Action<ISequentialValueOption<TValue>>? configure = null,
+        Func<ISequentialValueOption<TValue>, ISequentialValueOption<TValue>>? configure = null,
         ArityType valueArity = ArityType.ZeroOrMore)
         where TValue : struct, IComparable
         where TSource : new()

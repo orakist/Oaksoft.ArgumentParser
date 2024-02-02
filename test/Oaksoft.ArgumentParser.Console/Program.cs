@@ -77,7 +77,6 @@ internal static class Program
         };
 
         Console.WriteLine($"Result: {equation}");
-        Console.WriteLine();
     }
 
     private static IArgumentParser<CalculatorOptions> ConfigureOptions(this IArgumentParserBuilder<CalculatorOptions> builder)

@@ -367,7 +367,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
 
         _writer.Write(BuildHeaderText(true, true).ToString());
-        _writer.WriteLine();
     }
 
     private void AutoPrintHelpText()
@@ -387,8 +386,7 @@ internal abstract class BaseArgumentParser : IArgumentParser
             return;
         }
 
-        _writer.Write(AssemblyHelper.GetAssemblyVersion());
-        _writer.WriteLine();
+        _writer.WriteLine(AssemblyHelper.GetAssemblyVersion());
     }
 
     protected void AutoPrintErrorText()
@@ -399,7 +397,6 @@ internal abstract class BaseArgumentParser : IArgumentParser
         }
 
         _writer.Write(BuildErrorText(Settings.EnableColoring).ToString());
-        _writer.WriteLine();
     }
 
     private StringBuilder BuildHeaderText(bool showTitle, bool showDescription, bool showSectionName = false)

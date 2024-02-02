@@ -23,6 +23,7 @@ internal sealed class ArgumentParser<TOptions>
     public override VerbosityLevelType VerbosityLevel => GetBuiltInOptions().Verbosity ?? Settings.VerbosityLevel;
 
     private readonly TOptions _appOptions;
+    private bool _commentPrinted;
 
     public ArgumentParser(BaseArgumentParserBuilder builder)
         : base(builder)
@@ -216,7 +217,7 @@ internal sealed class ArgumentParser<TOptions>
         {
             EvaluateArguments(args, callback);
 
-            args = GetInputArguments();
+            args = GetInputArguments(comment);
         }
     }
 
@@ -228,7 +229,7 @@ internal sealed class ArgumentParser<TOptions>
         {
             await EvaluateArgumentsAsync(args, callback);
 
-            args = await GetInputArgumentsAsync();
+            args = await GetInputArgumentsAsync(comment);
         }
     }
 
@@ -248,14 +249,6 @@ internal sealed class ArgumentParser<TOptions>
 
     private string[] InitializeArguments(string? comment, string[]? args)
     {
-        if (!string.IsNullOrWhiteSpace(comment))
-        {
-            if (!CommandLine.DisableTextWriter)
-            {
-                _writer.WriteLine(comment);
-            }
-        }
-
         if (args?.Length > 0)
         {
             if (!CommandLine.DisableTextWriter && Settings.AutoPrintArguments)
@@ -265,7 +258,7 @@ internal sealed class ArgumentParser<TOptions>
         }
         else
         {
-            args = GetInputArguments();
+            args = GetInputArguments(comment);
         }
 
         return args;
@@ -273,14 +266,6 @@ internal sealed class ArgumentParser<TOptions>
 
     private async Task<string[]> InitializeArgumentsAsync(string? comment, string[]? args)
     {
-        if (!string.IsNullOrWhiteSpace(comment))
-        {
-            if (!CommandLine.DisableTextWriter)
-            {
-                await _writer.WriteLineAsync(comment);
-            }
-        }
-
         if (args?.Length > 0)
         {
             if (!CommandLine.DisableTextWriter && Settings.AutoPrintArguments)
@@ -290,7 +275,7 @@ internal sealed class ArgumentParser<TOptions>
         }
         else
         {
-            args = await GetInputArgumentsAsync();
+            args = await GetInputArgumentsAsync(comment);
         }
 
         return args;
@@ -361,8 +346,17 @@ internal sealed class ArgumentParser<TOptions>
         return args[0].Equals("quit", StringComparison.OrdinalIgnoreCase);
     }
 
-    private string[] GetInputArguments()
+    private string[] GetInputArguments(string? comment = null)
     {
+        if (!CommandLine.DisableTextWriter && !string.IsNullOrWhiteSpace(comment))
+        {
+            if (!_commentPrinted)
+            {
+                _writer.WriteLine(comment);
+                _commentPrinted = true;
+            }
+        }
+
         if (!CommandLine.DisableTextWriter)
         {
             _writer.Write("./> ");
@@ -371,7 +365,7 @@ internal sealed class ArgumentParser<TOptions>
         var commandLine = _reader.ReadLine();
 
         var result = commandLine?.SplitToArguments().ToArray() ??
-               Array.Empty<string>();
+                     Array.Empty<string>();
 
         if (!CommandLine.DisableTextWriter && Settings.AutoPrintArguments)
         {
@@ -381,8 +375,17 @@ internal sealed class ArgumentParser<TOptions>
         return result;
     }
 
-    private async Task<string[]> GetInputArgumentsAsync()
+    private async Task<string[]> GetInputArgumentsAsync(string? comment = null)
     {
+        if (!CommandLine.DisableTextWriter && !string.IsNullOrWhiteSpace(comment))
+        {
+            if (!_commentPrinted)
+            {
+                await _writer.WriteLineAsync(comment);
+                _commentPrinted = true;
+            }
+        }
+
         if (!CommandLine.DisableTextWriter)
         {
             await _writer.WriteAsync("./> ");

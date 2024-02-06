@@ -7,7 +7,7 @@
 # Command Line Arguments Parser Library for .Net
 
 **Oaksoft.ArgumentParser** is a fluent and simple command line arguments parser library. It is currently under 
-development but latest version is stable. And this documentation is for the latest version.\
+development but the latest version is stable. This documentation is for the latest version.\
 This library is compatible with **.Net 6.0+**, **.Net Standard 2.1**
 
 ## Quick Start Example
@@ -39,7 +39,9 @@ static class Program
         var options = parser.Parse(args);
 
         if (!parser.IsParsed)
+        {
             return;
+        }
 
         var result = options.Operator switch
         {
@@ -152,40 +154,26 @@ Please see [Named Options](https://github.com/orakist/Oaksoft.ArgumentParser/blo
 ```cs
 class ExampleOptions
 {
-    public int Count { get; set; }
-    public double Total { get; set; }
+    public int? Count { get; set; }
+    public double? Total { get; set; }
     public List<string> Names { get; set; }
 }
 ```
 
-See, how the value option registration affects the parser result for the below command-line inputs.
+See, how the value option registration order affects the parser result for the below command-line inputs.
 
 ```cs
 var parser = CommandLine.CreateParser<ExampleOptions>()
-    .AddValueOption(p => p.Count) // Firstly, bind first integer token
-    .AddValueOption(p => p.Total) // Secondly, bind first double token from unbinded tokens 
-    .AddValueOption(o => o.Names) // Thirdly, bind all remaining tokens
+    .AddValueOption(p => p.Count) // Firstly, try to parse next token as integer value (gets first integer)
+    .AddValueOption(p => p.Total) // Secondly, try to parse next token as double value (gets first double)
+    .AddValueOption(o => o.Names) // Thirdly, try to parse tokens as string values (gets all remaining values)
     .Build();
 ```
 ```console
 ./> frodo 10.5 sam 30 gandalf
 count: 30, total: 10.5, names: {frodo, sam, gandalf}
-./> frodo 10 sam 30.5 gandalf
-count: 10, total: 30.5, names: {frodo, sam, gandalf}
-```
-
-```cs
-var parser = CommandLine.CreateParser<ExampleOptions>()
-    .AddValueOption(p => p.Count) // firstly, bind first integer token
-    .AddValueOption(p => p.Names) // Secondly, bind all remaining tokens
-    .AddValueOption(o => o.Total) // Thirdly, bind first double token from unbinded tokens
-    .Build();
-```
-```console
-./> frodo 10.5 sam 30 gandalf
-count: 30, total: 0, names: {frodo, 10.5, sam, gandalf}
-./> frodo 10 sam 30.5 gandalf
-count: 10, total: 0, names: {frodo, sam, 30.5, gandalf}
+./> frodo 10.5 sam 30.5 gandalf
+count: null, total: 10.5, names: {frodo, sam, 30.5, gandalf}
 ```
 
 ## 2. Default Value

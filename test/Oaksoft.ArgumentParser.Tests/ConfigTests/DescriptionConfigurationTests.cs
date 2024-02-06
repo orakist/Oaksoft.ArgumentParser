@@ -15,12 +15,12 @@ public class DescriptionConfigurationTests : ArgumentParserTestBase
         const string description = "Cats have an adorable face with a tiny nose.";
         var sut = CommandLine.CreateParser<IntAppOptions>()
             .ConfigureSettings(s => s.Description = "Test description!")
-            .AddNamedOption(s => s.NullValue, o => o.WithDescription(description))
-            .AddCounterOption(s => s.NullValueCount, o => o.WithDescription(description))
-            .AddNamedOption(s => s.Values, o => o.WithDescription(description))
-            .AddValueOption(s => s.NullValues, o => o.WithDescription(description))
-            .AddSwitchOption(s => s.ValueFlag, o => o.WithDescription(description))
-            .AddValueOption(s => s.Value, o => o.WithDescription(description));
+            .AddNamedOption(s => s.NullValue, o => o.WithDescription(description).WithHidden(false))
+            .AddCounterOption(s => s.NullValueCount, o => o.WithDescription(description).WithHidden(false))
+            .AddNamedOption(s => s.Values, o => o.WithDescription(description).WithHidden(false))
+            .AddValueOption(s => s.NullValues, o => o.WithDescription(description).WithHidden(false))
+            .AddSwitchOption(s => s.ValueFlag, o => o.WithDescription(description).WithHidden(false))
+            .AddValueOption(s => s.Value, o => o.WithDescription(description).WithHidden(false));
 
         // Act
         var parser = sut.Build();
@@ -36,11 +36,13 @@ public class DescriptionConfigurationTests : ArgumentParserTestBase
         var option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
+        option.IsHidden.ShouldBeFalse();
         text.ShouldContain(option.Description!);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValueCount));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
+        option.IsHidden.ShouldBeFalse();
         text.ShouldContain(option.Description!);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.Values));
@@ -51,16 +53,19 @@ public class DescriptionConfigurationTests : ArgumentParserTestBase
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
+        option.IsHidden.ShouldBeFalse();
         text.ShouldContain(option.Description!);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
+        option.IsHidden.ShouldBeFalse();
         text.ShouldContain(option.Description!);
 
         option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
         option.Description.ShouldBe(description);
+        option.IsHidden.ShouldBeFalse();
         text.ShouldContain(option.Description!);
     }
 

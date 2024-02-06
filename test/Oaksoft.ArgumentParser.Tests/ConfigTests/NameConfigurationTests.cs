@@ -13,12 +13,12 @@ public class NameConfigurationTests : ArgumentParserTestBase
     {
         // Arrange
         var sut = CommandLine.CreateParser<IntAppOptions>()
-            .AddNamedOption(s => s.Value, o => o.WithName("Value"))
-            .AddCounterOption(s => s.NullValue, o => o.WithName("ValueCount"))
-            .AddSwitchOption(s => s.NullValueFlag, o => o.WithName("ValueUsageFlag"))
-            .AddNamedOption(s => s.Values, o => o.WithName("ValueList"))
-            .AddValueOption(s => s.NullValues, o => o.WithName("ValueX"))
-            .AddValueOption(s => s.ValueFlag, o => o.WithName("ValueY"));
+            .AddNamedOption(s => s.Value, o => o.WithName("Value").WithHidden(true))
+            .AddCounterOption(s => s.NullValue, o => o.WithName("ValueCount").WithHidden(true))
+            .AddSwitchOption(s => s.NullValueFlag, o => o.WithName("ValueUsageFlag").WithHidden(true))
+            .AddNamedOption(s => s.Values, o => o.WithName("ValueList").WithHidden(true))
+            .AddValueOption(s => s.NullValues, o => o.WithName("ValueX").WithHidden(true))
+            .AddValueOption(s => s.ValueFlag, o => o.WithName("ValueY").WithHidden(true));
 
         // Act
         var parser = sut.Build();
@@ -29,36 +29,42 @@ public class NameConfigurationTests : ArgumentParserTestBase
         var option = parser.GetOptionByName(nameof(IntAppOptions.Value));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("Value");
+        option.IsHidden.ShouldBeTrue();
         option = parser.GetOptionByName(option.Name);
         option.ShouldNotBeNull();
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValue));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("ValueCount");
+        option.IsHidden.ShouldBeTrue();
         option = parser.GetOptionByName(option.Name);
         option.ShouldNotBeNull();
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValueFlag));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("ValueUsageFlag");
+        option.IsHidden.ShouldBeTrue();
         option = parser.GetOptionByName(option.Name);
         option.ShouldNotBeNull();
 
         option = parser.GetOptionByName(nameof(IntAppOptions.Values));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("ValueList");
+        option.IsHidden.ShouldBeTrue();
         option = parser.GetOptionByName(option.Name);
         option.ShouldNotBeNull();
 
         option = parser.GetOptionByName(nameof(IntAppOptions.NullValues));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("ValueX");
+        option.IsHidden.ShouldBeTrue();
         option = parser.GetOptionByName(option.Name);
         option.ShouldNotBeNull();
 
         option = parser.GetOptionByName(nameof(IntAppOptions.ValueFlag));
         option.ShouldNotBeNull();
         option.Name.ShouldBe("ValueY");
+        option.IsHidden.ShouldBeTrue();
         option = parser.GetOptionByName(option.Name);
         option.ShouldNotBeNull();
     }

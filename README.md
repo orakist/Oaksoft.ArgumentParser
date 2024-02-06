@@ -466,7 +466,7 @@ You can manually configure following properties of an option.
   Sets usage string of the options to show a custom usage string in the help output.
   
 - **IsHidden:** *.WithHidden(bool hidden)*\
-  Do not prints the option in the help output, if it is a hidden option.
+  Do not print the option in the help output, if it is a hidden option.
   
 - **Aliases:** *.AddAliases(params string[] aliases)*\
   Sets aliases of named options. By default parser heuristically creates aliases of named options. Or it is manually configurable by this *AddAliases* method. AddAliases can be used multiple times for an option.
@@ -544,7 +544,7 @@ static void Main(string[] args)
 
 ### 8.1 Verbosity Level option
 
-*Oaksoft.ArgumentParser* typically offer a --verbosity (or --vl) option that specifies how much output is sent to the console. Here are the standard five settings: 
+*Oaksoft.ArgumentParser* typically offers a --verbosity (or --vl) option that specifies how much output is sent to the console. Here are the standard five settings: 
 
 Quiet, Minimal, Normal, Detailed, Trace
 
@@ -595,10 +595,10 @@ System.NotImplementedException: The method or operation is not implemented.
 
 As you can see in the preceding output;
 - Level Quiet: Prints only first error message.
-- Level Minimal: Prints all error messages. this is the default verbosity.
+- Level Minimal: Prints all error messages. This is the default verbosity.
 - Level Normal: Prints all error messages with error index.
 - Level Detailed: Prints all error messages with error index, title and code.
-- Level Trace: In addition to Detailed level error, prints exception call stack of validator in the example code. See the throwal of NotImplementedException.
+- Level Trace: In addition to Detailed level, prints exception call stack of validator in the example code. See the throwal of NotImplementedException.
 
 ### 8.2 Version Number option
 
@@ -673,6 +673,6 @@ Options:
   --vl     Usage: --vl (value)
            Aliases: --vl, --verbosity, /vl, /verbosity
            Sets verbosity-level that specifies how much output is sent to the
-           console. [Allowed-Values: Quiet | Minimal | Normal | Detailed | Trace],
+           console. [Allowed-Values: Quiet | Minimal | Normal | Detailed | Trace], 
            [Default: Minimal]
 ```
